@@ -9,10 +9,8 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
-import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
-import org.jetbrains.kotlin.com.intellij.psi.PsiMethodCallExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
@@ -21,9 +19,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.PA
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCoreCommentImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
-import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ReferenceListElement
 import org.jetbrains.kotlin.psi.psiUtil.children
-import kotlin.math.log
 
 class LineBreaker : FormatRule {
 
