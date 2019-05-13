@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCoreCommentImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.jetbrains.kotlin.psi.psiUtil.startOffset
 import kotlin.math.log
 
 class LineBreaker : FormatRule {
@@ -71,7 +72,8 @@ class LineBreaker : FormatRule {
         val lineNum: Int,
         val start: Int,
         val end: Int,
-        val exceed: Boolean
+        val exceed: Boolean,
+        val txt: String
     )
 
     //map lineNum -> line(startOffset, endOffset)
@@ -160,10 +162,16 @@ class LineBreaker : FormatRule {
                     )
                 }
             } else if (node.elementType == DOT) {
-                //方法调用，断
                 if (line.exceed) {
                     val parent = node.treeParent
                     if (parent != null && (parent is PsiReferenceExpression)) {
+                        val column = location.column
+                        val parentText = (parent as ASTNode).text
+                        val totalLength = column + parent.treeNext.textLength +
+                            parentText.split(".")[1].length
+                        if (line.txt.indexOf(".") == (column - 1) && totalLength <= 119) {
+                            return
+                        }
                         toBeLineBreak.add(
                             NormalLineBreak(
                                 node,
@@ -298,7 +306,7 @@ class LineBreaker : FormatRule {
             val lineNum = index + 1
             lineEnd += line.length + 1
             lines[lineNum] = Line(
-                lineNum, lineStart, lineEnd, line.length > maxLineLength)
+                lineNum, lineStart, lineEnd, line.length > maxLineLength, line)
             lineStart = lineEnd + 1
         }
     }
