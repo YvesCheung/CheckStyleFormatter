@@ -35,7 +35,7 @@ object CodeFormatter {
 
     @Suppress("RemoveExplicitTypeArguments")
     private val usingRules = mutableSetOf<FormatRule>(
-        DumpAST(),
+        //DumpAST(),
         LineBreaker()
     )
 
@@ -76,6 +76,8 @@ object CodeFormatter {
         psiFileFactory = PsiFileFactory.getInstance(project)
     }
 
+    @JvmStatic
+    @JvmOverloads
     fun reformat(
         fileName: String,
         fileContent: String,

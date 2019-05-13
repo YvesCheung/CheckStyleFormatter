@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.PA
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCoreCommentImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ReferenceListElement
 import org.jetbrains.kotlin.psi.psiUtil.children
 
 class LineBreaker : FormatRule {
