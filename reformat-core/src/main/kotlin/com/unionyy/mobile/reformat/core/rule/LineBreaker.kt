@@ -73,7 +73,12 @@ class LineBreaker : FormatRule {
     //map lineNum -> line(startOffset, endOffset)
     private val lines = mutableMapOf<Int, Line>()
 
-    private val toBeLineBreak = mutableListOf<Runnable>()
+    private val toBeLineBreak = mutableListOf<LineBreakAction>()
+
+    private interface LineBreakAction {
+
+        fun run(context: FormatContext)
+    }
 
     override fun beforeVisit(context: FormatContext) {
         super.beforeVisit(context)
@@ -147,7 +152,7 @@ class LineBreaker : FormatRule {
                     }
 
                     toBeLineBreak.add(
-                        CutComment(context, node)
+                        CutComment(node)
                     )
                 }
             }
@@ -160,8 +165,9 @@ class LineBreaker : FormatRule {
     private class NormalLineBreak(
         val toBeBreak: ASTNode,
         val lineBreak: ASTNode
-    ) : Runnable {
-        override fun run() {
+    ) : LineBreakAction {
+
+        override fun run(context: FormatContext) {
             when {
                 toBeBreak is PsiWhiteSpace -> {
                     toBeBreak.treeParent.replaceChild(toBeBreak, lineBreak)
@@ -173,6 +179,9 @@ class LineBreaker : FormatRule {
                     toBeBreak.treeParent.addChild(lineBreak, toBeBreak)
                 }
             }
+            context.report(
+                "Add a line break.",
+                context.getCodeFragment(toBeBreak))
         }
     }
 
@@ -183,8 +192,9 @@ class LineBreaker : FormatRule {
         val comment: ASTNode,
         val parent: ASTNode,
         val lineBreak: ASTNode
-    ) : Runnable {
-        override fun run() {
+    ) : LineBreakAction {
+
+        override fun run(context: FormatContext) {
             val whiteSpace = comment.treePrev
             if (whiteSpace is PsiWhiteSpace) {
                 parent.removeChild(whiteSpace)
@@ -193,6 +203,10 @@ class LineBreaker : FormatRule {
             val anchor = parent.children().firstOrNull()
             parent.addChild(comment, anchor)
             parent.addChild(lineBreak, anchor)
+
+            context.report(
+                "Move comment to the start.",
+                context.getCodeFragment(comment))
         }
     }
 
@@ -200,12 +214,14 @@ class LineBreaker : FormatRule {
      * 如果注释 [comment] 过长，需要裁剪
      */
     private class CutComment(
-        val context: FormatContext,
         val comment: ASTNode
-    ) : Runnable {
+    ) : LineBreakAction {
 
-        override fun run() {
-            context.notifyTextChange()
+        override fun run(context: FormatContext) {
+            context.report(
+                "Cut the too long comment.",
+                context.getCodeFragment(comment),
+                true)
 
             var startNode = comment
             var totalLength = comment.textLength
@@ -250,8 +266,7 @@ class LineBreaker : FormatRule {
 
     override fun afterVisit(context: FormatContext) {
         super.afterVisit(context)
-        toBeLineBreak.forEach { it.run() }
-        context.report("haha", context.getCodeFragment(context.fileContent))
+        toBeLineBreak.forEach { it.run(context) }
     }
 
     private fun visitWholeFile(file: FileElement) {
