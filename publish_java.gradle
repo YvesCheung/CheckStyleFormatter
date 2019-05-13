@@ -1,0 +1,115 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
+def getReleaseRepositoryUrl() {
+    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
+            : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+}
+
+def getSnapshotRepositoryUrl() {
+    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
+            : "https://oss.sonatype.org/content/repositories/snapshots/"
+}
+
+def getRepositoryUsername() {
+    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+def getRepositoryPassword() {
+    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
+
+group = "com.unionyy.mobile"
+
+//task androidJavadocs(type: Javadoc) {
+//    source = android.sourceSets.main.java.srcDirs
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//    exclude '**/*.so'
+//}
+//
+//task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+//    classifier = 'javadoc'
+//    from androidJavadocs.destinationDir
+//}
+
+task pluginJar(type: Jar, dependsOn: build) {
+    //classifier = 'sources'
+    File libs = new File(buildDir, 'libs')
+    println "pluginJar for gradle plugin from ${libs}"
+
+    from(libs)
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    if (project.hasProperty("android")) {
+        from android.sourceSets.main.java.sourceFiles
+    }
+}
+
+task javaSourceJar(type: Jar) {
+    classifier = 'sources'
+    if (project.plugins.hasPlugin(JavaPlugin)) {
+        from sourceSets.main.java.srcDirs
+    }
+}
+
+task androidNativeJar(type: Jar) {
+    classifier = 'so'
+    from(new File(buildDir, 'libs'))
+    include("**/*.so")
+}
+
+task androidNativeZip(type: Zip) {
+    classifier = 'so'
+    from(new File(buildDir, 'libs'))
+    include("**/*.so")
+}
+
+//task gradlePluginJar(type: Copy) {
+//
+//    println "gradle plugin from: ${bs.list()}"
+//    include("**/*.jar")
+//
+//    from(bs)
+//}
+
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username = getRepositoryUsername()
+                password = getRepositoryPassword()
+            }
+
+            if (isReleaseBuild()) {
+                url getReleaseRepositoryUrl()
+            } else {
+                url getSnapshotRepositoryUrl()
+            }
+        }
+    }
+}
+
+
+publish.dependsOn build
+publishToMavenLocal.dependsOn build
+
+//Fixed Fixed gradle will package annotation class in second build;for detail see java.lang.annotation.RetentionPolicy.SOURCE
+tasks.whenTaskAdded { task ->
+    if (task.name == "extractReleaseAnnotations" || task.name == "extractDebugAnnotations") {
+        task.outputs.upToDateWhen { false }
+    }
+    if (task.name == "publishMavenPublicationToMavenRepository") {
+        task.dependsOn build
+    }
+}
+
+
+
+
+
