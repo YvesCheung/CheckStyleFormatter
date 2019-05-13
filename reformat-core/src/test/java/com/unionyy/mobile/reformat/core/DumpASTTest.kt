@@ -5,11 +5,6 @@ import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import org.junit.Test
 
 
-/**
- * Created by 张宇 on 2019/5/9.
- * E-mail: zhangyu4@yy.com
- * YY: 909017428
- */
 class DumpASTTest {
 
     @Test

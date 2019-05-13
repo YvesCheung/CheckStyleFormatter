@@ -206,9 +206,10 @@ class LineBreaker : FormatRule {
                             END_OF_LINE_COMMENT,
                             "//" + node.text.substring(half))
                         val cutPoint = node.treeNext
-                        node.treeParent.replaceChild(node, halfComment)
-                        halfComment.treeParent.addChild(lineBreakNode, cutPoint)
-                        halfComment.treeParent.addChild(otherComment, cutPoint)
+                        val parent = node.treeParent
+                        parent.replaceChild(node, halfComment)
+                        parent.addChild(lineBreakNode, cutPoint)
+                        parent.addChild(otherComment, cutPoint)
                         checkAndCutComment(halfComment)
                         checkAndCutComment(otherComment)
                     }
