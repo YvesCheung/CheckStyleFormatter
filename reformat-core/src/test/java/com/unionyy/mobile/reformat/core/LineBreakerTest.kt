@@ -364,7 +364,8 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public boolean isPluginLianMai() {
-        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLianMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang();
+        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang();
+        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang;
     }
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
