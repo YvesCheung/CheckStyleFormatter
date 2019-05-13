@@ -5,6 +5,7 @@ import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.internal.VariantManager
 import com.android.build.gradle.internal.scope.VariantScope
 import com.unionyy.mobile.reformat.core.CodeFormatter
+import kotlin.Pair
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -21,36 +22,41 @@ class FormatPlugin implements Plugin<Project> {
 
                 it.doLast {
                     getSourceFiles(p) {
-                        System.out.println(it)
+                        System.out.println(it.first)
                     }
                 }
             }
             getSourceFiles(p) {
-                createFormatTask(p, it)
+                def files = it.first
+                def sourceSetName = it.second
+                createFormatTask(p, files, sourceSetName)
             }
         }
     }
 
     private static Task createFormatTask(
             Project project,
-            Collection<File> input) {
-        if (project.tasks.findByName("JavaFormatting") == null) {
-            project.tasks.create("JavaFormatting") {
-                it.group = "checkstyle"
+            Collection<File> input,
+            String sourceSetName) {
+        def taskName = sourceSetName == "main" ? "JavaFormatting"
+                : "${sourceSetName}JavaFormatting"
+        project.tasks.create(taskName) {
+            it.group = "checkstyle"
 
-                it.doLast {
-                    input.forEach { file ->
-                        def newText = CodeFormatter.reformat(
-                                file.absolutePath,
-                                file.newReader().text)
-                        file.write(newText)
-                    }
+            it.doLast {
+                input.forEach { file ->
+                    def newText = CodeFormatter.reformat(
+                            file.absolutePath,
+                            file.newReader().text)
+                    file.write(newText)
                 }
             }
         }
     }
 
-    private static void getSourceFiles(Project project, Action<Collection<File>> callback) {
+    private static void getSourceFiles(
+            Project project,
+            Action<Pair<Collection<File>, String>> callback) {
         project.afterEvaluate {
             VariantManager variantManager = null
             if (project.plugins.hasPlugin(AppPlugin)) {
@@ -69,17 +75,19 @@ class FormatPlugin implements Plugin<Project> {
                             .javaSources
                             .collect { it.dir }
                             .grep { it.path.endsWith(".java") }
-                    callback.execute(files)
+                    callback.execute(new Pair<>(files, "main"))
                 }
             } else {
                 project.convention.findPlugin(JavaPluginConvention)
                         ?.sourceSets?.forEach {
                     callback.execute(
-                            it.java.getSourceDirectories().asFileTree.matching {
-                                it.include("**/*.java")
-                            }.files
+                            new Pair<>(
+                                    it.java.getSourceDirectories().asFileTree.matching {
+                                        it.include("**/*.java")
+                                    }.files,
+                                    it.name
+                            )
                     )
-
                 }
             }
         }

@@ -294,9 +294,8 @@ class LineBreaker : FormatRule {
 
     override fun afterVisit(context: FormatContext) {
         super.afterVisit(context)
-        toBeLineBreak.forEach { it.run(context) }
-        context.notifyTextChange()
         toBeLineBreak.forEach { it.report(context) }
+        toBeLineBreak.forEach { it.run(context) }
     }
 
     private fun visitWholeFile(file: FileElement) {
