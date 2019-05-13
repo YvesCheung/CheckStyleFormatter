@@ -83,6 +83,8 @@ class LineBreaker : FormatRule {
     private interface LineBreakAction {
 
         fun run(context: FormatContext)
+
+        fun report(context: FormatContext)
     }
 
     override fun beforeVisit(context: FormatContext) {
@@ -201,6 +203,9 @@ class LineBreaker : FormatRule {
                     toBeBreak.treeParent.addChild(lineBreak, toBeBreak)
                 }
             }
+        }
+
+        override fun report(context: FormatContext) {
             context.report(
                 "Add a line break.",
                 context.getCodeFragment(toBeBreak))
@@ -225,7 +230,9 @@ class LineBreaker : FormatRule {
             val anchor = parent.children().firstOrNull()
             parent.addChild(comment, anchor)
             parent.addChild(lineBreak, anchor)
+        }
 
+        override fun report(context: FormatContext) {
             context.report(
                 "Move comment to the start.",
                 context.getCodeFragment(comment))
@@ -240,10 +247,7 @@ class LineBreaker : FormatRule {
     ) : LineBreakAction {
 
         override fun run(context: FormatContext) {
-            context.report(
-                "Cut the too long comment.",
-                context.getCodeFragment(comment),
-                true)
+            context.notifyTextChange()
 
             var startNode = comment
             var totalLength = comment.textLength
@@ -284,11 +288,19 @@ class LineBreaker : FormatRule {
                 checkAndCutComment(comment)
             }
         }
+
+        override fun report(context: FormatContext) {
+            context.report(
+                "Cut the too long comment.",
+                context.getCodeFragment(comment))
+        }
     }
 
     override fun afterVisit(context: FormatContext) {
         super.afterVisit(context)
         toBeLineBreak.forEach { it.run(context) }
+        context.notifyTextChange()
+        toBeLineBreak.forEach { it.report(context) }
     }
 
     private fun visitWholeFile(file: FileElement) {
