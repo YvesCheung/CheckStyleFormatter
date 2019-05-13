@@ -197,34 +197,24 @@ class LineBreaker : FormatRule {
                 val whiteSpaceLen = lineBreakNode.textLength
 
                 fun checkAndCutComment(node: ASTNode) {
-                    if(node.textLength + whiteSpaceLen >= maxLineLength) {
+                    if (node.textLength + whiteSpaceLen >= maxLineLength) {
                         val half = node.textLength / 2
                         val halfComment = PsiCoreCommentImpl(
                             END_OF_LINE_COMMENT,
-                            comment.text.substring(0, half))
+                            node.text.substring(0, half))
                         val otherComment = PsiCoreCommentImpl(
                             END_OF_LINE_COMMENT,
-                            "//" + comment.text.substring(half))
-                        val cutPoint = comment.treeNext
-                        comment.treeParent.replaceChild(comment, halfComment)
-                        cutPoint.treeParent.addChild(lineBreakNode, cutPoint)
-                        cutPoint.treeParent.addChild(otherComment, cutPoint)
+                            "//" + node.text.substring(half))
+                        val cutPoint = node.treeNext
+                        node.treeParent.replaceChild(node, halfComment)
+                        halfComment.treeParent.addChild(lineBreakNode, cutPoint)
+                        halfComment.treeParent.addChild(otherComment, cutPoint)
+                        checkAndCutComment(halfComment)
+                        checkAndCutComment(otherComment)
                     }
                 }
 
-                while (totalLength >= maxLineLength) {
-                    val half = comment.text.length / 2
-                    val halfComment = PsiCoreCommentImpl(
-                        END_OF_LINE_COMMENT,
-                        comment.text.substring(0, half))
-                    val otherComment = PsiCoreCommentImpl(
-                        END_OF_LINE_COMMENT,
-                        "//" + comment.text.substring(half))
-                    val cutPoint = comment.treeNext
-                    comment.treeParent.replaceChild(comment, halfComment)
-                    cutPoint.treeParent.addChild(lineBreakNode, cutPoint)
-                    cutPoint.treeParent.addChild(otherComment, cutPoint)
-                }
+                checkAndCutComment(comment)
             }
         }
     }
