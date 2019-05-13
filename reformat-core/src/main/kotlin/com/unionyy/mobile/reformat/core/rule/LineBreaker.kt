@@ -5,12 +5,15 @@ import com.unionyy.mobile.reformat.core.FormatRule
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
+import org.jetbrains.kotlin.com.intellij.psi.PsiMethodCallExpression
+import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
@@ -20,6 +23,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ReferenceListElement
 import org.jetbrains.kotlin.psi.psiUtil.children
+import kotlin.math.log
 
 class LineBreaker : FormatRule {
 
@@ -155,6 +159,23 @@ class LineBreaker : FormatRule {
                     toBeLineBreak.add(
                         CutComment(node)
                     )
+                }
+            } else if (node.elementType == DOT) {
+                //方法调用，断
+                if (line.exceed) {
+                    val parent = node.treeParent
+                    if (parent != null && (parent is PsiReferenceExpression)) {
+                        toBeLineBreak.add(
+                            NormalLineBreak(
+                                node,
+                                lineBreak(
+                                    context,
+                                    line.start,
+                                    indent + indent
+                                )
+                            )
+                        )
+                    }
                 }
             }
         }
