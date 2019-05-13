@@ -33,7 +33,7 @@ public class A {
         return veryLongArg3;
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
 
@@ -92,12 +92,12 @@ package com.yy.mobile.checkstyleformatter;
 
 public class A {
 
-    public static final String TAG = "A"; //it' a tag for log. and this comment is too long, so cut it. asljdfashflishlhjfkasdddasdasdadasl.
+    public static final String TAG = "A"; //it' a tag for log. and this comment is too long, so cut it. asljdfashflidsafghakjsdbhkjabfjhasdadsfsdfaddsfasdshlhjfkasdddasdasdadasl.
 
-    //it' a tag for log. and this comment is too long, so cut it. asljdfashflishlhjfkasdddasdasdadasl.
+    //it' a tag for log. and this comment is too long, so cut it. asljdfashflishlhadsfjkghbajsdh,jsadfhaksdhkhfaskldhfkjhsdjvabskljhfklasfkasdddasdasdadasl.
     public static final String TAGB = "B";
 
-    public void docTooLong(String arg1, int arg2) {//asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekfdjshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvfluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
+    public void docTooLong(String arg1, int arg2) {//asljdfashasdsfasfaddfdsvfflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekfdjshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvfluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
         System.out.println(arg1);
     }
 
@@ -106,43 +106,68 @@ public class A {
         System.out.println(arg1);
     }
 
-    public void dontChange(String arg1, int argdd) { //asljdfashflishlh
+    public void dontChange(String arg1, int argdd, int arggg) { //asljdfashflishlh
         //asljdfashflishlh
         System.out.println(arg1);
 
         System.out.println(argdd);//asljdfashflishl
 
+        System.out.println(arggg);//asljdfashflishlasljdfashf苏打粉萨阿德沙发上的阿斯顿vlishlhjfkasdddasdasdadasldhjksfakjhdgasdsdfasdfad
+
         int ddd = 12362713;//asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekfdjshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvfluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
 
 public class A {
 
-    //it' a tag for log. and this comment is too long, so cut it. asljdfashflishlhjfkasdddasdasdadasl.
+    //it' a tag for log. and this comment is too long, so cut it. asljdf
+    //ashflidsafghakjsdbhkjabfjhasdadsfsdfaddsfasdshlhjfkasdddasdasdadasl.
     public static final String TAG = "A";
 
-    public void docTooLong(String arg1, int arg2) {
+    //it' a tag for log. and this comment is too long, so cut it. asljdfashflish
+    //lhadsfjkghbajsdh,jsadfhaksdhkhfaskldhfkjhsdjvabskljhfklasfkasdddasdasdadasl.
+    public static final String TAGB = "B";
+
+    public void docTooLong(
+        String arg1,
+        int arg2
+    ) {
+    //asljdfashasdsfasfaddfdsvfflishlhjfkasdddasdasdadasldhjksfakjhdgfkahs
+    //dhflakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfa
+    //ilhahekfdjshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgcky
+    //asdvfluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
+        System.out.println(arg1);
+    }
+
+    //asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkg
+    //sdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekf
+    //djshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdv
+    //fluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
+    public void doc(String arg1, int arg2) {//asljdfashflishlh
+        System.out.println(arg1);
+    }
+
+    public void dontChange(String arg1, int argdd, int arggg) { //asljdfashflishlh
+        //asljdfashflishlh
+        System.out.println(arg1);
+
+        System.out.println(argdd);//asljdfashflishl
+
+        //asljdfashflishlasljdfashf苏打粉萨阿德沙发上的阿斯顿vlishlhjfkasdddasdasdadasldhjksfakjhdgasdsdfasdfad
+        System.out.println(arggg);
+
         //asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkg
         //sdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekf
         //djshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdv
         //fluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
-        System.out.println(arg1);
-    }
-
-    public void doc(String arg1, int arg2) { //asljdfashflishlh
-        System.out.println(arg1);
-    }
-
-    public void dontChange(String arg1, int arg2) { //asljdfashflishlh
-        //asljdfashflishlh
-        System.out.println(arg1);
+        int ddd = 12362713;
     }
 }
-        """.trimIndent())
+""".trimIndent())
     }
 
     @Test

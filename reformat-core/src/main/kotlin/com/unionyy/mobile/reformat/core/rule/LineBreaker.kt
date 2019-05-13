@@ -29,6 +29,38 @@ class LineBreaker : FormatRule {
         private const val lineBreak = "\n"
 
         private const val indent = "    "
+
+        private fun lineBreak(
+            context: FormatContext,
+            lineStart: Int,
+            moreIndent: String = ""
+        ): ASTNode {
+            val startNode = context.fileContent.psi.findElementAt(lineStart)?.node
+                ?: return PsiWhiteSpaceImpl(lineBreak)
+            return lineBreak(startNode, moreIndent)
+        }
+
+        private fun lineBreak(
+            startNode: ASTNode,
+            moreIndent: String = ""
+        ): ASTNode {
+            var lastIndent = ""
+            if (startNode is PsiWhiteSpace) {
+                lastIndent = getIndent((startNode as PsiWhiteSpace).text)
+            } else if (startNode.treePrev is PsiWhiteSpace) {
+                lastIndent = getIndent((startNode.treePrev as PsiWhiteSpace).text)
+            }
+            return PsiWhiteSpaceImpl(lineBreak + lastIndent + moreIndent)
+        }
+
+        private fun getIndent(txt: String): String {
+            val idx = txt.lastIndexOf(lineBreak)
+            return if (idx in 0..txt.length - 2) {
+                txt.substring(idx + 1)
+            } else {
+                txt
+            }
+        }
     }
 
     private data class Line(
@@ -54,7 +86,7 @@ class LineBreaker : FormatRule {
             return
         }
         if (node is FileElement) {
-            visitWholeFile(context, node)
+            visitWholeFile(node)
         } else {
 
             if (lines.isEmpty()) {
@@ -115,7 +147,7 @@ class LineBreaker : FormatRule {
                     }
 
                     toBeLineBreak.add(
-                        CutComment(context, node, ::lineBreak)
+                        CutComment(context, node)
                     )
                 }
             }
@@ -169,8 +201,7 @@ class LineBreaker : FormatRule {
      */
     private class CutComment(
         val context: FormatContext,
-        val comment: ASTNode,
-        val lineBreakNode: (FormatContext, Int, String) -> ASTNode
+        val comment: ASTNode
     ) : Runnable {
 
         override fun run() {
@@ -181,19 +212,12 @@ class LineBreaker : FormatRule {
             val whiteSpace = comment.treePrev
             if (whiteSpace is PsiWhiteSpace) {
                 startNode = whiteSpace
-                val whiteTxt = (whiteSpace as PsiWhiteSpace).text
-                val lineBreakIdx = whiteTxt.lastIndexOf(lineBreak)
-                totalLength +=
-                    if (lineBreakIdx in 0..whiteTxt.length - 2) {
-                        whiteTxt.substring(lineBreakIdx + 1).length
-                    } else {
-                        whiteTxt.length
-                    }
+                totalLength += getIndent((whiteSpace as PsiWhiteSpace).text).length
             }
 
             if (totalLength >= maxLineLength) {
                 val lineBreakNode = {
-                    lineBreakNode(context, startNode.startOffset, "")
+                    lineBreak(startNode, "")
                 }
                 val whiteSpaceLen = lineBreakNode().textLength
 
@@ -224,64 +248,13 @@ class LineBreaker : FormatRule {
         }
     }
 
-    private fun lineBreak(
-        context: FormatContext,
-        lineStart: Int,
-        moreIndent: String = ""
-    ): ASTNode {
-        val startNode = context.fileContent.psi.findElementAt(lineStart)?.node
-            ?: return PsiWhiteSpaceImpl(lineBreak)
-        var lastIndent = ""
-        if (startNode is PsiWhiteSpace) {
-            lastIndent = (startNode as PsiWhiteSpace).text.replace(lineBreak, "")
-        } else if (startNode.treePrev is PsiWhiteSpace) {
-            lastIndent = (startNode.treePrev as PsiWhiteSpace)
-                .text.replace(lineBreak, "")
-        }
-        return PsiWhiteSpaceImpl(lineBreak + lastIndent + moreIndent)
-    }
-
     override fun afterVisit(context: FormatContext) {
         super.afterVisit(context)
         toBeLineBreak.forEach { it.run() }
+        context.report("haha", context.getCodeFragment(context.fileContent))
     }
 
-    private fun visitWholeFile(context: FormatContext, file: FileElement) {
-//        var changeText: Boolean
-//        do {
-//            var lineStart = 0
-//            var lineEnd = 0
-//            changeText = false
-//            lines.clear()
-//
-//            val lines = file.text.split("\n")
-//            for ((index, line) in lines.withIndex()) {
-//                lineEnd += line.length + 1
-//
-//                this.lines[index + 1] = Line(
-//                    index + 1, lineStart, lineEnd, line.length > maxLineLength)
-//
-//                if (line.length > maxLineLength) {
-//                    val element = file.psi.findElementAt(lineEnd)?.node
-//                    if (element != null) {
-//                        val lastNode = element.preNode {
-//                            it !is PsiWhiteSpace && it.elementType.toString() != "SEMICOLON"
-//                        } //最后一个有效元素
-//
-//                        changeText = context.handleComment(lastNode) {
-//                            lineBreak(context, lineStart, it)
-//                        }
-//                    }
-//                }
-//
-//                if (changeText) {
-//                    break
-//                }
-//
-//                lineStart = lineEnd + 1
-//            }
-//        } while (changeText)
-
+    private fun visitWholeFile(file: FileElement) {
         var lineStart = 0
         var lineEnd = 0
         val textLines = file.text.split("\n")
@@ -292,41 +265,5 @@ class LineBreaker : FormatRule {
                 lineNum, lineStart, lineEnd, line.length > maxLineLength)
             lineStart = lineEnd + 1
         }
-    }
-
-    private fun FormatContext.handleComment(
-        lastNode: ASTNode?,
-        doLineBreak: (String) -> ASTNode
-    ): Boolean {
-        var changeText = false
-        if (lastNode is PsiComment) { //以注释结尾
-            val comment = lastNode as PsiComment
-            val preComment: ASTNode? = lastNode.treePrev
-            if (preComment is PsiWhiteSpace) {
-                if ((preComment as PsiWhiteSpace).text.contains("\n")) {
-                    val half = comment.text.length / 2
-                    val halfComment = PsiCoreCommentImpl(
-                        END_OF_LINE_COMMENT,
-                        comment.text.substring(0, half))
-                    val otherComment = PsiCoreCommentImpl(
-                        END_OF_LINE_COMMENT,
-                        "//" + comment.text.substring(half))
-                    val cutPoint = lastNode.treeNext
-                    lastNode.treeParent.replaceChild(lastNode, halfComment)
-                    cutPoint.treeParent.addChild(doLineBreak(""), cutPoint)
-                    cutPoint.treeParent.addChild(otherComment, cutPoint)
-                    this.report("cut the long comment.",
-                        this.getCodeFragment(cutPoint), true)
-                    changeText = true
-                }
-            }
-            if (!changeText && preComment != null) {
-                this.report("add line break before comment.",
-                    this.getCodeFragment(preComment), true)
-                lastNode.treeParent.addChild(doLineBreak(indent), lastNode)
-                changeText = true
-            }
-        }
-        return changeText
     }
 }
