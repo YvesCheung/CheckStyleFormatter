@@ -28,9 +28,6 @@ class DumpAST : FormatRule {
     private fun visitInner(node: ASTNode, level: Int, cb: (node: ASTNode, level: Int) -> Unit) {
         cb(node, level)
 
-        if (node is PsiQualifiedReferenceElement) {
-            return
-        }
         node.getChildren(null).forEach { visitInner(it, level + 1, cb) }
     }
 }

@@ -194,23 +194,38 @@ class LineBreaker : FormatRule {
             if (totalLength >= maxLineLength) {
                 val lineBreakNode =
                     lineBreakNode(context, startNode.startOffset, "")
+                val whiteSpaceLen = lineBreakNode.textLength
+
+                fun checkAndCutComment(node: ASTNode) {
+                    if(node.textLength + whiteSpaceLen >= maxLineLength) {
+                        val half = node.textLength / 2
+                        val halfComment = PsiCoreCommentImpl(
+                            END_OF_LINE_COMMENT,
+                            comment.text.substring(0, half))
+                        val otherComment = PsiCoreCommentImpl(
+                            END_OF_LINE_COMMENT,
+                            "//" + comment.text.substring(half))
+                        val cutPoint = comment.treeNext
+                        comment.treeParent.replaceChild(comment, halfComment)
+                        cutPoint.treeParent.addChild(lineBreakNode, cutPoint)
+                        cutPoint.treeParent.addChild(otherComment, cutPoint)
+                    }
+                }
+
+                while (totalLength >= maxLineLength) {
+                    val half = comment.text.length / 2
+                    val halfComment = PsiCoreCommentImpl(
+                        END_OF_LINE_COMMENT,
+                        comment.text.substring(0, half))
+                    val otherComment = PsiCoreCommentImpl(
+                        END_OF_LINE_COMMENT,
+                        "//" + comment.text.substring(half))
+                    val cutPoint = comment.treeNext
+                    comment.treeParent.replaceChild(comment, halfComment)
+                    cutPoint.treeParent.addChild(lineBreakNode, cutPoint)
+                    cutPoint.treeParent.addChild(otherComment, cutPoint)
+                }
             }
-
-            while (totalLength >= maxLineLength) {
-                val half = comment.text.length / 2
-                val halfComment = PsiCoreCommentImpl(
-                    END_OF_LINE_COMMENT,
-                    comment.text.substring(0, half))
-                val otherComment = PsiCoreCommentImpl(
-                    END_OF_LINE_COMMENT,
-                    "//" + comment.text.substring(half))
-                val cutPoint = comment.treeNext
-                comment.treeParent.replaceChild(comment, halfComment)
-                cutPoint.treeParent.addChild(doLineBreak(""), cutPoint)
-                cutPoint.treeParent.addChild(otherComment, cutPoint)
-            }
-
-
         }
     }
 
