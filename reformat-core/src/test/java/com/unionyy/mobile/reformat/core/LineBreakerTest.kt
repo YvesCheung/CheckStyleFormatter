@@ -105,12 +105,13 @@ public class A {
         System.out.println(arg1);
     }
 
-    public void dontChange(String arg1, int arg2) { //asljdfashflishlh
+    public void dontChange(String arg1, int argdd) { //asljdfashflishlh
         //asljdfashflishlh
         System.out.println(arg1);
 
-        //ajshfdkadh
-        System.out.println(arg1);
+        System.out.println(argdd);//asljdfashflishl
+
+        int ddd = 12362713;//asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekfdjshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvfluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
     }
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))

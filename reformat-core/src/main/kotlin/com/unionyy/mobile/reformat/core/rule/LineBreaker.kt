@@ -9,6 +9,8 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
+import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
+import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
@@ -90,10 +92,31 @@ class LineBreaker : FormatRule {
             } else if (node.elementType == END_OF_LINE_COMMENT) {
                 if (line.exceed) {
                     val parent = node.treeParent
-                    if (parent != null &&
-                        parent.elementType == FIELD) {
-
+                    if (parent != null && (
+                            parent.elementType == FIELD ||
+                                parent is PsiDeclarationStatement ||
+                                parent is PsiExpressionStatement
+                            )
+                    ) {
+                        toBeLineBreak.add(
+                            MoveCommentToStart(
+                                node,
+                                parent,
+                                lineBreak(context, parent.startOffset - 1)
+                            )
+                        )
+                    } else {
+                        toBeLineBreak.add(
+                            NormalLineBreak(
+                                node,
+                                lineBreak(context, line.start)
+                            )
+                        )
                     }
+
+                    toBeLineBreak.add(
+                        CutComment(context, node, ::lineBreak)
+                    )
                 }
             }
         }
@@ -107,19 +130,86 @@ class LineBreaker : FormatRule {
         val lineBreak: ASTNode
     ) : Runnable {
         override fun run() {
-            if (toBeBreak is PsiWhiteSpace) {
-                toBeBreak.treeParent.replaceChild(toBeBreak, lineBreak)
-            } else {
-                toBeBreak.treeParent.addChild(lineBreak, toBeBreak)
+            when {
+                toBeBreak is PsiWhiteSpace -> {
+                    toBeBreak.treeParent.replaceChild(toBeBreak, lineBreak)
+                }
+                toBeBreak.treePrev is PsiWhiteSpace -> {
+                    toBeBreak.treeParent.replaceChild(toBeBreak.treePrev, lineBreak)
+                }
+                else -> {
+                    toBeBreak.treeParent.addChild(lineBreak, toBeBreak)
+                }
             }
         }
     }
 
     /**
-     * 把注释挪到 field 的开头
+     * 把注释 [comment] 挪到 [parent] 的开头
      */
-    private class moveCommentToFieldStart() : Runnable {
+    private class MoveCommentToStart(
+        val comment: ASTNode,
+        val parent: ASTNode,
+        val lineBreak: ASTNode
+    ) : Runnable {
         override fun run() {
+            val whiteSpace = comment.treePrev
+            if (whiteSpace is PsiWhiteSpace) {
+                parent.removeChild(whiteSpace)
+            }
+            parent.removeChild(comment)
+            val anchor = parent.children().firstOrNull()
+            parent.addChild(comment, anchor)
+            parent.addChild(lineBreak, anchor)
+        }
+    }
+
+    /**
+     * 如果注释 [comment] 过长，需要裁剪
+     */
+    private class CutComment(
+        val context: FormatContext,
+        val comment: ASTNode,
+        val lineBreakNode: (FormatContext, Int, String) -> ASTNode
+    ) : Runnable {
+
+        override fun run() {
+            context.notifyTextChange()
+
+            var startNode = comment
+            var totalLength = comment.textLength
+            val whiteSpace = comment.treePrev
+            if (whiteSpace is PsiWhiteSpace) {
+                startNode = whiteSpace
+                val whiteTxt = (whiteSpace as PsiWhiteSpace).text
+                val lineBreakIdx = whiteTxt.lastIndexOf(lineBreak)
+                totalLength +=
+                    if (lineBreakIdx in 0..whiteTxt.length - 2) {
+                        whiteTxt.substring(lineBreakIdx + 1).length
+                    } else {
+                        whiteTxt.length
+                    }
+            }
+
+            if (totalLength >= maxLineLength) {
+                val lineBreakNode =
+                    lineBreakNode(context, startNode.startOffset, "")
+            }
+
+            while (totalLength >= maxLineLength) {
+                val half = comment.text.length / 2
+                val halfComment = PsiCoreCommentImpl(
+                    END_OF_LINE_COMMENT,
+                    comment.text.substring(0, half))
+                val otherComment = PsiCoreCommentImpl(
+                    END_OF_LINE_COMMENT,
+                    "//" + comment.text.substring(half))
+                val cutPoint = comment.treeNext
+                comment.treeParent.replaceChild(comment, halfComment)
+                cutPoint.treeParent.addChild(doLineBreak(""), cutPoint)
+                cutPoint.treeParent.addChild(otherComment, cutPoint)
+            }
+
 
         }
     }
@@ -130,12 +220,15 @@ class LineBreaker : FormatRule {
         moreIndent: String = ""
     ): ASTNode {
         val startNode = context.fileContent.psi.findElementAt(lineStart)?.node
-            ?: return PsiWhiteSpaceImpl("\n")
+            ?: return PsiWhiteSpaceImpl(lineBreak)
         var lastIndent = ""
         if (startNode is PsiWhiteSpace) {
-            lastIndent = (startNode as PsiWhiteSpace).text.replace("\n", "")
+            lastIndent = (startNode as PsiWhiteSpace).text.replace(lineBreak, "")
+        } else if (startNode.treePrev is PsiWhiteSpace) {
+            lastIndent = (startNode.treePrev as PsiWhiteSpace)
+                .text.replace(lineBreak, "")
         }
-        return PsiWhiteSpaceImpl("\n" + lastIndent + moreIndent)
+        return PsiWhiteSpaceImpl(lineBreak + lastIndent + moreIndent)
     }
 
     override fun afterVisit(context: FormatContext) {

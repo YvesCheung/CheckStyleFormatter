@@ -33,10 +33,14 @@ class FormatContext(
         return getLocation(node.textRange.startOffset)
     }
 
+    fun notifyTextChange() {
+        locationGetter = null
+    }
+
     fun report(msg: String, code: CodeFragment, changeText: Boolean = false) {
         reporter.report(msg, code)
         if (changeText) {
-            locationGetter = null
+            notifyTextChange()
         }
     }
 
