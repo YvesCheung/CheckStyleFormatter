@@ -9,10 +9,8 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
-import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
-import org.jetbrains.kotlin.com.intellij.psi.PsiMethodCallExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
@@ -84,6 +82,8 @@ class LineBreaker : FormatRule {
     private interface LineBreakAction {
 
         fun run(context: FormatContext)
+
+        fun report(context: FormatContext)
     }
 
     override fun beforeVisit(context: FormatContext) {
@@ -162,6 +162,7 @@ class LineBreaker : FormatRule {
                     )
                 }
             } else if (node.elementType == DOT) {
+                //方法调用，断
                 if (line.exceed) {
                     val parent = node.treeParent
                     if (parent != null && (parent is PsiReferenceExpression)) {
@@ -208,6 +209,9 @@ class LineBreaker : FormatRule {
                     toBeBreak.treeParent.addChild(lineBreak, toBeBreak)
                 }
             }
+        }
+
+        override fun report(context: FormatContext) {
             context.report(
                 "Add a line break.",
                 context.getCodeFragment(toBeBreak))
@@ -232,7 +236,9 @@ class LineBreaker : FormatRule {
             val anchor = parent.children().firstOrNull()
             parent.addChild(comment, anchor)
             parent.addChild(lineBreak, anchor)
+        }
 
+        override fun report(context: FormatContext) {
             context.report(
                 "Move comment to the start.",
                 context.getCodeFragment(comment))
@@ -247,10 +253,7 @@ class LineBreaker : FormatRule {
     ) : LineBreakAction {
 
         override fun run(context: FormatContext) {
-            context.report(
-                "Cut the too long comment.",
-                context.getCodeFragment(comment),
-                true)
+            context.notifyTextChange()
 
             var startNode = comment
             var totalLength = comment.textLength
@@ -291,11 +294,19 @@ class LineBreaker : FormatRule {
                 checkAndCutComment(comment)
             }
         }
+
+        override fun report(context: FormatContext) {
+            context.report(
+                "Cut the too long comment.",
+                context.getCodeFragment(comment))
+        }
     }
 
     override fun afterVisit(context: FormatContext) {
         super.afterVisit(context)
         toBeLineBreak.forEach { it.run(context) }
+        context.notifyTextChange()
+        toBeLineBreak.forEach { it.report(context) }
     }
 
     private fun visitWholeFile(file: FileElement) {
