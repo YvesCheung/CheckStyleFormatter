@@ -192,9 +192,10 @@ class LineBreaker : FormatRule {
             }
 
             if (totalLength >= maxLineLength) {
-                val lineBreakNode =
+                val lineBreakNode = {
                     lineBreakNode(context, startNode.startOffset, "")
-                val whiteSpaceLen = lineBreakNode.textLength
+                }
+                val whiteSpaceLen = lineBreakNode().textLength
 
                 fun checkAndCutComment(node: ASTNode) {
                     if (node.textLength + whiteSpaceLen >= maxLineLength) {
@@ -205,10 +206,13 @@ class LineBreaker : FormatRule {
                         val otherComment = PsiCoreCommentImpl(
                             END_OF_LINE_COMMENT,
                             "//" + node.text.substring(half))
-                        val cutPoint = node.treeNext
                         val parent = node.treeParent
+                        var cutPoint = node.treeNext
+                        if (cutPoint.treeParent !== parent) {
+                            cutPoint = null
+                        }
                         parent.replaceChild(node, halfComment)
-                        parent.addChild(lineBreakNode, cutPoint)
+                        parent.addChild(lineBreakNode(), cutPoint)
                         parent.addChild(otherComment, cutPoint)
                         checkAndCutComment(halfComment)
                         checkAndCutComment(otherComment)
