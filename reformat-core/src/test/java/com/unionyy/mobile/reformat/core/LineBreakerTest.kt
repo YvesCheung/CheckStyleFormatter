@@ -355,4 +355,20 @@ public class A {
 
         Assert.assertEquals(text, """""".trimIndent())
     }
+
+    @Test
+    fun testJavaReferenceTooLong() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLianMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang();
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """""".trimIndent())
+    }
 }
