@@ -174,24 +174,27 @@ class LineBreaker : FormatRule {
     ) {
         if (line.exceed) {
             val parent = node.treeParent
-            if (parent != null && (
-                    parent.elementType == FIELD ||
+            if (parent != null) {
+                val preNode = node.treePrev
+                val isLineStart = preNode is PsiWhiteSpace && preNode.textContains('\n')
+                if (preNode != null && !isLineStart) {
+                    if (parent.elementType == FIELD ||
                         parent is PsiDeclarationStatement ||
-                        parent is PsiExpressionStatement
-                    )
-            ) {
-                toBeLineBreak.add(
-                    MoveCommentToStart(
-                        node,
-                        parent,
-                        lineBreak(context, parent.startOffset - 1))
-                )
-            } else {
-                toBeLineBreak.add(
-                    NormalLineBreak(
-                        node,
-                        lineBreak(context, line.start))
-                )
+                        parent is PsiExpressionStatement) {
+                        toBeLineBreak.add(
+                            MoveCommentToStart(
+                                node,
+                                parent,
+                                lineBreak(context, parent.startOffset - 1))
+                        )
+                    } else {
+                        toBeLineBreak.add(
+                            NormalLineBreak(
+                                node,
+                                lineBreak(context, line.start))
+                        )
+                    }
+                }
             }
 
             toBeLineBreak.add(CutComment(node))
