@@ -253,7 +253,7 @@ class LineBreaker : FormatRule {
     ) {
         val literal = node.treeParent
         if (literal != null && literal.elementType == LITERAL_EXPRESSION) {
-            if (line.exceed || node.textLength > CutString.MAX_STRING_LEN) {
+            if (node.textLength > CutString.MAX_STRING_LEN) {
                 toBeLineBreak.add(
                     CutString(literal, lineBreak(context, line.start, indent)))
             }
