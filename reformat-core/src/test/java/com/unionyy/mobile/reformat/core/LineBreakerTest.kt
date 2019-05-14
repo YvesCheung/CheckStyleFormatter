@@ -205,8 +205,15 @@ public class A {
     public Observable<LoadPluginListener.Result> loadPlugin(final SinglePluginInfo pluginInfo, final boolean showDefaultLoading) {
         MLog.info("zhangyu4 is a nice man, wangfeihang is a beautiful woman, pengkangjia is a well guider, pengyangfan is a good xiaodi");
     }
+
+    public Observable<LoadPluginListener.Result> loadPlugin2(final SinglePluginInfo pluginInfo, final boolean showDefaultLoading) {
+        MLog.info("zhangyu4 is a nice man, " +
+            "wangfeihang is a beautiful woman, " +
+            "pengkangjia is a well guider, " +
+            "pengyangfan is a good xiaodi");
+    }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """""".trimIndent())
     }

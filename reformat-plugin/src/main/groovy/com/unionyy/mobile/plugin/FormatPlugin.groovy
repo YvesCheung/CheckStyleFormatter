@@ -54,7 +54,7 @@ class FormatPlugin implements Plugin<Project> {
         }
     }
 
-    private static void getSourceFiles(
+    private static def getSourceFiles(
             Project project,
             Action<Pair<Collection<File>, String>> callback) {
         project.afterEvaluate {
@@ -68,7 +68,7 @@ class FormatPlugin implements Plugin<Project> {
             if (variantManager != null) {
                 VariantScope variant = variantManager.variantScopes.find {
                     it.fullVariantName?.toLowerCase() == "debug"
-                } ?: variantManager.variantScopes.firstOrNull()
+                } ?: firstOrNull(variantManager.variantScopes)
 
                 if (variant != null) {
                     List<File> files = variant.variantData
@@ -90,6 +90,14 @@ class FormatPlugin implements Plugin<Project> {
                     )
                 }
             }
+        }
+    }
+
+    private static <T> T firstOrNull(List<T> list) {
+        if (list.isEmpty()) {
+            return null
+        } else {
+            return list.first()
         }
     }
 }
