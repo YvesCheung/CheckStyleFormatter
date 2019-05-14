@@ -10,7 +10,9 @@ class DumpAST : FormatRule {
     private var visitOnce = true
 
     override fun beforeVisit(context: FormatContext) {
-        visitOnce = true
+        if (context.scanningTimes == 1) {
+            visitOnce = true
+        }
     }
 
     override fun visit(context: FormatContext, node: ASTNode) {
@@ -19,7 +21,7 @@ class DumpAST : FormatRule {
 
             visitInner(node, 0) { n, level ->
                 context.report(
-                    msg = "  ".repeat(level) + "($level)" +  "$n ${n::class.java.simpleName}",
+                    msg = "  ".repeat(level) + "($level)" + "$n ${n::class.java.simpleName}",
                     code = context.getCodeFragment(n))
             }
         }

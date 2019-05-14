@@ -3,12 +3,9 @@
   <groupId>com.unionyy.mobile</groupId>
   <artifactId>reformat-core</artifactId>
   <versioning>
-    <release>1.0.0</release>
     <versions>
-      <version>unspecified</version>
-      <version>1.0.0</version>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.0.1-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20190513141334</lastUpdated>
+    <lastUpdated>20190514095553</lastUpdated>
   </versioning>
 </metadata>

@@ -10,26 +10,35 @@ import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.plugins.JavaPluginConvention
 
 class FormatPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.rootProject.subprojects { p ->
-            p.tasks.create("srcDirs") {
-                it.group = "checkstyle"
+        project.rootProject.allprojects { p ->
 
-                it.doLast {
-                    getSourceFiles(p) {
-                        System.out.println(it.first)
-                    }
-                }
-            }
             getSourceFiles(p) {
                 def files = it.first
                 def sourceSetName = it.second
                 createFormatTask(p, files, sourceSetName)
+                createPrintFileTask(p, files)
+            }
+        }
+    }
+
+    private static Task createPrintFileTask(
+            Project project,
+            Collection<File> input) {
+        def taskName = "printSrcDirs"
+        if (project.tasks.findByName(taskName) == null) {
+            project.tasks.create(taskName) {
+                it.group = "checkstyle"
+                it.doLast {
+                    System.out.println("FileList:")
+                    System.out.println(input.join("\n"))
+                }
             }
         }
     }
@@ -38,17 +47,19 @@ class FormatPlugin implements Plugin<Project> {
             Project project,
             Collection<File> input,
             String sourceSetName) {
-        def taskName = sourceSetName == "main" ? "JavaFormatting"
+        def taskName = sourceSetName == "main" ? "javaFormatting"
                 : "${sourceSetName}JavaFormatting"
-        project.tasks.create(taskName) {
-            it.group = "checkstyle"
+        if (project.tasks.findByName(taskName) == null) {
+            project.tasks.create(taskName) {
+                it.group = "checkstyle"
 
-            it.doLast {
-                input.forEach { file ->
-                    def newText = CodeFormatter.reformat(
-                            file.absolutePath,
-                            file.newReader().text)
-                    file.write(newText)
+                it.doLast {
+                    input.forEach { file ->
+                        def newText = CodeFormatter.reformat(
+                                file.absolutePath,
+                                file.newReader().text)
+                        file.write(newText)
+                    }
                 }
             }
         }
@@ -69,12 +80,19 @@ class FormatPlugin implements Plugin<Project> {
                 VariantScope variant = variantManager.variantScopes.find {
                     it.fullVariantName?.toLowerCase() == "debug"
                 } ?: firstOrNull(variantManager.variantScopes)
-
                 if (variant != null) {
-                    List<File> files = variant.variantData
-                            .javaSources
-                            .collect { it.dir }
-                            .grep { it.path.endsWith(".java") }
+                    List<ConfigurableFileTree> fileTree =
+                            variant.variantData.javaSources.grep {
+                                def buildPath = project.buildDir.absolutePath
+                                return !it.dir.absolutePath.contains(buildPath)
+                            }
+                    Collection<File> files = fileTree.collect {
+                        it.matching {
+                            it.include("**/*.java")
+                        }.files
+                    }.flatten()
+                    System.out.println("Variant: " + variant.fullVariantName +
+                            "\nDir:\n" + fileTree.dir.join("\n"))
                     callback.execute(new Pair<>(files, "main"))
                 }
             } else {

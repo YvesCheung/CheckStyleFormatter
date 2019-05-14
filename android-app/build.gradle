@@ -1,0 +1,49 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'format'
+
+android {
+    ext {
+        compile_sdk_version = "27"
+        build_tools_version = "27.0.3"
+        min_sdk_version = "14"
+        target_sdk_version = "22"
+    }
+    compileSdkVersion "${compile_sdk_version}" as Integer
+    buildToolsVersion "${build_tools_version}"
+
+    defaultConfig {
+        applicationId "com.yy.mobile.demo"
+        minSdkVersion min_sdk_version as Integer
+        targetSdkVersion "${target_sdk_version}" as Integer
+        versionCode 1
+        versionName "1.0"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                it.argument('moduleName', project.getName())
+                includeCompileClasspath = true
+            }
+        }
+
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
+
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), "${rootProject.projectDir}/proguard-rules.pro"
+        }
+    }
+}
+
+dependencies {
+    implementation "com.android.support:appcompat-v7:27.1.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}

@@ -6,6 +6,7 @@ import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
+import org.jetbrains.kotlin.com.intellij.lang.FileASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
 import org.jetbrains.kotlin.com.intellij.openapi.extensions.ExtensionPoint
@@ -17,6 +18,7 @@ import org.jetbrains.kotlin.com.intellij.pom.PomModelAspect
 import org.jetbrains.kotlin.com.intellij.pom.PomTransaction
 import org.jetbrains.kotlin.com.intellij.pom.impl.PomTransactionBase
 import org.jetbrains.kotlin.com.intellij.pom.tree.TreeAspect
+import org.jetbrains.kotlin.com.intellij.psi.PsiFile
 import org.jetbrains.kotlin.com.intellij.psi.PsiFileFactory
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.TreeCopyHandler
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -35,7 +37,7 @@ object CodeFormatter {
 
     @Suppress("RemoveExplicitTypeArguments")
     private val usingRules = mutableSetOf<FormatRule>(
-        //DumpAST(),
+        DumpAST(),
         LineBreaker()
     )
 
@@ -96,22 +98,33 @@ object CodeFormatter {
             .replace("\r\n", "\n")
             .replace("\r", "\n")
 
-        val psiFile = psiFileFactory.createFileFromText(fileName, lang, normalizedText)
-        val context = FormatContext(
-            fileName,
-            psiFile.node,
-            lang,
-            reporter,
-            rules
-        )
+        var repeat: Boolean
+        var repeatTime = 1
+        var psiFile: FileASTNode
+        var context: FormatContext? = null
+        var hasError = false
+        do {
+            psiFile = context?.fileContent
+                ?: psiFileFactory.createFileFromText(fileName, lang, normalizedText).node
+            context = FormatContext(
+                fileName,
+                psiFile,
+                lang,
+                repeatTime++,
+                reporter,
+                rules
+            )
+            rules.forEach { it.beforeVisit(context) }
+            psiFile.visit { node ->
+                rules.forEach { it.visit(context, node) }
+            }
+            rules.forEach { it.afterVisit(context) }
 
-        rules.forEach { it.beforeVisit(context) }
-        psiFile.node.visit { node ->
-            rules.forEach { it.visit(context, node) }
-        }
-        rules.forEach { it.afterVisit(context) }
+            hasError = hasError || context.reportCnt > 0
+            repeat = context.requestRepeat && context.reportCnt > 0
+        } while (repeat)
 
-        return if (reporter.getReportCount(fileName) > 0) {
+        return if (hasError) {
             psiFile.text.replace("\n", System.lineSeparator())
         } else {
             psiFile.text

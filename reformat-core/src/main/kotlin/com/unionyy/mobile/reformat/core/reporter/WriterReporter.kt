@@ -14,8 +14,6 @@ class WriterReporter(private val writer: Appendable = StringWriter()) : Reporter
 
     private var index = 0
 
-    private var reportCnt = mutableMapOf<String, Int>()
-
     private var totalCnt = 0
 
     override fun report(msg: String, code: CodeFragment) {
@@ -38,11 +36,8 @@ class WriterReporter(private val writer: Appendable = StringWriter()) : Reporter
 
         writer.append(" $index. " +
             "(line:${code.startPos.line}, column:${code.startPos.column}): $msg\n")
-        reportCnt.merge(file, 1) { i, j -> i + j }
         totalCnt++
     }
 
     override fun getReportCount(): Int = totalCnt
-
-    override fun getReportCount(fileName: String): Int = reportCnt[fileName] ?: 0
 }

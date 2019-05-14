@@ -9,16 +9,13 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
-import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.IF_KEYWORD
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.PLUS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
-import org.jetbrains.kotlin.com.intellij.psi.PsiBinaryExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiIfStatement
-import org.jetbrains.kotlin.com.intellij.psi.PsiKeyword
 import org.jetbrains.kotlin.com.intellij.psi.PsiPolyadicExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
@@ -34,7 +31,6 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterList
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
 import org.jetbrains.kotlin.psi.psiUtil.children
-import org.jetbrains.kotlin.psi.psiUtil.parents
 
 class LineBreaker : FormatRule {
 
@@ -122,143 +118,145 @@ class LineBreaker : FormatRule {
             val line = lines.getValue(location.line)
 
             if (node is ParameterListElement) {
-                val paramNum = node.children().count {
-                    it.elementType == PARAMETER
-                }
-                if (paramNum > 4 || line.exceed) {
-                    node.getChildren(null).forEach { child ->
-                        if (child.elementType == COMMA ||
-                            child.elementType == LPARENTH) {
-                            val whiteSpaceExpect = child.treeNext
-                            toBeLineBreak.add(
-                                NormalLineBreak(
-                                    whiteSpaceExpect,
-                                    lineBreak(context, line.start, indent)
-                                )
-                            )
-                        } else if (child.elementType == RPARENTH) {
-                            toBeLineBreak.add(
-                                NormalLineBreak(
-                                    child,
-                                    lineBreak(context, line.start)
-                                )
-                            )
-                        }
-                    }
-                }
+                breakFunctionParam(context, node, line)
             } else if (node.elementType == END_OF_LINE_COMMENT) {
-                if (line.exceed) {
-                    val parent = node.treeParent
-                    if (parent != null && (
-                            parent.elementType == FIELD ||
-                                parent is PsiDeclarationStatement ||
-                                parent is PsiExpressionStatement
-                            )
-                    ) {
-                        toBeLineBreak.add(
-                            MoveCommentToStart(
-                                node,
-                                parent,
-                                lineBreak(context, parent.startOffset - 1)
-                            )
-                        )
-                    } else {
-                        toBeLineBreak.add(
-                            NormalLineBreak(
-                                node,
-                                lineBreak(context, line.start)
-                            )
-                        )
-                    }
-
-                    toBeLineBreak.add(
-                        CutComment(node)
-                    )
-                }
+                breakComment(context, node, line)
             } else if (node is PsiIfStatement) {
-                //if 语句判断 or else if
-                if (line.exceed) {
-                    val ifState = node.findChildByType(BINARY_EXPRESSION)
-                    ifState?.let {
-                        val oror = ifState.findChildByType(JavaTokenType.OROR)
-                        val andand = ifState.findChildByType(JavaTokenType.ANDAND)
-                        val or = ifState.findChildByType(JavaTokenType.OR)
-                        val and = ifState.findChildByType(JavaTokenType.AND)
-                        or?.run {
-                            toBeLineBreak.add(
-                                NormalLineBreak(
-                                    this,
-                                    lineBreak(context, line.start, indent + indent)
-                                )
-                            )
-                        }
-                        and?.run {
-                            toBeLineBreak.add(
-                                NormalLineBreak(
-                                    this,
-                                    lineBreak(context, line.start, indent + indent)
-                                )
-                            )
-                        }
-                        oror?.run {
-                            toBeLineBreak.add(
-                                NormalLineBreak(
-                                    this,
-                                    lineBreak(context, line.start, indent + indent)
-                                )
-                            )
-                        }
-                        andand?.run {
-                            toBeLineBreak.add(
-                                NormalLineBreak(
-                                    this,
-                                    lineBreak(context, line.start, indent + indent)
-                                )
-                            )
-                        }
-                    }
-                }
-            } else if (node.elementType == JavaTokenType.QUEST || node.elementType == JavaTokenType.COLON) {
-                //三目运算符里的逗号和冒号
-                if (line.exceed) {
-                    toBeLineBreak.add(
-                        NormalLineBreak(
-                            node,
-                            lineBreak(
-                                context,
-                                line.start,
-                                indent + indent
-                            )
-                        )
-                    )
-                }
+                breakIfStatement(context, node, line)
+            } else if (node.elementType == JavaTokenType.QUEST ||
+                node.elementType == JavaTokenType.COLON) {
+                breakQuest(context, node, line)
             } else if (node.elementType == DOT) {
-                //这里面得加上判断如果是if的话，且blabla就跳过，我想想怎么处理呢，一点都不好处理
-                if (line.exceed) {
-                    val parent = node.treeParent
-                    if (parent != null && (parent is PsiReferenceExpression)) {
-                        val column = location.column
-                        val parentText = (parent as ASTNode).text
-                        val nextParentTextLength = parent.treeNext?.textLength ?: 0
-                        val totalLength = column + nextParentTextLength +
-                            parentText.split(".")[1].length
-                        if (line.txt.indexOf(".") == (column - 1) && totalLength <= 119) {
-                            return
-                        }
-                        toBeLineBreak.add(
-                            NormalLineBreak(
-                                node,
-                                lineBreak(
-                                    context,
-                                    line.start,
-                                    indent + indent
-                                )
-                            )
-                        )
-                    }
-                }
+                breakDot(context, node, line, location)
             } else if (node.elementType == STRING_LITERAL) {
                 breakStringLiteral(context, node, line)
+            }
+        }
+    }
+
+    private fun breakFunctionParam(
+        context: FormatContext,
+        node: ASTNode,
+        line: Line
+    ) {
+        val paramNum = node.children().count {
+            it.elementType == PARAMETER
+        }
+        if (paramNum > 4 || line.exceed) {
+            node.getChildren(null).forEach { child ->
+                if (child.elementType == COMMA ||
+                    child.elementType == LPARENTH) {
+                    val whiteSpaceExpect = child.treeNext
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            whiteSpaceExpect,
+                            lineBreak(context, line.start, indent)
+                        )
+                    )
+                } else if (child.elementType == RPARENTH) {
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            child,
+                            lineBreak(context, line.start)
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun breakComment(
+        context: FormatContext,
+        node: ASTNode,
+        line: Line
+    ) {
+        if (line.exceed) {
+            val parent = node.treeParent
+            if (parent != null && (
+                    parent.elementType == FIELD ||
+                        parent is PsiDeclarationStatement ||
+                        parent is PsiExpressionStatement
+                    )
+            ) {
+                toBeLineBreak.add(
+                    MoveCommentToStart(
+                        node,
+                        parent,
+                        lineBreak(context, parent.startOffset - 1))
+                )
+            } else {
+                toBeLineBreak.add(
+                    NormalLineBreak(
+                        node,
+                        lineBreak(context, line.start))
+                )
+            }
+
+            toBeLineBreak.add(CutComment(node))
+        }
+    }
+
+    private fun breakIfStatement(
+        context: FormatContext,
+        node: ASTNode,
+        line: Line
+    ) {
+        fun ASTNode?.doBreak() {
+            val target = this ?: return
+            toBeLineBreak.add(
+                NormalLineBreak(
+                    target,
+                    lineBreak(context, line.start, indent + indent))
+            )
+        }
+        //if 语句判断 or else if
+        if (line.exceed) {
+            val ifState = node.findChildByType(BINARY_EXPRESSION) ?: return
+            ifState.findChildByType(JavaTokenType.OROR).doBreak()
+            ifState.findChildByType(JavaTokenType.ANDAND).doBreak()
+            ifState.findChildByType(JavaTokenType.OR).doBreak()
+            ifState.findChildByType(JavaTokenType.AND).doBreak()
+        }
+    }
+
+    private fun breakQuest(context: FormatContext, node: ASTNode, line: Line) {
+        //三目运算符里的逗号和冒号
+        if (line.exceed) {
+            toBeLineBreak.add(
+                NormalLineBreak(
+                    node,
+                    lineBreak(
+                        context,
+                        line.start,
+                        indent + indent)
+                )
+            )
+        }
+    }
+
+    private fun breakDot(context: FormatContext, node: ASTNode, line: Line, location: Location) {
+        //这里面得加上判断如果是if的话，且blabla就跳过，我想想怎么处理呢，一点都不好处理
+        if (line.exceed && context.scanningTimes > 1) {
+            val parent = node.treeParent
+            if (parent != null && (parent is PsiReferenceExpression)) {
+                val column = location.column
+                val parentText = (parent as ASTNode).text
+                val nextParentTextLength = parent.treeNext?.textLength ?: 0
+                val totalLength = column + nextParentTextLength +
+                    parentText.split(".")[1].length
+                if (line.txt.indexOf(".") == (column - 1) && totalLength <= 119) {
+                    return
+                }
+                toBeLineBreak.add(
+                    NormalLineBreak(
+                        node,
+                        lineBreak(
+                            context,
+                            line.start,
+                            indent + indent
+                        )
+                    )
+                )
             }
         }
     }
@@ -465,6 +463,10 @@ class LineBreaker : FormatRule {
         super.afterVisit(context)
         toBeLineBreak.forEach { it.report(context) }
         toBeLineBreak.forEach { it.run(context) }
+
+        if (context.reportCnt > 0 && context.scanningTimes < 2) {
+            context.requestRepeatScan()
+        }
     }
 
     private fun visitWholeFile(file: FileElement) {
