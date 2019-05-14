@@ -32,6 +32,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
+import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 import org.jetbrains.kotlin.psi.psiUtil.children
 
 class LineBreaker : FormatRule {
@@ -43,6 +44,11 @@ class LineBreaker : FormatRule {
         private const val lineBreak = "\n"
 
         private const val indent = "    "
+
+        //最多 3 轮扫描遍历
+        private const val SCAN_HIGH = 1
+        private const val SCAN_MIDDLE = 2
+        private const val SCAN_LOW = 3
 
         private fun lineBreak(
             context: FormatContext,
@@ -106,6 +112,7 @@ class LineBreaker : FormatRule {
         toBeLineBreak.clear()
     }
 
+    @Suppress("CascadeIf")
     override fun visit(context: FormatContext, node: ASTNode) {
         if (context.language != JavaLanguage.INSTANCE) {
             return
@@ -121,21 +128,27 @@ class LineBreaker : FormatRule {
             val location = context.getCodeLocation(node)
             val line = lines.getValue(location.line)
 
-            if (node is ParameterListElement) {
-                breakFunctionParam(context, node, line)
-            } else if (node.elementType == END_OF_LINE_COMMENT) {
-                breakComment(context, node, line)
-            } else if (node is PsiIfStatement) {
-                breakIfStatement(context, node, line)
-            } else if (node.elementType == JavaTokenType.QUEST ||
-                node.elementType == JavaTokenType.COLON) {
-                breakQuest(context, node, line)
-            } else if (node is PsiExpressionList) {
-                breakFuntionCallParamList(context, node, line)
-            } else if (node.elementType == DOT) {
-                breakDot(context, node, line, location)
-            } else if (node.elementType == STRING_LITERAL) {
-                breakStringLiteral(context, node, line)
+            if (context.scanningTimes == SCAN_HIGH) {
+                if (node is ParameterListElement) {
+                    breakFunctionParam(context, node, line)
+                } else if (node.elementType == END_OF_LINE_COMMENT) {
+                    breakComment(context, node, line)
+                } else if (node is PsiIfStatement) {
+                    breakIfStatement(context, node, line)
+                }
+            } else if (context.scanningTimes == SCAN_MIDDLE) {
+                if (node.elementType == JavaTokenType.QUEST ||
+                    node.elementType == JavaTokenType.COLON) {
+                    breakQuest(context, node, line)
+                } else if (node.elementType == STRING_LITERAL) {
+                    breakStringLiteral(context, node, line)
+                } else if (node is PsiExpressionList) {
+                    breakFuntionCallParamList(context, node, line)
+                }
+            } else if (context.scanningTimes == SCAN_LOW) {
+                if (node.elementType == DOT) {
+                    breakDot(context, node, line, location)
+                }
             }
         }
     }
@@ -156,14 +169,16 @@ class LineBreaker : FormatRule {
                     toBeLineBreak.add(
                         NormalLineBreak(
                             whiteSpaceExpect,
-                            lineBreak(context, line.start, indent)
+                            lineBreak(context, line.start, indent),
+                            "the token '(' or ',' in a parameter list."
                         )
                     )
                 } else if (child.elementType == RPARENTH) {
                     toBeLineBreak.add(
                         NormalLineBreak(
                             child,
-                            lineBreak(context, line.start)
+                            lineBreak(context, line.start),
+                            "the token ')' in a parameter list."
                         )
                     )
                 }
@@ -224,7 +239,9 @@ class LineBreaker : FormatRule {
             val parent = node.treeParent
             if (parent != null) {
                 val preNode = node.treePrev
-                val isLineStart = preNode is PsiWhiteSpace && preNode.textContains('\n')
+                val isLineStart =
+                    (preNode is PsiWhiteSpace && preNode.textContains('\n')) ||
+                        node.startOffset == line.start
                 if (preNode != null && !isLineStart) {
                     if (parent.elementType == FIELD ||
                         parent is PsiDeclarationStatement ||
@@ -239,7 +256,8 @@ class LineBreaker : FormatRule {
                         toBeLineBreak.add(
                             NormalLineBreak(
                                 node,
-                                lineBreak(context, line.start))
+                                lineBreak(context, line.start),
+                                "move the end of line comment to a new line: ${node.text}.")
                         )
                     }
                 }
@@ -259,16 +277,17 @@ class LineBreaker : FormatRule {
             toBeLineBreak.add(
                 NormalLineBreak(
                     target,
-                    lineBreak(context, line.start, indent + indent))
+                    lineBreak(context, line.start, indent + indent),
+                    "operator '${target.elementType}' in 'if' statement.")
             )
         }
         //if 语句判断 or else if
         if (line.exceed) {
             val ifState = node.findChildByType(BINARY_EXPRESSION) ?: return
-            ifState.findChildByType(JavaTokenType.OROR).doBreak()
-            ifState.findChildByType(JavaTokenType.ANDAND).doBreak()
-            ifState.findChildByType(JavaTokenType.OR).doBreak()
-            ifState.findChildByType(JavaTokenType.AND).doBreak()
+            val target = listOf<IElementType>(
+                JavaTokenType.OROR, JavaTokenType.ANDAND, JavaTokenType.OR, JavaTokenType.AND
+            )
+            target.forEach { ifState.findChildByType(it).doBreak() }
         }
     }
 
@@ -278,10 +297,8 @@ class LineBreaker : FormatRule {
             toBeLineBreak.add(
                 NormalLineBreak(
                     node,
-                    lineBreak(
-                        context,
-                        line.start,
-                        indent + indent)
+                    lineBreak(context, line.start, indent + indent),
+                    "ternary operator: ' ? : '."
                 )
             )
         }
@@ -289,7 +306,7 @@ class LineBreaker : FormatRule {
 
     private fun breakDot(context: FormatContext, node: ASTNode, line: Line, location: Location) {
         //这里面得加上判断如果是if的话，且blabla就跳过，我想想怎么处理呢，一点都不好处理
-        if (line.exceed && context.scanningTimes > 1) {
+        if (line.exceed) {
             val parent = node.treeParent
             if (parent != null && (parent is PsiReferenceExpression)) {
                 val column = location.column
@@ -303,11 +320,8 @@ class LineBreaker : FormatRule {
                 toBeLineBreak.add(
                     NormalLineBreak(
                         node,
-                        lineBreak(
-                            context,
-                            line.start,
-                            indent + indent
-                        )
+                        lineBreak(context, line.start, indent + indent),
+                        "'.' in the reference expression."
                     )
                 )
             }
@@ -319,6 +333,7 @@ class LineBreaker : FormatRule {
         node: ASTNode, //STRING_LITERAL
         line: Line
     ) {
+
         val literal = node.treeParent
         if (literal != null && literal.elementType == LITERAL_EXPRESSION) {
             if (node.textLength > CutString.MAX_STRING_LEN) {
@@ -333,7 +348,8 @@ class LineBreaker : FormatRule {
      */
     private class NormalLineBreak(
         val toBeBreak: ASTNode,
-        val lineBreak: ASTNode
+        val lineBreak: ASTNode,
+        val reason: String? = null
     ) : LineBreakAction {
 
         override fun run(context: FormatContext) {
@@ -352,7 +368,7 @@ class LineBreaker : FormatRule {
 
         override fun report(context: FormatContext) {
             context.report(
-                "Add a line break.",
+                "Add a line break${if (reason != null) ": $reason" else "."}",
                 context.getCodeFragment(toBeBreak))
         }
     }
@@ -379,7 +395,7 @@ class LineBreaker : FormatRule {
 
         override fun report(context: FormatContext) {
             context.report(
-                "Move comment to the start.",
+                "Move comment to the start of the statement: ${comment.text}.",
                 context.getCodeFragment(comment))
         }
     }
@@ -513,7 +529,7 @@ class LineBreaker : FormatRule {
         toBeLineBreak.forEach { it.report(context) }
         toBeLineBreak.forEach { it.run(context) }
 
-        if (context.reportCnt > 0 && context.scanningTimes < 2) {
+        if (context.scanningTimes < SCAN_LOW) {
             context.requestRepeatScan()
         }
     }
