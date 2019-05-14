@@ -17,12 +17,16 @@ class FormatPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         project.rootProject.subprojects { p ->
-            p.tasks.create("srcDirs") {
-                it.group = "checkstyle"
+            def taskName = "printSrcDirs"
+            if (p.tasks.findByName(taskName) == null) {
+                p.tasks.create(taskName) {
+                    it.group = "checkstyle"
 
-                it.doLast {
-                    getSourceFiles(p) {
-                        System.out.println(it.first)
+                    it.doLast {
+                        getSourceFiles(p) {
+                            System.out.println("FileList:")
+                            System.out.println(it.first.join("\n"))
+                        }
                     }
                 }
             }
@@ -40,15 +44,17 @@ class FormatPlugin implements Plugin<Project> {
             String sourceSetName) {
         def taskName = sourceSetName == "main" ? "JavaFormatting"
                 : "${sourceSetName}JavaFormatting"
-        project.tasks.create(taskName) {
-            it.group = "checkstyle"
+        if (project.tasks.findByName(taskName) == null) {
+            project.tasks.create(taskName) {
+                it.group = "checkstyle"
 
-            it.doLast {
-                input.forEach { file ->
-                    def newText = CodeFormatter.reformat(
-                            file.absolutePath,
-                            file.newReader().text)
-                    file.write(newText)
+                it.doLast {
+                    input.forEach { file ->
+                        def newText = CodeFormatter.reformat(
+                                file.absolutePath,
+                                file.newReader().text)
+                        file.write(newText)
+                    }
                 }
             }
         }
@@ -69,12 +75,13 @@ class FormatPlugin implements Plugin<Project> {
                 VariantScope variant = variantManager.variantScopes.find {
                     it.fullVariantName?.toLowerCase() == "debug"
                 } ?: firstOrNull(variantManager.variantScopes)
-
                 if (variant != null) {
-                    List<File> files = variant.variantData
-                            .javaSources
-                            .collect { it.dir }
-                            .grep { it.path.endsWith(".java") }
+                    Collection<File> files = variant.variantData.javaSources.collect {
+                        it.matching {
+                            it.include("**/*.java")
+                        }.files
+                    }.flatten()
+                    System.out.println("variant = " + variant + " files = " + files)
                     callback.execute(new Pair<>(files, "main"))
                 }
             } else {

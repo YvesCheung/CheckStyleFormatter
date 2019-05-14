@@ -1,9 +1,6 @@
-apply plugin: 'kotlin'
 apply plugin: 'java'
-apply plugin: 'format'
+//apply plugin: 'format'
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    testImplementation('junit:junit:4.12')
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

@@ -1,1 +1,1 @@
-include ':app', ':reformat-plugin', ':reformat-core'
+include ':app', ':android-app', ':reformat-plugin', ':reformat-core'
