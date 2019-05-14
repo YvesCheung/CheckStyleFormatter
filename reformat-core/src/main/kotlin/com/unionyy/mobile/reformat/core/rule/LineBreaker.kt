@@ -135,8 +135,6 @@ class LineBreaker : FormatRule {
                     breakComment(context, node, line)
                 } else if (node is PsiIfStatement) {
                     breakIfStatement(context, node, line)
-                } else if (node is PsiExpressionList) {
-                    breakFuntionCallParamList(context, node, line)
                 }
             } else if (context.scanningTimes == SCAN_MIDDLE) {
                 if (node.elementType == JavaTokenType.QUEST ||
@@ -144,6 +142,8 @@ class LineBreaker : FormatRule {
                     breakQuest(context, node, line)
                 } else if (node.elementType == STRING_LITERAL) {
                     breakStringLiteral(context, node, line)
+                } else if (node is PsiExpressionList) {
+                    breakFuntionCallParamList(context, node, line)
                 }
             } else if (context.scanningTimes == SCAN_LOW) {
                 if (node.elementType == DOT) {
@@ -194,7 +194,7 @@ class LineBreaker : FormatRule {
         val paramNum = node.children().count {
             it.elementType == COMMA
         }
-        if (line.exceed) {
+        if (line.exceed && paramNum > 0) {
 
             node.getChildren(null).forEach { child ->
                 if (child.elementType == COMMA ||
