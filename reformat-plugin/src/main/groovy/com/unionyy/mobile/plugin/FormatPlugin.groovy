@@ -47,7 +47,7 @@ class FormatPlugin implements Plugin<Project> {
             Project project,
             Collection<File> input,
             String sourceSetName) {
-        def taskName = sourceSetName == "main" ? "JavaFormatting"
+        def taskName = sourceSetName == "main" ? "javaFormatting"
                 : "${sourceSetName}JavaFormatting"
         if (project.tasks.findByName(taskName) == null) {
             project.tasks.create(taskName) {
