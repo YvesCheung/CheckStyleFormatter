@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCoreCommentImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
 import org.jetbrains.kotlin.psi.psiUtil.children
+import org.jetbrains.kotlin.psi.psiUtil.parents
 
 class LineBreaker : FormatRule {
 
@@ -75,7 +76,8 @@ class LineBreaker : FormatRule {
         val start: Int,
         val end: Int,
         val exceed: Boolean,
-        val txt: String
+        val txt: String,
+        val line: Line? = null
     )
 
     //map lineNum -> line(startOffset, endOffset)
@@ -188,14 +190,29 @@ class LineBreaker : FormatRule {
                         }
                     }
                 }
+            } else if (node.elementType == JavaTokenType.QUEST || node.elementType == JavaTokenType.COLON) {
+                //三目运算符里的逗号和冒号
+                if (line.exceed) {
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            node,
+                            lineBreak(
+                                context,
+                                line.start,
+                                indent + indent
+                            )
+                        )
+                    )
+                }
             } else if (node.elementType == DOT) {
-                //方法调用，断
+                //这里面得加上判断如果是if的话，且blabla就跳过，我想想怎么处理呢，一点都不好处理
                 if (line.exceed) {
                     val parent = node.treeParent
                     if (parent != null && (parent is PsiReferenceExpression)) {
                         val column = location.column
                         val parentText = (parent as ASTNode).text
-                        val totalLength = column + parent.treeNext.textLength +
+                        val nextParentTextLength = parent.treeNext?.textLength ?: 0
+                        val totalLength = column + nextParentTextLength +
                             parentText.split(".")[1].length
                         if (line.txt.indexOf(".") == (column - 1) && totalLength <= 119) {
                             return
