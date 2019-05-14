@@ -13,7 +13,9 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.PLUS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
+import org.jetbrains.kotlin.com.intellij.psi.PsiCodeBlock
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
+import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionList
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiIfStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiPolyadicExpression
@@ -133,6 +135,8 @@ class LineBreaker : FormatRule {
                     breakComment(context, node, line)
                 } else if (node is PsiIfStatement) {
                     breakIfStatement(context, node, line)
+                } else if (node is PsiExpressionList) {
+                    breakFuntionCallParamList(context, node, line)
                 }
             } else if (context.scanningTimes == SCAN_MIDDLE) {
                 if (node.elementType == JavaTokenType.QUEST ||
@@ -179,6 +183,51 @@ class LineBreaker : FormatRule {
                     )
                 }
             }
+        }
+    }
+
+    private fun breakFuntionCallParamList(
+        context: FormatContext,
+        node: ASTNode,
+        line: Line
+    ) {
+        val paramNum = node.children().count {
+            it.elementType == COMMA
+        }
+        if (line.exceed) {
+
+            node.getChildren(null).forEach { child ->
+                if (child.elementType == COMMA ||
+                    child.elementType == LPARENTH) {
+                    val whiteSpaceExpect = child.treeNext
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            whiteSpaceExpect,
+                            lineBreak(context, line.start, getRealIndent(node, indent))
+                        )
+                    )
+                } else if (child.elementType == RPARENTH) {
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            child,
+                            lineBreak(context, line.start, getRealIndent(node, indent))
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun getRealIndent(node: ASTNode?, actualIndent: String): String {
+        if (node == null) {
+            return actualIndent
+        }
+        if (node is PsiCodeBlock) {
+            return actualIndent
+        } else if (node is PsiExpressionList) {
+            return getRealIndent(node.treeParent, actualIndent + indent)
+        } else {
+            return getRealIndent(node.treeParent, actualIndent)
         }
     }
 
