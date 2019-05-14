@@ -2,6 +2,7 @@ package com.unionyy.mobile.reformat.core.rule
 
 import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
+import com.unionyy.mobile.reformat.core.Location
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType
@@ -10,21 +11,28 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.IF_KEYWORD
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.PLUS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
 import org.jetbrains.kotlin.com.intellij.psi.PsiBinaryExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiIfStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiKeyword
+import org.jetbrains.kotlin.com.intellij.psi.PsiPolyadicExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.CompositeElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.BINARY_EXPRESSION
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.LITERAL_EXPRESSION
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.PARAMETER
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCoreCommentImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
 import org.jetbrains.kotlin.psi.psiUtil.children
 
 class LineBreaker : FormatRule {
@@ -175,16 +183,36 @@ class LineBreaker : FormatRule {
                         val or = ifState.findChildByType(JavaTokenType.OR)
                         val and = ifState.findChildByType(JavaTokenType.AND)
                         or?.run {
-                            toBeLineBreak.add(NormalLineBreak(this, lineBreak(context, line.start, indent + indent)))
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    this,
+                                    lineBreak(context, line.start, indent + indent)
+                                )
+                            )
                         }
                         and?.run {
-                            toBeLineBreak.add(NormalLineBreak(this, lineBreak(context, line.start, indent + indent)))
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    this,
+                                    lineBreak(context, line.start, indent + indent)
+                                )
+                            )
                         }
                         oror?.run {
-                            toBeLineBreak.add(NormalLineBreak(this, lineBreak(context, line.start, indent + indent)))
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    this,
+                                    lineBreak(context, line.start, indent + indent)
+                                )
+                            )
                         }
                         andand?.run {
-                            toBeLineBreak.add(NormalLineBreak(this, lineBreak(context, line.start, indent + indent)))
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    this,
+                                    lineBreak(context, line.start, indent + indent)
+                                )
+                            )
                         }
                     }
                 }
@@ -212,6 +240,22 @@ class LineBreaker : FormatRule {
                         )
                     }
                 }
+            } else if (node.elementType == STRING_LITERAL) {
+                breakStringLiteral(context, node, line)
+            }
+        }
+    }
+
+    private fun breakStringLiteral(
+        context: FormatContext,
+        node: ASTNode, //STRING_LITERAL
+        line: Line
+    ) {
+        val literal = node.treeParent
+        if (literal != null && literal.elementType == LITERAL_EXPRESSION) {
+            if (line.exceed || node.textLength > CutString.MAX_STRING_LEN) {
+                toBeLineBreak.add(
+                    CutString(literal, lineBreak(context, line.start, indent)))
             }
         }
     }
@@ -324,8 +368,79 @@ class LineBreaker : FormatRule {
 
         override fun report(context: FormatContext) {
             context.report(
-                "Cut the too long comment.",
+                "Cut the too long comment: ${comment.text}.",
                 context.getCodeFragment(comment))
+        }
+    }
+
+    private class CutString(
+        val string: ASTNode, //LITERAL_EXPRESSION
+        val lineBreakNode: ASTNode
+    ) : LineBreakAction {
+
+        companion object {
+            const val MAX_STRING_LEN = 80
+        }
+
+        override fun run(context: FormatContext) {
+            var polyadicExp = string.treeParent
+            val anchorBefore: ASTNode?
+            if (polyadicExp is PsiPolyadicExpression) {
+                anchorBefore = string
+            } else {
+                polyadicExp = PsiPolyadicExpressionImpl()
+                anchorBefore = null
+                string.treeParent.replaceChild(string, polyadicExp)
+            }
+
+            cutStringIfNeed(string.text, lineBreakNode.text, true) { child ->
+                polyadicExp.addChild(child, anchorBefore)
+            }
+
+            if (anchorBefore === string) {
+                string.treeParent.removeChild(string)
+            }
+        }
+
+        override fun report(context: FormatContext) {
+            context.report(
+                "Cut the too long String literal: ${string.text}.",
+                context.getCodeFragment(string))
+        }
+
+        private fun cutStringIfNeed(
+            node: String,
+            lineBreak: String,
+            mustCut: Boolean,
+            addToTree: (ASTNode) -> Unit
+        ) {
+            if (mustCut || node.length > 80) {
+                val half = node.length / 2
+                cutStringIfNeed(
+                    node.substring(0, half),
+                    lineBreak,
+                    false,
+                    addToTree)
+                addToTree(PsiWhiteSpaceImpl(" "))
+                addToTree(PsiJavaTokenImpl(PLUS, "+"))
+                addToTree(PsiWhiteSpaceImpl(lineBreak))
+                cutStringIfNeed(
+                    node.substring(half),
+                    lineBreak,
+                    false,
+                    addToTree)
+            } else {
+                val literal = CompositeElement(LITERAL_EXPRESSION)
+                addToTree(literal)
+                var txtWithQuot: String = node
+                if (!node.startsWith("\"")) {
+                    txtWithQuot = "\"" + node
+                }
+                if (!node.endsWith("\"")) {
+                    txtWithQuot = node + "\""
+                }
+                literal.addChild(PsiJavaTokenImpl(STRING_LITERAL, txtWithQuot))
+            }
         }
     }
 
