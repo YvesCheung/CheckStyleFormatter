@@ -218,33 +218,12 @@ package com.yy.mobile.checkstyleformatter;
 
 public class A {
 
-    public BasePluginViewController getCurrentUsingController(boolean isHost) {
-        for (Map.Entry<String, WeakReference<BasePluginViewController>> entry : isHost ? mHostControllers.entrySet() : mGuestControllers.entrySet()) {
-            if (pluginsReadyState.containsKey(entry.getKey())) {
-                return entry.getValue().get();
-            }
-        }
-
-        return null;
-    }
-
     public Observable<LoadPluginListener.Result> loadPlugin(final SinglePluginInfo pluginInfo, final boolean showDefaultLoading) {
-        if (LiveModuleManagerProxy.getInstance().isBookMode(EarningRxEvent.StreamLight_Type) || LiveModuleManagerProxy.getInstance().getEarnigCommonEvent() != null) {
+        if (LiveModuleManagerProxy.getInstance().isBookMode(EarningRxEvent.StreamLight_Type) && LiveModuleManagerProxy.getInstance().getEarnigCommonEvent() != null) {
+            return null;
+        } else if (LiveModuleManagerProxy.getInstance().isBookMode(EarningRxEvent.StreamLight_Type) || LiveModuleManagerProxy.getInstance().getEarnigCommonEvent() != null) {
             return null;
         }
-    }
-
-    public boolean isPluginLianMai() {
-        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLianMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang();
-        if (lianMaiType == TransChannelLianMaiType.HAPPY_BASKETBALL || lianMaiType == TransChannelLianMaiType.GREEDY_FACE || lianMaiType == TransChannelLianMaiType.FACE_LIMINATE
-//                || lianMaiType == TransChannelLianMaiType.PVP
-        ) {
-            MLog.info(TAG, "ICoreManagerBase.getCore(ITransChannelLianMaiCore.class).isPluginLianMai : true");
-            return true;
-        }
-        MLog.info(TAG, "ICoreManagerBase.getCore(ITransChannelLianMaiCore.class).isPluginLianMai : false");
-        AudienceMetadataManager manager = AudienceMetadataManager.getInstance();
-        return manager.isBasketBallLianMai() || manager.isGreedyFaceLianMai() || manager.isOppositeScoreLianMai();
     }
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
@@ -365,7 +344,7 @@ public class A {
 
     public boolean isPluginLianMai() {
         int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang();
-        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang;
+        ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang().testAsLongAs();
     }
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))

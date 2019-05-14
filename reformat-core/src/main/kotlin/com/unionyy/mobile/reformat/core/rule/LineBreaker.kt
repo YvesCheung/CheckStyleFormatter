@@ -4,16 +4,22 @@ import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.IF_KEYWORD
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
+import org.jetbrains.kotlin.com.intellij.psi.PsiBinaryExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
+import org.jetbrains.kotlin.com.intellij.psi.PsiIfStatement
+import org.jetbrains.kotlin.com.intellij.psi.PsiKeyword
 import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.BINARY_EXPRESSION
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.PARAMETER
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCoreCommentImpl
@@ -158,6 +164,29 @@ class LineBreaker : FormatRule {
                     toBeLineBreak.add(
                         CutComment(node)
                     )
+                }
+            } else if (node is PsiIfStatement) {
+                //if 语句判断 or else if
+                if (line.exceed) {
+                    val ifState = node.findChildByType(BINARY_EXPRESSION)
+                    ifState?.let {
+                        val oror = ifState.findChildByType(JavaTokenType.OROR)
+                        val andand = ifState.findChildByType(JavaTokenType.ANDAND)
+                        val or = ifState.findChildByType(JavaTokenType.OR)
+                        val and = ifState.findChildByType(JavaTokenType.AND)
+                        or?.run {
+                            toBeLineBreak.add(NormalLineBreak(this, lineBreak(context, line.start, indent + indent)))
+                        }
+                        and?.run {
+                            toBeLineBreak.add(NormalLineBreak(this, lineBreak(context, line.start, indent + indent)))
+                        }
+                        oror?.run {
+                            toBeLineBreak.add(NormalLineBreak(this, lineBreak(context, line.start, indent + indent)))
+                        }
+                        andand?.run {
+                            toBeLineBreak.add(NormalLineBreak(this, lineBreak(context, line.start, indent + indent)))
+                        }
+                    }
                 }
             } else if (node.elementType == DOT) {
                 //方法调用，断
