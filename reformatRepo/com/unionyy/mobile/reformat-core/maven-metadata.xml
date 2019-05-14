@@ -4,9 +4,8 @@
   <artifactId>reformat-core</artifactId>
   <versioning>
     <versions>
-      <version>1.0.0-SNAPSHOT</version>
       <version>1.0.1-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20190514091534</lastUpdated>
+    <lastUpdated>20190514095553</lastUpdated>
   </versioning>
 </metadata>

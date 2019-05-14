@@ -10,30 +10,35 @@ import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.plugins.JavaPluginConvention
 
 class FormatPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.rootProject.subprojects { p ->
-            def taskName = "printSrcDirs"
-            if (p.tasks.findByName(taskName) == null) {
-                p.tasks.create(taskName) {
-                    it.group = "checkstyle"
+        project.rootProject.allprojects { p ->
 
-                    it.doLast {
-                        getSourceFiles(p) {
-                            System.out.println("FileList:")
-                            System.out.println(it.first.join("\n"))
-                        }
-                    }
-                }
-            }
             getSourceFiles(p) {
                 def files = it.first
                 def sourceSetName = it.second
                 createFormatTask(p, files, sourceSetName)
+                createPrintFileTask(p, files)
+            }
+        }
+    }
+
+    private static Task createPrintFileTask(
+            Project project,
+            Collection<File> input) {
+        def taskName = "printSrcDirs"
+        if (project.tasks.findByName(taskName) == null) {
+            project.tasks.create(taskName) {
+                it.group = "checkstyle"
+                it.doLast {
+                    System.out.println("FileList:")
+                    System.out.println(input.join("\n"))
+                }
             }
         }
     }
@@ -76,12 +81,18 @@ class FormatPlugin implements Plugin<Project> {
                     it.fullVariantName?.toLowerCase() == "debug"
                 } ?: firstOrNull(variantManager.variantScopes)
                 if (variant != null) {
-                    Collection<File> files = variant.variantData.javaSources.collect {
+                    List<ConfigurableFileTree> fileTree =
+                            variant.variantData.javaSources.grep {
+                                def buildPath = project.buildDir.absolutePath
+                                return !it.dir.absolutePath.contains(buildPath)
+                            }
+                    Collection<File> files = fileTree.collect {
                         it.matching {
                             it.include("**/*.java")
                         }.files
                     }.flatten()
-                    System.out.println("variant = " + variant + " files = " + files)
+                    System.out.println("Variant: " + variant.fullVariantName +
+                            "\nDir:\n" + fileTree.dir.join("\n"))
                     callback.execute(new Pair<>(files, "main"))
                 }
             } else {
