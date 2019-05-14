@@ -226,7 +226,43 @@ public class A {
 }
         """.trimIndent())
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals("""
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public A(
+        String arg1,
+        int arg2,
+        String veryLongArg3,
+        float arg4,
+        String arg5,
+        byte[] arg6,
+        int arg7,
+        String veryLongArg8
+    ) {
+        System.out.println(veryLongArg3);
+    }
+
+    public Observable<LoadPluginListener.Result> loadPlugin(
+        final SinglePluginInfo pluginInfo,
+        final boolean showDefaultLoading
+    ) {
+        MLog.info("zhangyu4 is a nice man, wangfeihang is a beautiful woman, " +
+            "pengkangjia is a well guider, pengyangfan is a good xiaodi");
+    }
+
+    public Observable<LoadPluginListener.Result> loadPlugin2(
+        final SinglePluginInfo pluginInfo,
+        final boolean showDefaultLoading
+    ) {
+        MLog.info("zhangyu4 is a nice man, " +
+            "wangfeihang is a beautiful woman, " +
+            "pengkangjia is a well guider, " +
+            "pengyangfan is a good xiaodi");
+    }
+}
+        """.trimIndent(), text)
     }
 
     @Test
@@ -246,7 +282,25 @@ public class A {
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public Observable<LoadPluginListener.Result> loadPlugin(
+        final SinglePluginInfo pluginInfo,
+        final boolean showDefaultLoading
+    ) {
+        if (LiveModuleManagerProxy.getInstance().isBookMode(EarningRxEvent.StreamLight_Type)
+                && LiveModuleManagerProxy.getInstance().getEarnigCommonEvent() != null) {
+            return null;
+        } else if (LiveModuleManagerProxy.getInstance().isBookMode(EarningRxEvent.StreamLight_Type)
+                || LiveModuleManagerProxy.getInstance().getEarnigCommonEvent() != null) {
+            return null;
+        }
+    }
+}
+        """.trimIndent())
     }
 
     @Test
@@ -367,7 +421,24 @@ public class A {
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class)
+                .getLianmaiType()
+                .getZhangyu4()
+                .getWangfeihang();
+        ICoreManagerBase.getCore(ITransChannelLnMaiCore.class)
+                .getLianmaiType()
+                .getZhangyu4()
+                .getWangfeihang()
+                .testAsLongAs();
+    }
+}
+        """.trimIndent())
     }
 
     @Test

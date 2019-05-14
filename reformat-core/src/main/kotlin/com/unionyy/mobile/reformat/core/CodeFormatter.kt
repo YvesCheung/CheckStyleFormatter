@@ -121,7 +121,7 @@ object CodeFormatter {
             rules.forEach { it.afterVisit(context) }
 
             hasError = hasError || context.reportCnt > 0
-            repeat = context.requestRepeat && context.reportCnt > 0
+            repeat = context.requestRepeat && repeatTime < 50
         } while (repeat)
 
         return if (hasError) {
