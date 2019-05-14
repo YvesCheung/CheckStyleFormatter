@@ -179,7 +179,7 @@ class LineBreaker : FormatRule {
         val paramNum = node.children().count {
             it.elementType == COMMA
         }
-        if (line.exceed) {
+        if (line.exceed && paramNum > 0) {
 
             node.getChildren(null).forEach { child ->
                 if (child.elementType == COMMA ||
@@ -188,15 +188,14 @@ class LineBreaker : FormatRule {
                     toBeLineBreak.add(
                         NormalLineBreak(
                             whiteSpaceExpect,
-                            lineBreak(context, line.start, getRealIndent(node, indent))
+                            lineBreak(context, line.start, getRealIndent(node, ""))
                         )
                     )
                 } else if (child.elementType == RPARENTH) {
                     toBeLineBreak.add(
                         NormalLineBreak(
                             child,
-                            lineBreak(context, line.start, getRealIndent(node, indent))
-                        )
+                            lineBreak(context, line.start, getRealIndent(node, "").substring(4)))
                     )
                 }
             }

@@ -246,7 +246,24 @@ public class A {
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public Observable<LoadPluginListener.Result> loadPlugin(
+        final SinglePluginInfo pluginInfo,
+        final boolean showDefaultLoading
+    ) {
+        if (LiveModuleManagerProxy.getInstance().isBookMode(EarningRxEvent.StreamLight_Type)
+                && LiveModuleManagerProxy.getInstance().getEarnigCommonEvent() != null) {
+            return null;
+        } else if (LiveModuleManagerProxy.getInstance().isBookMode(EarningRxEvent.StreamLight_Type)
+                || LiveModuleManagerProxy.getInstance().getEarnigCommonEvent() != null) {
+            return null;
+        }
+    }
+}""".trimIndent())
     }
 
     @Test
@@ -347,8 +364,7 @@ public class A {
             return changeInfoInner(param);
         }
     }
-}
-        """.trimIndent())
+}""".trimIndent())
 
         Assert.assertEquals(text, """""".trimIndent())
     }
@@ -367,7 +383,23 @@ public class A {
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class)
+                .getLianmaiType()
+                .getZhangyu4()
+                .getWangfeihang();
+        ICoreManagerBase.getCore(ITransChannelLnMaiCore.class)
+                .getLianmaiType()
+                .getZhangyu4()
+                .getWangfeihang()
+                .testAsLongAs();
+    }
+}""".trimIndent())
     }
 
     @Test
@@ -383,7 +415,17 @@ public class A {
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType()
+                ? test.pluginA
+                : test.pluginB;
+    }
+}""".trimIndent())
     }
 
     @Test
@@ -408,7 +450,41 @@ public class A {
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        if (true) {
+            ICoreManagerBase.getCore(IChatEmotionCore.class)
+                    .addRichTextFilterFeature(RichTextManager
+                    .Feature
+                    .NOBLEMOTION);
+        }
+
+        String guideString = CommonPref.instance()
+                .get(String
+                .valueOf(LoginUtil
+                .getUid()) + "nobleChatEmotssssssionGuide");
+
+        mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(
+            mXdown > getWidth() / 2
+                ? R.drawable.icon_voice
+                : R.drawable.icon_brigh,
+            0,
+            0,
+            0
+        );
+        mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+
+        com.yy.mobile.http.RequestManager.instance().submitDownloadRequest(
+            url,
+            urlPathMap.get(url),
+            new ResponseListener<String>()
+        );
+    }
+}""".trimIndent())
     }
 
     @Test
@@ -441,7 +517,40 @@ public class A {
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        com.yy.mobile.http.RequestManager.instance().submitDownloadRequest(
+            url,
+            urlPathMap.get(url),
+            new ResponseListener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            MLog.info("BatchDownloadManager", url + " download success");
+                            e.onNext(url);
+                        }
+                    },
+            new ResponseErrorListener() {
+                        @Override
+                        public void onErrorResponse(RequestError error) {
+                            MLog.info("BatchDownloadManager", url + " download failed");
+                            e.onNext(DOWNLOAD_FAILED);
+                        }
+                    },
+            new ProgressListener() {
+                        @Override
+                        public void onProgress(ProgressInfo info) {
+
+                        }
+                    },
+            false,
+            true
+        );
+    }
+}""".trimIndent())
     }
 
     @Test
@@ -463,9 +572,21 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public boolean isPluginLianMai() {
-        mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(info, urlPathMap.get(url, url, url, url), 0, 0, zhangyu4, wangfeihang, pengyangfan);
+        mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(
+            info,
+            urlPathMap.get(
+                url,
+                url,
+                url,
+                url
+            ),
+            0,
+            0,
+            zhangyu4,
+            wangfeihang,
+            pengyangfan
+        );
     }
-}
-        """.trimIndent())
+}""".trimIndent())
     }
 }
