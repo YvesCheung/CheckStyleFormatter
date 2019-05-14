@@ -358,4 +358,20 @@ public class A {
 
         Assert.assertEquals(text, """""".trimIndent())
     }
+
+    @Test
+    fun testJavaTrinocularTooLong() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType() ? test.pluginA : test.pluginB;
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """""".trimIndent())
+    }
 }
