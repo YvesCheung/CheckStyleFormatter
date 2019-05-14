@@ -401,6 +401,7 @@ public class A {
         String guideString = CommonPref.instance().get(String.valueOf(LoginUtil.getUid()) + "nobleChatEmotssssssionGuide");
 
         mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(mXdown > getWidth() / 2 ? R.drawable.icon_voice : R.drawable.icon_brigh, 0, 0, 0);
+        mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 
         com.yy.mobile.http.RequestManager.instance().submitDownloadRequest(url, urlPathMap.get(url), new ResponseListener<String>());
     }
@@ -441,5 +442,30 @@ public class A {
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
         Assert.assertEquals(text, """""".trimIndent())
+    }
+
+    @Test
+    fun testJavaFuntionCallTooLong() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(info, urlPathMap.get(url, url, url, url), 0, 0, zhangyu4, wangfeihang, pengyangfan);
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(info, urlPathMap.get(url, url, url, url), 0, 0, zhangyu4, wangfeihang, pengyangfan);
+    }
+}
+        """.trimIndent())
     }
 }
