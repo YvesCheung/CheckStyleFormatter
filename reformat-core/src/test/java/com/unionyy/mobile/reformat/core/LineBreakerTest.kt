@@ -192,6 +192,17 @@ public class A {
     }
 
     @Test
+    fun testJavaAddOperation(){
+        val text = CodeFormatter.reformat("Haha.java","""
+public class Haha {
+    final File dir = new File(YYFileUtils.getRootDir() + File.separator + CommonFuncNoticeController.COMMON_ANIMATION_DIR);
+}
+        """.trimIndent())
+
+        Assert.assertEquals(text, """""".trimIndent())
+    }
+
+    @Test
     fun testJavaStringTooLong() {
         val text = CodeFormatter.reformat("D.java", """
 package com.yy.mobile.checkstyleformatter;
@@ -337,7 +348,7 @@ public class A {
         }
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """""".trimIndent())
     }

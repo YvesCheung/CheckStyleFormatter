@@ -1,17 +1,23 @@
 package com.unionyy.mobile.reformat.core
 
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
+import org.jetbrains.kotlin.com.intellij.lang.FileASTNode
 import org.jetbrains.kotlin.com.intellij.lang.Language
+import org.jetbrains.kotlin.com.intellij.psi.PsiFile
 import java.util.ArrayList
 
 @Suppress("MemberVisibilityCanBePrivate", "unused", "CanBeParameter")
 class FormatContext(
     val fileName: String,
-    val fileContent: ASTNode,
+    val fileContent: FileASTNode,
     val language: Language,
+    val scanningTimes: Int,
     private val reporter: Reporter,
     private val rules: Set<FormatRule>
 ) {
+
+    var requestRepeat: Boolean = false
+        private set
 
     private val fileText: String
         get() = fileContent.text
@@ -39,9 +45,17 @@ class FormatContext(
 
     fun report(msg: String, code: CodeFragment, changeText: Boolean = false) {
         reporter.report(msg, code)
+        reportCnt++
         if (changeText) {
             notifyTextChange()
         }
+    }
+
+    var reportCnt: Int = 0
+        private set
+
+    fun requestRepeatScan() {
+        requestRepeat = true
     }
 
     private fun calculateLineColByOffset(text: String): (offset: Int) -> Location {
