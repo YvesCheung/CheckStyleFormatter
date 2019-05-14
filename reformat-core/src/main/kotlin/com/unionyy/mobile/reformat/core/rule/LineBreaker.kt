@@ -61,6 +61,8 @@ class LineBreaker : FormatRule {
                 lastIndent = getIndent((startNode as PsiWhiteSpace).text)
             } else if (startNode.treePrev is PsiWhiteSpace) {
                 lastIndent = getIndent((startNode.treePrev as PsiWhiteSpace).text)
+            } else if (startNode.treePrev == null && startNode.treeParent != null) {
+                return lineBreak(startNode.treeParent, moreIndent)
             }
             return PsiWhiteSpaceImpl(lineBreak + lastIndent + moreIndent)
         }
@@ -350,34 +352,30 @@ class LineBreaker : FormatRule {
             }
 
             if (totalLength >= maxLineLength) {
-                val lineBreakNode = {
-                    lineBreak(startNode, "")
-                }
-                val whiteSpaceLen = lineBreakNode().textLength
+                val lineBreakText = lineBreak(startNode, "").text
+                val whiteSpaceLen = lineBreakText.length
 
-                fun checkAndCutComment(node: ASTNode) {
-                    if (node.textLength + whiteSpaceLen >= maxLineLength) {
-                        val half = node.textLength / 2
-                        val halfComment = PsiCoreCommentImpl(
-                            END_OF_LINE_COMMENT,
-                            node.text.substring(0, half))
-                        val otherComment = PsiCoreCommentImpl(
-                            END_OF_LINE_COMMENT,
-                            "//" + node.text.substring(half))
-                        val parent = node.treeParent
-                        var cutPoint = node.treeNext
-                        if (cutPoint.treeParent !== parent) {
-                            cutPoint = null
-                        }
-                        parent.replaceChild(node, halfComment)
-                        parent.addChild(lineBreakNode(), cutPoint)
-                        parent.addChild(otherComment, cutPoint)
-                        checkAndCutComment(halfComment)
-                        checkAndCutComment(otherComment)
+                fun checkAndCutComment(comment: String, addToTree: (ASTNode) -> Unit) {
+                    if (comment.length + whiteSpaceLen >= maxLineLength) {
+                        val half = comment.length / 2
+                        checkAndCutComment(comment.substring(0, half), addToTree)
+                        addToTree(PsiWhiteSpaceImpl(lineBreakText))
+                        checkAndCutComment(comment.substring(half), addToTree)
+                    } else {
+                        val text =
+                            if (comment.startsWith("//")) {
+                                comment
+                            } else {
+                                "//$comment"
+                            }
+                        addToTree(PsiCoreCommentImpl(END_OF_LINE_COMMENT, text))
                     }
                 }
 
-                checkAndCutComment(comment)
+                checkAndCutComment(comment.text) { child ->
+                    comment.treeParent.addChild(child, comment)
+                }
+                comment.treeParent.removeChild(comment)
             }
         }
 
