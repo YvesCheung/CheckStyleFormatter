@@ -386,4 +386,61 @@ public class A {
 
         Assert.assertEquals(text, """""".trimIndent())
     }
+
+    @Test
+    fun testJavaDeclarationTooLong() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        if (true) {
+            ICoreManagerBase.getCore(IChatEmotionCore.class).addRichTextFilterFeature(RichTextManager.Feature.NOBLEMOTION);
+        }
+
+        String guideString = CommonPref.instance().get(String.valueOf(LoginUtil.getUid()) + "nobleChatEmotssssssionGuide");
+
+        mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(mXdown > getWidth() / 2 ? R.drawable.icon_voice : R.drawable.icon_brigh, 0, 0, 0);
+
+        com.yy.mobile.http.RequestManager.instance().submitDownloadRequest(url, urlPathMap.get(url), new ResponseListener<String>());
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """""".trimIndent())
+    }
+
+    @Test
+    fun testJavaSpecialTooLong() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        com.yy.mobile.http.RequestManager.instance().submitDownloadRequest(url, urlPathMap.get(url), new ResponseListener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            MLog.info("BatchDownloadManager", url + " download success");
+                            e.onNext(url);
+                        }
+                    }, new ResponseErrorListener() {
+                        @Override
+                        public void onErrorResponse(RequestError error) {
+                            MLog.info("BatchDownloadManager", url + " download failed");
+                            e.onNext(DOWNLOAD_FAILED);
+                        }
+                    }, new ProgressListener() {
+                        @Override
+                        public void onProgress(ProgressInfo info) {
+
+                        }
+                    }, false, true);
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """""".trimIndent())
+    }
 }
