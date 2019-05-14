@@ -26,9 +26,23 @@ sourceSets {
     }
 }
 
+if (isJenkins()) { //构建系统构建时不要测试
+    gradle.taskGraph.whenReady {
+        tasks.each { task ->
+            if (task.name.contains("test")) {
+                task.enabled = false
+            }
+        }
+    }
+}
+
+static def isJenkins() {
+    return System.getenv("BUILD_NUMBER") != null
+}
+
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:1.3.30"
-    compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:1.3.30"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
     compile 'com.github.javaparser:javaparser-core:3.14.0'
 
     testCompile 'junit:junit:4.12'
