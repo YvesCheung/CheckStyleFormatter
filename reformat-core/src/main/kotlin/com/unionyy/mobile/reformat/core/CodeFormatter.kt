@@ -4,6 +4,7 @@ import com.unionyy.mobile.reformat.core.reporter.WriterReporter
 import com.unionyy.mobile.reformat.core.rule.AddSpace
 import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
+import com.unionyy.mobile.reformat.core.rule.TabCharacter
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -40,7 +41,8 @@ object CodeFormatter {
     private val usingRules = mutableSetOf<FormatRule>(
         //DumpAST(),
         LineBreaker(),
-        AddSpace()
+        AddSpace(),
+        TabCharacter()
     )
 
     init {

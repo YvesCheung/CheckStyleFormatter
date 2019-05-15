@@ -1,6 +1,5 @@
 package com.unionyy.mobile.reformat.core.rule
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import com.unionyy.mobile.reformat.core.Location
