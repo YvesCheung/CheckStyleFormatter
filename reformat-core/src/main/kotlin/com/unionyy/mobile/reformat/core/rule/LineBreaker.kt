@@ -405,6 +405,8 @@ class LineBreaker : FormatRule {
             toBeLineBreak.add(CutEndOfLineComment(node))
         } else if (node.elementType == C_STYLE_COMMENT) {
             toBeLineBreak.add(CutCStyleComment(node))
+        } else if (node.elementType == END_OF_LINE_COMMENT && node.treePrev !is PsiWhiteSpace) {
+            node.treeParent.addChild(PsiWhiteSpaceImpl(" "), node)
         }
     }
 

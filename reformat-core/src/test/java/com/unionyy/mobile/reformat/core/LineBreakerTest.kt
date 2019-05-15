@@ -981,4 +981,33 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
 }
         """.trimIndent())
     }
+
+    @Test
+    fun testJavaCommentTooClose() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView { //niubi
+
+    public boolean isPluginLianMai() {//niubi
+        int i = 0;//niubi
+        int j = 1; //niubi
+    }//niubi
+
+} //niubi
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView { //niubi
+
+    public boolean isPluginLianMai() { //niubi
+        int i = 0; //niubi
+        int j = 1; //niubi
+    } //niubi
+
+} //niubi
+        """.trimIndent())
+    }
 }
