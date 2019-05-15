@@ -1040,7 +1040,7 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
     }
 
     @Test
-    fun testJavaCommentTooClose() {
+    fun testJavaNestedTooClose() {
         val text = CodeFormatter.reformat("D.java", """
 package com.yy.mobile.checkstyleformatter;
 
