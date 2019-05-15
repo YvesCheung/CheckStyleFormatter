@@ -823,4 +823,26 @@ public class A {
 }
         """.trimIndent())
     }
+
+    @Test
+    fun testJavaExtendsImplementTooLong() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView implements EventCompat, VideoDebugInfoListener, IAudienceVideoQualityChangeListener {
+
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView implements
+        EventCompat,
+        VideoDebugInfoListener,
+        IAudienceVideoQualityChangeListener {
+
+}
+        """.trimIndent())
+    }
 }

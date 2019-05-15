@@ -31,12 +31,15 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.CompositeElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.BINARY_EXPRESSION
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.EXTENDS_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.IMPLEMENTS_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.JAVA_CODE_REFERENCE
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.LITERAL_EXPRESSION
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.PARAMETER
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCoreCommentImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ClassElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
@@ -146,6 +149,8 @@ class LineBreaker : FormatRule {
                     breakIfStatement(context, node, line)
                 } else if (node is PsiPolyadicExpression) {
                     breakPolyadicOperator(context, node, line)
+                } else if (node is ClassElement) {
+                    breakClassDefine(context, node, line)
                 }
             } else if (context.scanningTimes == SCAN_MIDDLE) {
                 if (node.elementType == JavaTokenType.QUEST ||
@@ -408,9 +413,50 @@ class LineBreaker : FormatRule {
                     NormalLineBreak(
                         node,
                         lineBreak(context, line.start, indent + indent),
-                        "'.' in the reference expression: $parentText."
+                        "'.' in the reference method call expression: $parentText."
                     )
                 )
+            }
+        }
+    }
+
+    private fun breakClassDefine(
+        context: FormatContext,
+        node: ASTNode,
+        line: Line
+    ) {
+        if (line.exceed) {
+            when (context.scanningTimes) {
+                SCAN_HIGH -> {
+                    //第一遍扫描换行接口们
+                    val implements = node.findChildByType(IMPLEMENTS_LIST)
+                    implements?.children()?.forEach {
+                        if (it is PsiJavaCodeReferenceElement) {
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    it,
+                                    lineBreak(context, line.start, indent + indent),
+                                    "'implement' in the class define expression: ${node.text}."
+                                )
+                            )
+                        }
+                    }
+                }
+                SCAN_MIDDLE -> {
+                    //第二遍扫描换行extends
+                    val extends = node.findChildByType(EXTENDS_LIST)
+                    extends?.children()?.forEach {
+                        if (it is PsiJavaCodeReferenceElement) {
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    it,
+                                    lineBreak(context, line.start, indent + indent),
+                                    "'extends' in the class define expression: ${node.text}."
+                                )
+                            )
+                        }
+                    }
+                }
             }
         }
     }
