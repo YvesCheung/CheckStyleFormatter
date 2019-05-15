@@ -20,4 +20,14 @@ public class NormalJavaClass {
             return CommonFuncNoticeController.COMMON_ANIMATION_DIR;
         }
     }
+
+    private static class DispenseChannelProtocol {
+
+        private static class ALongClassName {
+
+
+        }
+    }
+
+    private static NormalJavaClass.DispenseChannelProtocol.ALongClassName clsName = new NormalJavaClass.DispenseChannelProtocol.ALongClassName();
 }

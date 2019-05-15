@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.C_STYLE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DIV
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.EQ
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.MINUS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.PLUS
@@ -23,7 +24,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionList
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiIfStatement
-import org.jetbrains.kotlin.com.intellij.psi.PsiJavaCodeReferenceElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiLocalVariable
 import org.jetbrains.kotlin.com.intellij.psi.PsiMethodCallExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiPolyadicExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
@@ -55,9 +56,11 @@ class LineBreaker : FormatRule {
         private const val indent = "    "
 
         //最多 3 轮扫描遍历
-        private const val SCAN_HIGH = 1
-        private const val SCAN_MIDDLE = 2
-        private const val SCAN_LOW = 3
+        private const val SCAN_A = 1
+        private const val SCAN_B = 2
+        private const val SCAN_C = 3
+        private const val SCAN_D = 4
+        private const val SCAN_E = 5
 
         private fun lineBreak(
             context: FormatContext,
@@ -137,30 +140,42 @@ class LineBreaker : FormatRule {
             val location = context.getCodeLocation(node)
             val line = lines.getValue(location.line)
 
-            if (context.scanningTimes == SCAN_HIGH) {
-                if (node is ParameterListElement) {
-                    breakFunctionParam(context, node, line)
-                } else if (node is PsiComment) {
-                    breakComment(context, node, line)
-                } else if (node is PsiIfStatement) {
-                    breakIfStatement(context, node, line)
-                } else if (node is PsiPolyadicExpression) {
-                    breakPolyadicOperator(context, node, line)
+            when (context.scanningTimes) {
+                SCAN_A -> {
+                    if (node is ParameterListElement) {
+                        breakFunctionParam(context, node, line)
+                    } else if (node is PsiComment) {
+                        breakComment(context, node, line)
+                    } else if (node is PsiIfStatement) {
+                        breakIfStatement(context, node, line)
+                    }
                 }
-            } else if (context.scanningTimes == SCAN_MIDDLE) {
-                if (node.elementType == JavaTokenType.QUEST ||
-                    node.elementType == JavaTokenType.COLON) {
-                    breakQuest(context, node, line)
-                } else if (node.elementType == STRING_LITERAL) {
-                    breakStringLiteral(context, node, line)
-                } else if (node is PsiExpressionList) {
-                    breakFunctionCallParamList(context, node, line)
-                } else if (node is PsiPolyadicExpression) {
-                    breakPolyadicOperator(context, node, line)
+                SCAN_B -> {
+                    if (node is PsiExpressionList) {
+                        breakFunctionCallParamList(context, node, line)
+                    } else if (node.elementType == EQ) {
+                        breakFieldOrVariable(context, node, line)
+                    }
                 }
-            } else if (context.scanningTimes == SCAN_LOW) {
-                if (node.elementType == DOT) {
-                    breakDot(context, node, line, location)
+                SCAN_C -> {
+                    if (node.elementType == JavaTokenType.QUEST ||
+                        node.elementType == JavaTokenType.COLON) {
+                        breakQuest(context, node, line)
+                    } else if (node.elementType == STRING_LITERAL) {
+                        breakStringLiteral(context, node, line)
+                    } else if (node is PsiPolyadicExpression) {
+                        breakPolyadicOperator(context, node, line)
+                    }
+                }
+                SCAN_D -> {
+                    if (node is PsiPolyadicExpression) {
+                        breakPolyadicOperator(context, node, line)
+                    }
+                }
+                SCAN_E -> {
+                    if (node.elementType == DOT) {
+                        breakDot(context, node, line, location)
+                    }
                 }
             }
         }
@@ -268,7 +283,7 @@ class LineBreaker : FormatRule {
                             maybeWhiteSpace
                         }) ?: continue
 
-                    if (context.scanningTimes == SCAN_HIGH) {
+                    if (context.scanningTimes == SCAN_C) {
                         if (next.elementType != LITERAL_EXPRESSION ||
                             next.getChildren(null).firstOrNull()?.elementType != STRING_LITERAL) {
                             continue
@@ -287,6 +302,27 @@ class LineBreaker : FormatRule {
                             "operator '${child.elementType}' " +
                                 "in the expression: ${node.text}."))
                 }
+            }
+        }
+    }
+
+    private fun breakFieldOrVariable(
+        context: FormatContext,
+        node: ASTNode, //EQ
+        line: Line
+    ) {
+        if (line.exceed) {
+            val parent = node.treeParent ?: return
+            if (parent.elementType == FIELD ||
+                parent is PsiLocalVariable) {
+
+                toBeLineBreak.add(
+                    NormalLineBreak(
+                        node.treeNext,
+                        lineBreak(context, line.start, indent + indent),
+                        "token '=' in the field or variable: ${parent.text}."
+                    )
+                )
             }
         }
     }
@@ -378,8 +414,8 @@ class LineBreaker : FormatRule {
         if (line.exceed) {
             val parent = node.treeParent
             val grandlParent = node.treeParent.treeParent
-            if (grandlParent != null && ((grandlParent is PsiReferenceExpression) || (parent.elementType ==
-                    JAVA_CODE_REFERENCE))) {
+            if (grandlParent != null && ((grandlParent is PsiReferenceExpression)
+                    || (parent.elementType == JAVA_CODE_REFERENCE))) {
                 val column = location.column
                 val parentText = (parent as ASTNode).text
                 val nextParentTextLength = parent.treeNext?.textLength ?: 0
@@ -392,7 +428,7 @@ class LineBreaker : FormatRule {
                     NormalLineBreak(
                         node,
                         lineBreak(context, line.start, indent + indent),
-                        "'.' in the reference expression."
+                        "'.' in the reference expression: $parentText."
                     )
                 )
             } else if (grandlParent != null && (grandlParent is PsiMethodCallExpression)) {
@@ -654,7 +690,7 @@ class LineBreaker : FormatRule {
         toBeLineBreak.forEach { it.report(context) }
         toBeLineBreak.forEach { it.run(context) }
 
-        if (context.scanningTimes < SCAN_LOW) {
+        if (lines.values.any { it.exceed } && context.scanningTimes < SCAN_E) {
             context.requestRepeatScan()
         }
     }

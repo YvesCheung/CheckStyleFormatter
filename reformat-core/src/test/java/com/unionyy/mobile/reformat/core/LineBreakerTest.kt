@@ -328,24 +328,26 @@ public class NormalJavaClass {
         String d,
         String e
     ) {
-        final File dir = new File(YYFileUtils.getRootDir() +
-            File.separator +
-            CommonFuncNoticeController.COMMON_ANIMATION_DIR);
-        String aa = "asdsafahsdfhladh: " + dir.getPath() + dir.toString().length()+a.length()+ b.length() +
-            " and the next is: " + dir;
-        int bbb = a.length() +
-            dir.toString().length()+
-            a.length()+
-            b.length() + 123432 +
-            b.length() +
-            c.length() +
-            d.length() +
-            e.length();
+        final File dir =
+                new File(YYFileUtils.getRootDir() + File.separator + CommonFuncNoticeController.COMMON_ANIMATION_DIR);
+        String aa =
+                "asdsafahsdfhladh: " + dir.getPath() + dir.toString().length()+a.length()+ b.length() +
+                    " and the next is: " + dir;
+        int bbb =
+                a.length() +
+                    dir.toString().length()+
+                    a.length()+
+                    b.length() + 123432 +
+                    b.length() +
+                    c.length() +
+                    d.length() +
+                    e.length();
     }
 
     private static class CommonFuncNoticeController {
-        private static final String COMMON_ANIMATION_DIR = "ashdfduhishcahasdhlfhslhakHsfuiewhiknkdn" +
-            "ajksdiufhgwgefukyawgekgakdhckgdfkaghfjkhe";
+        private static final String COMMON_ANIMATION_DIR =
+                "ashdfduhishcahasdhlfhslhakHsfuiewhiknkdn" +
+                    "ajksdiufhgwgefukyawgekgakdhckgdfkaghfjkhe";
     }
 
     private static class YYFileUtils {
@@ -559,7 +561,126 @@ public class A {
     }
 }""".trimIndent())
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public Observable<LoadPluginListener.Result> loadPlugin(
+        final SinglePluginInfo pluginInfo,
+        final boolean showDefaultLoading
+    ) {
+        MLog.info(
+            TAG,
+            "zhangyu4 is a nice man, wangfeihang is a beautiful woman," +
+                " pengkangjia is a well guider,pengyangfan is a good xiaodi"
+        );
+    }
+
+    public Flowable<Scene> setChannelInfo(final IChannelBaseParam param) {
+        final long sid = param.getSid();
+        final long ssid = param.getSsid();
+        final int liveType = param.getLiveType();
+        final String templateId = param.getTemplateId();
+        MLog.info(TAG, "requestChannelType setChannelInfo liveType = " + liveType + " templateId = " + templateId);
+        if (TextUtils.isEmpty(templateId)
+                || ((LinkChannelConstants.TEMPLATE_ENTERTAINMENT.equals(templateId)
+                || LinkChannelConstants.TEMPLATE_MOBILE_LIVE.equals(templateId))
+                && liveType == ILivingCoreConstant.LIVING_TYPE_UNKNOWN)) {
+            return changeScene(Scene.PREPARE)
+                    .concatMap(new Function<Scene, Publisher<DispenseChannelProtocol.ChannelSearchResp>>() {
+                        @Override
+                        public Publisher<DispenseChannelProtocol.ChannelSearchResp> apply(
+                            Scene scene
+                        ) throws Exception {
+                            applySceneToRoot(scene);
+                            return requestChannelType(sid, ssid)
+                                    .observeOn(AndroidSchedulers.mainThread());
+                        }
+                    })
+                    .onErrorResumeNext(new Function<Throwable, Publisher<
+                            ? extends DispenseChannelProtocol.ChannelSearchResp>>() {
+                        @Override
+                        public Publisher<? extends DispenseChannelProtocol.ChannelSearchResp> apply(
+                            Throwable throwable
+                        ) throws Exception {
+                            if (throwable instanceof EntNoConnectionError
+                                    || throwable instanceof EntTimeoutError
+                                    || throwable instanceof MaxRetryReachError) {
+                                DispenseChannelProtocol.ChannelSearchResp errorResp =
+                                        new DispenseChannelProtocol.ChannelSearchResp();
+                                if (liveType == ILivingCoreConstant.LIVING_TYPE_MOBILE_LIVE) {
+                                    errorResp.type = Uint32.toUInt(TYPE_MOBILE);
+                                } else {
+                                    errorResp.type = Uint32.toUInt(TYPE_DEFAULT);
+                                }
+                                MLog.info(TAG, "requestChannelType timeout or noconnection liveType =" + liveType);
+                                return Flowable.just(errorResp);
+                            }
+                            return Flowable.error(throwable);
+                        }
+                    })
+                    .concatMap(new Function<DispenseChannelProtocol.ChannelSearchResp, Publisher<? extends Scene>>() {
+                        @Override
+                        public Publisher<? extends Scene> apply(
+                            DispenseChannelProtocol.ChannelSearchResp channelSearchResp
+                        ) throws Exception {
+                            Map<String, String> extendInfo = channelSearchResp.mData;
+                            int type = channelSearchResp.type.intValue();
+                            //避免频道信息回来被覆盖
+                            String channelTemplateId =
+                                    ICoreManagerBase.getChannelLinkCore().getCurrentChannelInfo().templateid;
+                            MLog.info(TAG, "requestChannelType receive start channelTemplateId = " + channelTemplateId
+                                    + " templateId = " + templateId);
+                            if (TextUtils.isEmpty(channelTemplateId)) {
+                                channelTemplateId = templateId;
+                                if (TextUtils.isEmpty(channelTemplateId)) {
+                                    if (extendInfo != null && extendInfo.containsKey("template_id")) {
+                                        channelTemplateId = extendInfo.get("template_id");
+                                        ICoreManagerBase.getChannelLinkCore().setTemplateId(channelTemplateId);
+                                        MLog.info(
+                                            TAG,
+                                            "requestChannelType receive over channelTemplateId = " + channelTemplateId
+                                        );
+                                    }
+                                }
+                            }
+                            param.updateTemplateId(channelTemplateId);
+                            //避免流信息回来被覆盖
+                            int realLiveType = getStreamInfoType();
+                            MLog.info(
+                                TAG,
+                                "requestChannelType receive type = " + type + " realLiveType = " + realLiveType
+                            );
+                            if (realLiveType == 0) {
+                                switch (type) {
+                                    case TYPE_MOBILE:
+                                        realLiveType = ILivingCoreConstant.LIVING_TYPE_MOBILE_LIVE;
+                                        break;
+                                    case TYPE_GAME:
+                                        // 只有游戏类型的用网络传回来的sid ssid
+                                        long uid = channelSearchResp.uid.longValue();
+                                        long respSid = StringUtils.safeParseLong(channelSearchResp.reTopCid);
+                                        long respSsid = StringUtils.safeParseLong(channelSearchResp.reSubCid);
+                                        param.updateUid(uid);
+                                        param.updateSidAndSSid(respSid, respSsid);
+                                    case TYPE_NONE:
+                                    case TYPE_DEFAULT:
+                                    default:
+                                        realLiveType = ILivingCoreConstant.LIVING_TYPE_SHOW_LIVE;
+                                        break;
+                                }
+                            }
+                            param.updateLiveType(realLiveType);
+                            return changeInfoInner(param);
+                        }
+                    });
+        } else {
+            return changeInfoInner(param);
+        }
+    }
+}
+        """.trimIndent())
     }
 
     @Test
@@ -570,7 +691,7 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public boolean isPluginLianMai() {
-        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang();
+        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang().test().test();
         ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang().testAsLongAs();
     }
 }
@@ -582,10 +703,13 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public boolean isPluginLianMai() {
-        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class)
-                .getLianmaiType()
-                .getZhangyu4()
-                .getWangfeihang();
+        int lianMaiType =
+                ICoreManagerBase.getCore(ITransChannelLnMaiCore.class)
+                        .getLianmaiType()
+                        .getZhangyu4()
+                        .getWangfeihang()
+                        .test()
+                        .test();
         ICoreManagerBase.getCore(ITransChannelLnMaiCore.class)
                 .getLianmaiType()
                 .getZhangyu4()
@@ -604,7 +728,7 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public boolean isPluginLianMai() {
-        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType() ? test.pluginA : test.pluginB;
+        ICoreManagerBase.getCore(ITransChannelVeryLongAndVeryLongLnMaiCore.class).getLianmaiType() ? test.pluginA : test.pluginB);
     }
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
@@ -615,9 +739,9 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public boolean isPluginLianMai() {
-        int lianMaiType = ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType()
+        ICoreManagerBase.getCore(ITransChannelVeryLongAndVeryLongLnMaiCore.class).getLianmaiType()
                 ? test.pluginA
-                : test.pluginB;
+                : test.pluginB);
     }
 }""".trimIndent())
     }
@@ -652,18 +776,14 @@ public class A {
     public boolean isPluginLianMai() {
         if (true) {
             ICoreManagerBase.getCore(IChatEmotionCore.class)
-                    .addRichTextFilterFeature(RichTextManager
-                    .Feature
-                    .NOBLEMOTION);
+                    .addRichTextFilterFeature(RichTextManager.Feature.NOBLEMOTION);
         }
 
-        String guideString = CommonPref.instance().get(String.valueOf(LoginUtil.getUid()) +
-            "nobleChatEmotssssssionGuide");
+        String guideString =
+                CommonPref.instance().get(String.valueOf(LoginUtil.getUid()) + "nobleChatEmotssssssionGuide");
 
         mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(
-            mXdown > getWidth() / 2
-                ? R.drawable.icon_voice
-                : R.drawable.icon_brigh,
+            mXdown > getWidth() / 2 ? R.drawable.icon_voice : R.drawable.icon_brigh,
             0,
             0,
             0
@@ -804,8 +924,8 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public boolean isPluginLianMai() {
-        com.duowan.mobile.entlive.domain.pyf.FreeContainer container = new com.duowan.mobile.entlive.domain.pyf
-                .FreeContainer();
+        com.duowan.mobile.entlive.domain.pyf.FreeContainer container =
+                new com.duowan.mobile.entlive.domain.pyf.FreeContainer();
         com.duowan.mobile.RequestManager
                 .instance()
                 .submitDownloadRequest()
@@ -822,5 +942,48 @@ public class A {
     }
 }
         """.trimIndent())
+    }
+
+    @Test
+    fun testLongVariable() {
+        val text = CodeFormatter.reformat("A.java", """
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private static class DispenseChannelProtocol {
+
+        private static class ALongClassName {
+        }
+    }
+
+    private void someMethod() {
+        NormalJavaClass.DispenseChannelProtocol.ALongClassName inTheMethod = new NormalJavaClass.DispenseChannelProtocol.ALongClassName();
+    }
+
+    private static NormalJavaClass.DispenseChannelProtocol.ALongClassName clsName = new NormalJavaClass.DispenseChannelProtocol.ALongClassName();
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals("""
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private static class DispenseChannelProtocol {
+
+        private static class ALongClassName {
+        }
+    }
+
+    private void someMethod() {
+        NormalJavaClass.DispenseChannelProtocol.ALongClassName inTheMethod =
+                new NormalJavaClass.DispenseChannelProtocol.ALongClassName();
+    }
+
+    private static NormalJavaClass.DispenseChannelProtocol.ALongClassName clsName =
+            new NormalJavaClass.DispenseChannelProtocol.ALongClassName();
+}
+        """.trimIndent(), text)
     }
 }
