@@ -252,7 +252,38 @@ public class A {
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public A(
+        String arg1,
+        int arg2,
+        String veryLongArg3,
+        float arg4,
+        String arg5,
+        byte[] arg6,
+        int arg7,
+        String veryLongArg8
+    ) {
+        System.out.println(veryLongArg3);
+    }
+
+    public Observable<LoadPluginListener.Result> loadPlugin(
+        final SinglePluginInfo pluginInfo,
+        final boolean showDefaultLoading
+    ) {
+        MLog.info(
+            "PluginCenterApiImpl",
+            "loadPlugin plugin = %s, showDefaultLoading = %s",
+            pluginInfo,
+            showDefaultLoading
+        );
+        return PluginCenterController.INSTANCE.loadPlugin(pluginInfo, showDefaultLoading);
+    }
+}
+        """.trimIndent())
     }
 
     @Test
