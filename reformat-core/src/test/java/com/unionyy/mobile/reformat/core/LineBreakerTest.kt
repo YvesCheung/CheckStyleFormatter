@@ -1029,16 +1029,17 @@ package com.yy.mobile.checkstyleformatter;
 public class ChannelMediaVideoInfoView extends AbsFloatingView {
 
     public boolean isPluginLianMai() {
-        float[] radii = {
-            topLeftRadius,
-            topLeftRadius,
-            topRightRadius,
-            topRightRadius,
-            bottomRightRadius,
-            bottomRightRadius,
-            bottomLeftRadius,
-            bottomLeftRadius
-        };
+        float[] radii =
+                {
+                    topLeftRadius,
+                    topLeftRadius,
+                    topRightRadius,
+                    topRightRadius,
+                    bottomRightRadius,
+                    bottomRightRadius,
+                    bottomLeftRadius,
+                    bottomLeftRadius
+                };
     }
 
 }
