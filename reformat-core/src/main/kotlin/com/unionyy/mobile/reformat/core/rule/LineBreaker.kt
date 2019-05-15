@@ -23,6 +23,8 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionList
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiIfStatement
+import org.jetbrains.kotlin.com.intellij.psi.PsiJavaCodeReferenceElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiMethodCallExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiPolyadicExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
@@ -30,6 +32,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.CompositeElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.BINARY_EXPRESSION
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.JAVA_CODE_REFERENCE
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.LITERAL_EXPRESSION
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.PARAMETER
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCoreCommentImpl
@@ -371,10 +374,28 @@ class LineBreaker : FormatRule {
     }
 
     private fun breakDot(context: FormatContext, node: ASTNode, line: Line, location: Location) {
-        //这里面得加上判断如果是if的话，且blabla就跳过，我想想怎么处理呢，一点都不好处理
+        //处理引用与方法调用的区别
         if (line.exceed) {
             val parent = node.treeParent
-            if (parent != null && (parent is PsiReferenceExpression)) {
+            val grandlParent = node.treeParent.treeParent
+            if (grandlParent != null && ((grandlParent is PsiReferenceExpression) || (parent.elementType ==
+                    JAVA_CODE_REFERENCE))) {
+                val column = location.column
+                val parentText = (parent as ASTNode).text
+                val nextParentTextLength = parent.treeNext?.textLength ?: 0
+                val totalLength = column + nextParentTextLength +
+                    parentText.split(".")[1].length
+                if (totalLength <= 119) {
+                    return
+                }
+                toBeLineBreak.add(
+                    NormalLineBreak(
+                        node,
+                        lineBreak(context, line.start, indent + indent),
+                        "'.' in the reference expression."
+                    )
+                )
+            } else if (grandlParent != null && (grandlParent is PsiMethodCallExpression)) {
                 val column = location.column
                 val parentText = (parent as ASTNode).text
                 val nextParentTextLength = parent.treeNext?.textLength ?: 0
