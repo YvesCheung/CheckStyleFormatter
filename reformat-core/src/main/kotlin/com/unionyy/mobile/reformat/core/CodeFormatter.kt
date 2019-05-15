@@ -1,6 +1,7 @@
 package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.reporter.WriterReporter
+import com.unionyy.mobile.reformat.core.rule.AddSpace
 import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
@@ -38,7 +39,8 @@ object CodeFormatter {
     @Suppress("RemoveExplicitTypeArguments")
     private val usingRules = mutableSetOf<FormatRule>(
         //DumpAST(),
-        LineBreaker()
+        LineBreaker(),
+        AddSpace()
     )
 
     init {
