@@ -984,6 +984,24 @@ public class EntertainmentContainerAdapter extends
     }
 
     @Test
+    fun testFieldWithMethodCall() {
+        val text = CodeFormatter.reformat("A.java", """
+public class A {
+    private static final int imgSize = (int) ResolutionUtils.convertDpToPixel(27, BasicConfig.getInstance().getAppContext());
+}
+        """.trimIndent())
+
+        Assert.assertEquals("""
+public class A {
+    private static final int imgSize = (int) ResolutionUtils.convertDpToPixel(
+        27,
+        BasicConfig.getInstance().getAppContext()
+    );
+}
+        """.trimIndent(), text)
+    }
+
+    @Test
     fun testJavaOddArrayTooLong() {
         val text = CodeFormatter.reformat("D.java", """
 package com.yy.mobile.checkstyleformatter;

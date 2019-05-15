@@ -148,7 +148,9 @@ class LineBreaker : FormatRule {
 
             when (context.scanningTimes) {
                 SCAN_A -> {
-                    if (node is ParameterListElement) {
+                    if (node is PsiExpressionList) {
+                        breakFunctionCallParamList(context, node, line)
+                    } else if (node is ParameterListElement) {
                         breakFunctionParam(context, node, line)
                     } else if (node is PsiComment) {
                         breakComment(context, node, line)
@@ -159,9 +161,7 @@ class LineBreaker : FormatRule {
                     }
                 }
                 SCAN_B -> {
-                    if (node is PsiExpressionList) {
-                        breakFunctionCallParamList(context, node, line)
-                    } else if (node.elementType == EQ) {
+                    if (node.elementType == EQ) {
                         breakFieldOrVariable(context, node, line)
                     } else if (node is ClassElement) {
                         breakClassDefine(context, node, line)
