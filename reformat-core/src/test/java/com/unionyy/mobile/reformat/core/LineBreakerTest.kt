@@ -845,4 +845,40 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView implements
 }
         """.trimIndent())
     }
+
+    @Test
+    fun testJavaOddArrayTooLong() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView {
+
+    public boolean isPluginLianMai() {
+        float[] radii = {topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius};
+    }
+
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView {
+
+    public boolean isPluginLianMai() {
+        float[] radii = {
+            topLeftRadius,
+            topLeftRadius,
+            topRightRadius,
+            topRightRadius,
+            bottomRightRadius,
+            bottomRightRadius,
+            bottomLeftRadius,
+            bottomLeftRadius
+        };
+    }
+
+}
+        """.trimIndent())
+    }
 }

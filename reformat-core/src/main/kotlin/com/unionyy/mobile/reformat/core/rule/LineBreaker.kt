@@ -12,11 +12,14 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.C_STYLE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DIV
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.MINUS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.PLUS
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
+import org.jetbrains.kotlin.com.intellij.psi.PsiArrayInitializerExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiCodeBlock
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
@@ -160,6 +163,8 @@ class LineBreaker : FormatRule {
                     breakStringLiteral(context, node, line)
                 } else if (node is PsiExpressionList) {
                     breakFunctionCallParamList(context, node, line)
+                } else if (node is PsiArrayInitializerExpression) {
+                    breakArrayInitializer(context, node, line)
                 } else if (node is PsiPolyadicExpression) {
                     breakPolyadicOperator(context, node, line)
                 }
@@ -230,6 +235,36 @@ class LineBreaker : FormatRule {
                             child,
                             lineBreak(context, line.start,
                                 getRealIndent(node, "").substring(4)),
+                            "the token ')' in a expression: ${node.text}."
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun breakArrayInitializer(
+        context: FormatContext,
+        node: ASTNode,
+        line: Line
+    ) {
+        if (line.exceed) {
+            node.getChildren(null).forEach { child ->
+                if (child.elementType == COMMA ||
+                    child.elementType == LBRACE) {
+                    val whiteSpaceExpect = child.treeNext
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            whiteSpaceExpect,
+                            lineBreak(context, line.start, indent),
+                            "the token '(' or ',' in a expression: ${node.text}."
+                        )
+                    )
+                } else if (child.elementType == RBRACE) {
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            child,
+                            lineBreak(context, line.start),
                             "the token ')' in a expression: ${node.text}."
                         )
                     )
