@@ -977,7 +977,9 @@ public class EntertainmentContainerAdapter extends DefaultContainerAdapter<Enter
         """.trimIndent())
 
         Assert.assertEquals("""
-
+public class EntertainmentContainerAdapter extends
+        DefaultContainerAdapter<EntertainmentContainerAdapter.EntertainmentParam> {
+}
         """.trimIndent(), text)
     }
 
