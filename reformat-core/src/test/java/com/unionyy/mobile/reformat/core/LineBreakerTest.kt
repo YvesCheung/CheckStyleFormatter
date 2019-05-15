@@ -771,7 +771,7 @@ public class A {
      */
      public int b = 2;
 }
-        """.trimIndent(),text)
+        """.trimIndent(), text)
     }
 
     @Test
@@ -826,6 +826,20 @@ public class A {
     }
 }
 """.trimIndent())
+    }
+
+    @Test
+    fun textPlusString() {
+        val text = CodeFormatter.reformat("A.java", """
+public class A {
+    public void main() {
+        Log.v(TAG, "Register for class: " + cls.getName() + ", lifecycleObject type: " + lifecycleObject.getClass().getName());
+    }
+}
+        """.trimIndent())
+
+        Assert.assertEquals("""
+        """.trimIndent(), text)
     }
 
     @Test
