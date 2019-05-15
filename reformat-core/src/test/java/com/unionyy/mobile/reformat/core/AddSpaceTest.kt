@@ -1,5 +1,6 @@
 package com.unionyy.mobile.reformat.core
 
+import com.unionyy.mobile.reformat.core.rule.DumpAST
 import org.junit.Assert
 import org.junit.Test
 
@@ -8,7 +9,7 @@ class AddSpaceTest {
     @Test
     fun testCommentSpace() {
 
-        val text = CodeFormatter.reformat("A.java","""
+        val text = CodeFormatter.reformat("A.java", """
 class A {
     int a = 123;/* i am comment. */
 }
@@ -18,13 +19,13 @@ class A {
 class A {
     int a = 123; /* i am comment. */
 }
-        """.trimIndent(),text)
+        """.trimIndent(), text)
     }
 
     @Test
     fun testBraceSpace() {
 
-        val text = CodeFormatter.reformat("A.java","""
+        val text = CodeFormatter.reformat("A.java", """
 class A {
     void test(){
         if(true){int a = b;}
@@ -38,6 +39,6 @@ class A {
         if(true){ int a = b;}
     }
 }
-        """.trimIndent(),text)
+        """.trimIndent(), text)
     }
 }

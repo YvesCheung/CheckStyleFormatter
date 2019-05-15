@@ -1,5 +1,6 @@
 package com.unionyy.mobile.reformat.core.rule
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import com.unionyy.mobile.reformat.core.Location
@@ -75,25 +76,28 @@ class LineBreaker : FormatRule {
         ): ASTNode {
             val startNode = context.fileContent.psi.findElementAt(lineStart)?.node
                 ?: return PsiWhiteSpaceImpl(lineBreak)
-            return lineBreak(startNode, moreIndent)
+            return lineBreak(startNode, lineStart, moreIndent)
         }
 
         private fun lineBreak(
             startNode: ASTNode,
+            lineStart: Int,
             moreIndent: String = ""
         ): ASTNode {
-            var lastIndent = ""
+            val lastIndent: String
             if (startNode is PsiWhiteSpace) {
                 lastIndent = getIndent((startNode as PsiWhiteSpace).text)
             } else if (startNode.treePrev is PsiWhiteSpace) {
                 lastIndent = getIndent((startNode.treePrev as PsiWhiteSpace).text)
             } else if (startNode.treePrev == null && startNode.treeParent != null) {
-                return lineBreak(startNode.treeParent, moreIndent)
+                return lineBreak(startNode.treeParent, lineStart, moreIndent)
+            } else {
+                lastIndent = " ".repeat(Math.max(startNode.startOffset - lineStart, 0))
             }
             return PsiWhiteSpaceImpl(lineBreak + lastIndent + moreIndent)
         }
 
-        private fun getIndent(txt: String): String {
+        fun getIndent(txt: String): String {
             val idx = txt.lastIndexOf(lineBreak)
             return when {
                 idx in 0..txt.length - 2 -> txt.substring(idx + 1)
@@ -404,9 +408,9 @@ class LineBreaker : FormatRule {
                 }
             }
 
-            toBeLineBreak.add(CutEndOfLineComment(node))
+            toBeLineBreak.add(CutEndOfLineComment(node, line))
         } else if (node.elementType == C_STYLE_COMMENT) {
-            toBeLineBreak.add(CutCStyleComment(node))
+            toBeLineBreak.add(CutCStyleComment(node, line))
         }
     }
 
@@ -612,7 +616,8 @@ class LineBreaker : FormatRule {
      * 如果注释 [comment] 过长，需要裁剪
      */
     private class CutEndOfLineComment(
-        val comment: ASTNode
+        val comment: ASTNode,
+        val line: Line
     ) : LineBreakAction {
 
         override fun run(context: FormatContext) {
@@ -627,8 +632,8 @@ class LineBreaker : FormatRule {
             }
 
             if (totalLength >= maxLineLength) {
-                val lineBreakText = lineBreak(startNode, "").text
-                val whiteSpaceLen = lineBreakText.length
+                val lineBreakText = lineBreak(startNode, line.start).text
+                val whiteSpaceLen = getIndent(lineBreakText).length
 
                 fun checkAndCutComment(comment: String, addToTree: (ASTNode) -> Unit) {
                     if (comment.length + whiteSpaceLen >= maxLineLength) {
@@ -661,15 +666,30 @@ class LineBreaker : FormatRule {
         }
     }
 
+    @Suppress("CanBeParameter")
     private class CutCStyleComment(
-        val comment: ASTNode
+        val comment: ASTNode,
+        val line: Line
     ) : LineBreakAction {
+
+        val textLines: List<String>
+        val indent: String
+        var hasStar: Boolean = false
+
+        init {
+            textLines = comment.text.split(lineBreak).mapIndexed { index, s ->
+                if (index != 0) lineBreak + s else s
+            }
+            hasStar = textLines.map { it.trimStart() }.all {
+                it.startsWith("/") || it.startsWith("*")
+            }
+            indent = getIndent(lineBreak(comment, line.start, " ").text)
+        }
+
         override fun run(context: FormatContext) {
-            val textLines = comment.text.split(lineBreak)
-            val indentSize = lineBreak(comment, " ").textLength
             val newText = StringBuilder()
             textLines.forEach { text ->
-                cutLine(text, indentSize) {
+                cutLine(text, indent) {
                     newText.append(it)
                 }
             }
@@ -677,25 +697,29 @@ class LineBreaker : FormatRule {
             comment.treeParent.replaceChild(comment, newComment)
         }
 
-        private fun cutLine(text: String, indentSize: Int, addToTree: (String) -> Unit) {
-            if (text.length + indentSize > 100) {
+        private fun cutLine(text: String, indent: String, addToTree: (String) -> Unit) {
+            if (isTooLong(text)) {
+                val star = if (hasStar) "* " else " "
                 val half = text.length / 2
-                cutLine(newLine(text.substring(0, half)), indentSize, addToTree)
-                cutLine(newLine("\n" + " ".repeat(indentSize) + text.substring(half)),
-                    indentSize, addToTree)
+                cutLine(newLine(text.substring(0, half)), indent, addToTree)
+                cutLine(newLine(indent + star + text.substring(half)),
+                    indent, addToTree)
             } else {
                 addToTree(text)
             }
         }
 
-        private fun newLine(text: String): String {
-            return if (text.startsWith(lineBreak)) text else lineBreak + text
-        }
+        private fun newLine(text: String): String =
+            if (text.startsWith(lineBreak)) text else lineBreak + text
+
+        private fun isTooLong(txt: String): Boolean = txt.length + indent.length > maxLineLength
 
         override fun report(context: FormatContext) {
-            context.report(
-                "Cut the too long comment(/**/): ${comment.text}.",
-                context.getCodeFragment(comment))
+            if (textLines.any(::isTooLong)) {
+                context.report(
+                    "Cut the too long comment(/**/): ${comment.text}.",
+                    context.getCodeFragment(comment))
+            }
         }
     }
 
