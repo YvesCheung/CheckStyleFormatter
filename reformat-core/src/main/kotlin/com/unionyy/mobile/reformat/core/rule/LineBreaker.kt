@@ -6,10 +6,13 @@ import com.unionyy.mobile.reformat.core.Location
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.ASTERISK
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DIV
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.MINUS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.PLUS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
@@ -135,6 +138,8 @@ class LineBreaker : FormatRule {
                     breakComment(context, node, line)
                 } else if (node is PsiIfStatement) {
                     breakIfStatement(context, node, line)
+                } else if (node is PsiPolyadicExpression) {
+                    breakPolyadicOperator(context, node, line)
                 }
             } else if (context.scanningTimes == SCAN_MIDDLE) {
                 if (node.elementType == JavaTokenType.QUEST ||
@@ -143,7 +148,9 @@ class LineBreaker : FormatRule {
                 } else if (node.elementType == STRING_LITERAL) {
                     breakStringLiteral(context, node, line)
                 } else if (node is PsiExpressionList) {
-                    breakFuntionCallParamList(context, node, line)
+                    breakFunctionCallParamList(context, node, line)
+                } else if (node is PsiPolyadicExpression) {
+                    breakPolyadicOperator(context, node, line)
                 }
             } else if (context.scanningTimes == SCAN_LOW) {
                 if (node.elementType == DOT) {
@@ -170,7 +177,7 @@ class LineBreaker : FormatRule {
                         NormalLineBreak(
                             whiteSpaceExpect,
                             lineBreak(context, line.start, indent),
-                            "the token '(' or ',' in a parameter list."
+                            "the token '(' or ',' in a parameter list: ${node.text}."
                         )
                     )
                 } else if (child.elementType == RPARENTH) {
@@ -178,7 +185,7 @@ class LineBreaker : FormatRule {
                         NormalLineBreak(
                             child,
                             lineBreak(context, line.start),
-                            "the token ')' in a parameter list."
+                            "the token ')' in a parameter list: ${node.text}."
                         )
                     )
                 }
@@ -186,7 +193,7 @@ class LineBreaker : FormatRule {
         }
     }
 
-    private fun breakFuntionCallParamList(
+    private fun breakFunctionCallParamList(
         context: FormatContext,
         node: ASTNode,
         line: Line
@@ -195,7 +202,6 @@ class LineBreaker : FormatRule {
             it.elementType == COMMA
         }
         if (line.exceed && paramNum > 0) {
-
             node.getChildren(null).forEach { child ->
                 if (child.elementType == COMMA ||
                     child.elementType == LPARENTH) {
@@ -203,30 +209,79 @@ class LineBreaker : FormatRule {
                     toBeLineBreak.add(
                         NormalLineBreak(
                             whiteSpaceExpect,
-                            lineBreak(context, line.start, getRealIndent(node, ""))
+                            lineBreak(context, line.start, getRealIndent(node, "")),
+                            "the token '(' or ',' in a expression: ${node.text}."
                         )
                     )
                 } else if (child.elementType == RPARENTH) {
                     toBeLineBreak.add(
                         NormalLineBreak(
                             child,
-                            lineBreak(context, line.start, getRealIndent(node, "").substring(4)))
+                            lineBreak(context, line.start,
+                                getRealIndent(node, "").substring(4)),
+                            "the token ')' in a expression: ${node.text}."
+                        )
                     )
                 }
             }
         }
     }
 
+    @Suppress("CascadeIf")
     private fun getRealIndent(node: ASTNode?, actualIndent: String): String {
-        if (node == null) {
-            return actualIndent
-        }
-        if (node is PsiCodeBlock) {
-            return actualIndent
+        return if (node == null) {
+            actualIndent
+        } else if (node is PsiCodeBlock) {
+            actualIndent
         } else if (node is PsiExpressionList) {
-            return getRealIndent(node.treeParent, actualIndent + indent)
+            getRealIndent(node.treeParent, actualIndent + indent)
         } else {
-            return getRealIndent(node.treeParent, actualIndent)
+            getRealIndent(node.treeParent, actualIndent)
+        }
+    }
+
+    private fun breakPolyadicOperator(
+        context: FormatContext,
+        node: ASTNode, //PsiPolyadicExpression
+        line: Line
+    ) {
+        if (line.exceed) {
+            for (child in node.getChildren(null)) {
+                if (child.elementType == PLUS ||
+                    child.elementType == MINUS ||
+                    child.elementType == ASTERISK ||
+                    child.elementType == DIV) {
+                    val maybeWhiteSpace = child.treeNext
+                    val next: ASTNode =
+                        (if (maybeWhiteSpace is PsiWhiteSpace) {
+                            if (maybeWhiteSpace.textContains('\n')) {
+                                continue
+                            }
+                            maybeWhiteSpace.treeNext
+                        } else {
+                            maybeWhiteSpace
+                        }) ?: continue
+
+                    if (context.scanningTimes == SCAN_HIGH) {
+                        if (next.elementType != LITERAL_EXPRESSION ||
+                            next.getChildren(null).firstOrNull()?.elementType != STRING_LITERAL) {
+                            continue
+                        }
+                    } else {
+                        if (next.elementType == LITERAL_EXPRESSION &&
+                            next.getChildren(null).firstOrNull()?.elementType != STRING_LITERAL) {
+                            continue
+                        }
+                    }
+
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            next,
+                            lineBreak(context, line.start, indent),
+                            "operator '${child.elementType}' " +
+                                "in the expression: ${node.text}."))
+                }
+            }
         }
     }
 
@@ -294,11 +349,17 @@ class LineBreaker : FormatRule {
     private fun breakQuest(context: FormatContext, node: ASTNode, line: Line) {
         //三目运算符里的逗号和冒号
         if (line.exceed) {
+            val parentText =
+                if (node.treeParent != null) {
+                    " in the expression: " + node.treeParent + "."
+                } else {
+                    "."
+                }
             toBeLineBreak.add(
                 NormalLineBreak(
                     node,
                     lineBreak(context, line.start, indent + indent),
-                    "ternary operator: ' ? : '."
+                    "ternary operator: ' ? : '$parentText"
                 )
             )
         }
@@ -321,7 +382,7 @@ class LineBreaker : FormatRule {
                     NormalLineBreak(
                         node,
                         lineBreak(context, line.start, indent + indent),
-                        "'.' in the reference expression."
+                        "'.' in the reference expression: $parentText."
                     )
                 )
             }
@@ -537,7 +598,7 @@ class LineBreaker : FormatRule {
     private fun visitWholeFile(file: FileElement) {
         var lineStart = 0
         var lineEnd = 0
-        val textLines = file.text.split("\n")
+        val textLines = file.text.split(lineBreak)
         for ((index, line) in textLines.withIndex()) {
             val lineNum = index + 1
             lineEnd += line.length + 1

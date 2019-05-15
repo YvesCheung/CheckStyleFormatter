@@ -194,12 +194,73 @@ public class A {
     @Test
     fun testJavaAddOperation() {
         val text = CodeFormatter.reformat("Haha.java", """
-public class Haha {
-    final File dir = new File(YYFileUtils.getRootDir() + File.separator + CommonFuncNoticeController.COMMON_ANIMATION_DIR);
+package com.yy.mobile.demo;
+
+import java.io.File;
+
+public class NormalJavaClass {
+
+    private static void main(String a, String b, String c, String d, String e) {
+        final File dir = new File(YYFileUtils.getRootDir() + File.separator + CommonFuncNoticeController.COMMON_ANIMATION_DIR);
+        String aa = "asdsafahsdfhladh: " + dir.getPath() + dir.toString().length()+a.length()+ b.length() + " and the next is: " + dir;
+        int bbb = a.length() + dir.toString().length()+a.length()+ b.length() + 123432 + b.length() + c.length() + d.length() + e.length();
+    }
+
+    private static class CommonFuncNoticeController {
+        private static final String COMMON_ANIMATION_DIR = "ashdfduhishcahasdhlfhslhakHsfuiewhiknkdnajksdiufhgwgefukyawgekgakdhckgdfkaghfjkhe";
+    }
+
+    private static class YYFileUtils {
+
+        private static String getRootDir() {
+            return CommonFuncNoticeController.COMMON_ANIMATION_DIR;
+        }
+    }
 }
         """.trimIndent())
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.demo;
+
+import java.io.File;
+
+public class NormalJavaClass {
+
+    private static void main(
+        String a,
+        String b,
+        String c,
+        String d,
+        String e
+    ) {
+        final File dir = new File(YYFileUtils.getRootDir() +
+            File.separator +
+            CommonFuncNoticeController.COMMON_ANIMATION_DIR);
+        String aa = "asdsafahsdfhladh: " + dir.getPath() + dir.toString().length()+a.length()+ b.length() +
+            " and the next is: " + dir;
+        int bbb = a.length() +
+            dir.toString().length()+
+            a.length()+
+            b.length() + 123432 +
+            b.length() +
+            c.length() +
+            d.length() +
+            e.length();
+    }
+
+    private static class CommonFuncNoticeController {
+        private static final String COMMON_ANIMATION_DIR = "ashdfduhishcahasdhlfhslhakHsfuiewhiknkdn" +
+            "ajksdiufhgwgefukyawgekgakdhckgdfkaghfjkhe";
+    }
+
+    private static class YYFileUtils {
+
+        private static String getRootDir() {
+            return CommonFuncNoticeController.COMMON_ANIMATION_DIR;
+        }
+    }
+}
+        """.trimIndent())
     }
 
     @Test
@@ -501,10 +562,8 @@ public class A {
                     .NOBLEMOTION);
         }
 
-        String guideString = CommonPref.instance()
-                .get(String
-                .valueOf(LoginUtil
-                .getUid()) + "nobleChatEmotssssssionGuide");
+        String guideString = CommonPref.instance().get(String.valueOf(LoginUtil.getUid()) +
+            "nobleChatEmotssssssionGuide");
 
         mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(
             mXdown > getWidth() / 2
@@ -522,7 +581,8 @@ public class A {
             new ResponseListener<String>()
         );
     }
-}""".trimIndent())
+}
+""".trimIndent())
     }
 
     @Test
