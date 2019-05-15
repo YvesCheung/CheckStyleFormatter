@@ -970,6 +970,18 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView implements
     }
 
     @Test
+    fun testJavaExtends() {
+        val text = CodeFormatter.reformat("A.java", """
+public class EntertainmentContainerAdapter extends DefaultContainerAdapter<EntertainmentContainerAdapter.EntertainmentParam> {
+}
+        """.trimIndent())
+
+        Assert.assertEquals("""
+
+        """.trimIndent(), text)
+    }
+
+    @Test
     fun testJavaOddArrayTooLong() {
         val text = CodeFormatter.reformat("D.java", """
 package com.yy.mobile.checkstyleformatter;

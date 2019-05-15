@@ -205,12 +205,13 @@ class LineBreaker : FormatRule {
             node.getChildren(null).forEach { child ->
                 if (child.elementType == COMMA ||
                     child.elementType == LPARENTH) {
+                    val token = if (child.elementType == COMMA) "','" else "'('"
                     val whiteSpaceExpect = child.treeNext
                     toBeLineBreak.add(
                         NormalLineBreak(
                             whiteSpaceExpect,
                             lineBreak(context, line.start, indent),
-                            "the token '(' or ',' in a parameter list: ${node.text}."
+                            "the token $token in a parameter list: ${node.text}."
                         )
                     )
                 } else if (child.elementType == RPARENTH) {
@@ -238,12 +239,13 @@ class LineBreaker : FormatRule {
             node.getChildren(null).forEach { child ->
                 if (child.elementType == COMMA ||
                     child.elementType == LPARENTH) {
+                    val token = if (child.elementType == COMMA) "','" else "'('"
                     val whiteSpaceExpect = child.treeNext
                     toBeLineBreak.add(
                         NormalLineBreak(
                             whiteSpaceExpect,
                             lineBreak(context, line.start, getRealIndent(node, "")),
-                            "the token '(' or ',' in a expression: ${node.text}."
+                            "the token $token in a expression: ${node.text}."
                         )
                     )
                 } else if (child.elementType == RPARENTH) {
