@@ -116,11 +116,17 @@ object CodeFormatter {
                 reporter,
                 rules
             )
-            rules.forEach { it.beforeVisit(context) }
-            psiFile.visit { node ->
-                rules.forEach { it.visit(context, node) }
+            rules.forEach {
+                if (context.reportCnt > 0) {
+                    context.notifyTextChange()
+                }
+
+                it.beforeVisit(context)
+                psiFile.visit { node ->
+                    it.visit(context, node)
+                }
+                it.afterVisit(context)
             }
-            rules.forEach { it.afterVisit(context) }
 
             hasError = hasError || context.reportCnt > 0
             repeat = context.requestRepeat && repeatTime < 50
