@@ -257,7 +257,7 @@ class LineBreaker : FormatRule {
                         NormalLineBreak(
                             whiteSpaceExpect,
                             lineBreak(context, line.start, indent),
-                            "the token '(' or ',' in a expression: ${node.text}."
+                            "the token '{' or ',' in a expression: ${node.text}."
                         )
                     )
                 } else if (child.elementType == RBRACE) {
@@ -265,7 +265,7 @@ class LineBreaker : FormatRule {
                         NormalLineBreak(
                             child,
                             lineBreak(context, line.start),
-                            "the token ')' in a expression: ${node.text}."
+                            "the token '}' in a expression: ${node.text}."
                         )
                     )
                 }
