@@ -171,6 +171,30 @@ public class A {
     }
 
     @Test
+    fun testJavaComment2() {
+        val test = CodeFormatter.reformat("A.java", """
+   public void addMethod() {
+//        AddUiModuleApiMethodAction uiAction = new AddUiModuleApiMethodAction(new UIModuleMethods().getMethods());
+//        HostStore.INSTANCE.dispatch(uiAction);
+
+//        AddDataModuleApiMethodAction dataAction = new AddDataModuleApiMethodAction(new DataModuleMethods().getMethods());
+//        HostStore.INSTANCE.dispatch(dataAction);
+    }
+""".trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals("""
+   public void addMethod() {
+//        AddUiModuleApiMethodAction uiAction = new AddUiModuleApiMethodAction(new UIModuleMethods().getMethods());
+//        HostStore.INSTANCE.dispatch(uiAction);
+
+//        AddDataModuleApiMethodAction dataAction = new AddDa
+//taModuleApiMethodAction(new DataModuleMethods().getMethods());
+//        HostStore.INSTANCE.dispatch(dataAction);
+    }
+""".trimIndent(), test)
+    }
+
+    @Test
     fun testJavaFunctionCallTooLong() {
         val text = CodeFormatter.reformat("C.java", """
 package com.yy.mobile.checkstyleformatter;

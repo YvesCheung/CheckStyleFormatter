@@ -95,10 +95,10 @@ class LineBreaker : FormatRule {
 
         private fun getIndent(txt: String): String {
             val idx = txt.lastIndexOf(lineBreak)
-            return if (idx in 0..txt.length - 2) {
-                txt.substring(idx + 1)
-            } else {
-                txt
+            return when {
+                idx in 0..txt.length - 2 -> txt.substring(idx + 1)
+                idx < 0 -> txt
+                else -> ""
             }
         }
     }
