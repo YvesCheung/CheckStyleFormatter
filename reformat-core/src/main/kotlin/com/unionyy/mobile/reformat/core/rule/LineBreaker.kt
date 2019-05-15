@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionList
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiIfStatement
+import org.jetbrains.kotlin.com.intellij.psi.PsiJavaCodeReferenceElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiLocalVariable
 import org.jetbrains.kotlin.com.intellij.psi.PsiMethodCallExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiPolyadicExpression
@@ -162,6 +163,8 @@ class LineBreaker : FormatRule {
                         breakFunctionCallParamList(context, node, line)
                     } else if (node.elementType == EQ) {
                         breakFieldOrVariable(context, node, line)
+                    } else if (node is ClassElement) {
+                        breakClassDefine(context, node, line)
                     }
                 }
                 SCAN_C -> {
@@ -497,7 +500,7 @@ class LineBreaker : FormatRule {
     ) {
         if (line.exceed) {
             when (context.scanningTimes) {
-                SCAN_HIGH -> {
+                SCAN_A -> {
                     //第一遍扫描换行接口们
                     val implements = node.findChildByType(IMPLEMENTS_LIST)
                     implements?.children()?.forEach {
@@ -512,7 +515,7 @@ class LineBreaker : FormatRule {
                         }
                     }
                 }
-                SCAN_MIDDLE -> {
+                SCAN_B -> {
                     //第二遍扫描换行extends
                     val extends = node.findChildByType(EXTENDS_LIST)
                     extends?.children()?.forEach {
