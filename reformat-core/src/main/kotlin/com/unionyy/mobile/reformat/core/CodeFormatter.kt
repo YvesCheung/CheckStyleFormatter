@@ -37,7 +37,7 @@ object CodeFormatter {
 
     @Suppress("RemoveExplicitTypeArguments")
     private val usingRules = mutableSetOf<FormatRule>(
-        DumpAST(),
+        //DumpAST(),
         LineBreaker()
     )
 
