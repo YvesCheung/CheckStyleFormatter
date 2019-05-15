@@ -697,12 +697,35 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public boolean isPluginLianMai() {
-        //com.duowan.mobile.entlive.domain.FreeContainer container = new com.duowan.mobile.entlive.domain.FreeContainer();
-        com.yy.mobile.http.RequestManager.instance().submitDownloadRequest().test().test().test().test().test().test().test();
+        com.duowan.mobile.entlive.domain.pyf.FreeContainer container = new com.duowan.mobile.entlive.domain.pyf.FreeContainer();
+        com.duowan.mobile.RequestManager.instance().submitDownloadRequest().test().test().test().test().test().test().test().test().test().test();
     }
 }
         """.trimIndent(), setOf(DumpAST(), LineBreaker()))
 
-        Assert.assertEquals(text, """""".trimIndent())
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class A {
+
+    public boolean isPluginLianMai() {
+        com.duowan.mobile.entlive.domain.pyf.FreeContainer container = new com.duowan.mobile.entlive.domain.pyf
+                .FreeContainer();
+        com.duowan.mobile.RequestManager
+                .instance()
+                .submitDownloadRequest()
+                .test()
+                .test()
+                .test()
+                .test()
+                .test()
+                .test()
+                .test()
+                .test()
+                .test()
+                .test();
+    }
+}
+        """.trimIndent())
     }
 }
