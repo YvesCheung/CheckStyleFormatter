@@ -4,6 +4,7 @@ import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.C_STYLE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
@@ -22,8 +23,7 @@ import org.jetbrains.kotlin.psi.psiUtil.parents
 class AddSpace : FormatRule {
 
     private val toBeAddSpace = mutableListOf<AddSpaceAction>()
-    private val lines = mutableListOf<String>()
-    private val expelChar = listOf(';', '{', '}')
+    private val expelChar = setOf(LBRACE, RBRACE, SEMICOLON, COMMA)
 
     override fun beforeVisit(context: FormatContext) {
         super.beforeVisit(context)
@@ -31,18 +31,8 @@ class AddSpace : FormatRule {
     }
 
     override fun visit(context: FormatContext, node: ASTNode) {
-        if (context.language != JavaLanguage.INSTANCE) {
-            return
-        }
-        if (node is FileElement) {
-            lines.addAll(node.text.split("\n"))
-        }
-        when (context.scanningTimes) {
-            1 -> {
-                if (node.elementType == LBRACE || node.elementType == RBRACE || node.elementType == SEMICOLON) {
-                    addSpaceComment(context, node)
-                }
-            }
+        if (expelChar.contains(node.elementType)) {
+            addSpaceComment(context, node)
         }
     }
 

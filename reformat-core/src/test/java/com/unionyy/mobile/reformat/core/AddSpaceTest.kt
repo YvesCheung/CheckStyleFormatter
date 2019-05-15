@@ -32,6 +32,11 @@ class A {
     void test(){
         if(true){int a = b;}
     }
+
+    public enum CacheType {
+        PRIVATE,//登陆者私有数据
+        PUBLIC//公共数据
+    }
 }
         """.trimIndent())
 
@@ -39,6 +44,11 @@ class A {
 class A {
     void test(){
         if(true){ int a = b;}
+    }
+
+    public enum CacheType {
+        PRIVATE, //登陆者私有数据
+        PUBLIC//公共数据
     }
 }
         """.trimIndent(), text)
