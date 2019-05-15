@@ -797,7 +797,14 @@ class LineBreaker : FormatRule {
     override fun afterVisit(context: FormatContext) {
         super.afterVisit(context)
         toBeLineBreak.forEach { it.report(context) }
-        toBeLineBreak.forEach { it.run(context) }
+        toBeLineBreak.forEach {
+            try {
+                it.run(context)
+            } finally {
+                context.notifyTextChange()
+                it.report(context)
+            }
+        }
 
         if (lines.values.any { it.exceed } && context.scanningTimes < SCAN_E) {
             context.requestRepeatScan()

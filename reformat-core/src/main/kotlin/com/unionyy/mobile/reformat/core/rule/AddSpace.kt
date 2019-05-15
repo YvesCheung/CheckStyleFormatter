@@ -49,8 +49,15 @@ class AddSpace : FormatRule {
     override fun afterVisit(context: FormatContext) {
         super.afterVisit(context)
         toBeAddSpace.forEach {
-            it.addSpace()
             it.report(context)
+        }
+        toBeAddSpace.forEach {
+            try {
+                it.addSpace()
+            } finally {
+                context.notifyTextChange()
+                it.report(context)
+            }
         }
     }
 
@@ -69,8 +76,8 @@ class AddSpace : FormatRule {
         }
 
         override fun report(context: FormatContext) {
-            context.report("Add a space before ${context.getCodeLocation(beforeNode)}", context.getCodeFragment
-            (beforeNode))
+            context.report("Add a space before ${context.getCodeLocation(beforeNode)}",
+                context.getCodeFragment(beforeNode))
         }
     }
 
