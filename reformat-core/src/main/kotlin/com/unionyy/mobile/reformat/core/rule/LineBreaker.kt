@@ -247,7 +247,7 @@ class LineBreaker : FormatRule {
                     toBeLineBreak.add(
                         NormalLineBreak(
                             whiteSpaceExpect,
-                            lineBreak(context, line.start, getRealIndent(node, "")),
+                            lineBreak(context, line.start, getRealIndent(node, "    ")),
                             "the token $token in a expression: ${node.text}."
                         )
                     )

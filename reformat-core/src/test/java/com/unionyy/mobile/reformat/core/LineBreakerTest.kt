@@ -839,6 +839,15 @@ public class A {
         """.trimIndent())
 
         Assert.assertEquals("""
+public class A {
+    public void main() {
+        Log.v(
+                TAG,
+                "Register for class: " + cls.getName() +
+                    ", lifecycleObject type: " + lifecycleObject.getClass().getName()
+        );
+    }
+}
         """.trimIndent(), text)
     }
 
