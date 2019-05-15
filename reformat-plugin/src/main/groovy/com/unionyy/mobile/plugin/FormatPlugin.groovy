@@ -18,12 +18,18 @@ class FormatPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         project.rootProject.allprojects { p ->
+            println("FormatPlugin apply to ${p.name}")
+            p.apply {
+                it.plugin(FormatPlugin)
+            }
+        }
 
-            getSourceFiles(p) {
+        if (project != project.rootProject) {
+            getSourceFiles(project) {
                 def files = it.first
                 def sourceSetName = it.second
-                createFormatTask(p, files, sourceSetName)
-                createPrintFileTask(p, files)
+                createFormatTask(project, files, sourceSetName)
+                createPrintFileTask(project, files)
             }
         }
     }
@@ -36,8 +42,8 @@ class FormatPlugin implements Plugin<Project> {
             project.tasks.create(taskName) {
                 it.group = "checkstyle"
                 it.doLast {
-                    System.out.println("FileList:")
-                    System.out.println(input.join("\n"))
+                    println("FileList:")
+                    println(input.join("\n"))
                 }
             }
         }
@@ -91,7 +97,7 @@ class FormatPlugin implements Plugin<Project> {
                             it.include("**/*.java")
                         }.files
                     }.flatten()
-                    System.out.println("Variant: " + variant.fullVariantName +
+                    println("Variant: " + variant.fullVariantName +
                             "\nDir:\n" + fileTree.dir.join("\n"))
                     callback.execute(new Pair<>(files, "main"))
                 }

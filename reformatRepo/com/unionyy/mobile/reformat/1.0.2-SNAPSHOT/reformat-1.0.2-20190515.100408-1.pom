@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.unionyy.mobile</groupId>
   <artifactId>reformat</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.2-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>com.android.tools.build</groupId>
@@ -15,7 +15,7 @@
     <dependency>
       <groupId>com.unionyy.mobile</groupId>
       <artifactId>reformat-core</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>1.0.2-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
