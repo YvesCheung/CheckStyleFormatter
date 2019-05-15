@@ -13,11 +13,14 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DIV
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.EQ
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.MINUS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.PLUS
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
+import org.jetbrains.kotlin.com.intellij.psi.PsiArrayInitializerExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiCodeBlock
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
@@ -32,12 +35,15 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.CompositeElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.BINARY_EXPRESSION
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.EXTENDS_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.IMPLEMENTS_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.JAVA_CODE_REFERENCE
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.LITERAL_EXPRESSION
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.PARAMETER
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiCoreCommentImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ClassElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
@@ -55,7 +61,6 @@ class LineBreaker : FormatRule {
 
         private const val indent = "    "
 
-        //最多 3 轮扫描遍历
         private const val SCAN_A = 1
         private const val SCAN_B = 2
         private const val SCAN_C = 3
@@ -148,6 +153,8 @@ class LineBreaker : FormatRule {
                         breakComment(context, node, line)
                     } else if (node is PsiIfStatement) {
                         breakIfStatement(context, node, line)
+                    } else if (node is ClassElement) {
+                        breakClassDefine(context, node, line)
                     }
                 }
                 SCAN_B -> {
@@ -165,6 +172,8 @@ class LineBreaker : FormatRule {
                         breakStringLiteral(context, node, line)
                     } else if (node is PsiPolyadicExpression) {
                         breakPolyadicOperator(context, node, line)
+                    } else if (node is PsiArrayInitializerExpression) {
+                        breakArrayInitializer(context, node, line)
                     }
                 }
                 SCAN_D -> {
@@ -241,6 +250,36 @@ class LineBreaker : FormatRule {
                             lineBreak(context, line.start,
                                 getRealIndent(node, "").substring(4)),
                             "the token ')' in a expression: ${node.text}."
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun breakArrayInitializer(
+        context: FormatContext,
+        node: ASTNode,
+        line: Line
+    ) {
+        if (line.exceed) {
+            node.getChildren(null).forEach { child ->
+                if (child.elementType == COMMA ||
+                    child.elementType == LBRACE) {
+                    val whiteSpaceExpect = child.treeNext
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            whiteSpaceExpect,
+                            lineBreak(context, line.start, indent),
+                            "the token '{' or ',' in a expression: ${node.text}."
+                        )
+                    )
+                } else if (child.elementType == RBRACE) {
+                    toBeLineBreak.add(
+                        NormalLineBreak(
+                            child,
+                            lineBreak(context, line.start),
+                            "the token '}' in a expression: ${node.text}."
                         )
                     )
                 }
@@ -444,9 +483,50 @@ class LineBreaker : FormatRule {
                     NormalLineBreak(
                         node,
                         lineBreak(context, line.start, indent + indent),
-                        "'.' in the reference expression: $parentText."
+                        "'.' in the reference method call expression: $parentText."
                     )
                 )
+            }
+        }
+    }
+
+    private fun breakClassDefine(
+        context: FormatContext,
+        node: ASTNode,
+        line: Line
+    ) {
+        if (line.exceed) {
+            when (context.scanningTimes) {
+                SCAN_HIGH -> {
+                    //第一遍扫描换行接口们
+                    val implements = node.findChildByType(IMPLEMENTS_LIST)
+                    implements?.children()?.forEach {
+                        if (it is PsiJavaCodeReferenceElement) {
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    it,
+                                    lineBreak(context, line.start, indent + indent),
+                                    "'implement' in the class define expression: ${node.text}."
+                                )
+                            )
+                        }
+                    }
+                }
+                SCAN_MIDDLE -> {
+                    //第二遍扫描换行extends
+                    val extends = node.findChildByType(EXTENDS_LIST)
+                    extends?.children()?.forEach {
+                        if (it is PsiJavaCodeReferenceElement) {
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    it,
+                                    lineBreak(context, line.start, indent + indent),
+                                    "'extends' in the class define expression: ${node.text}."
+                                )
+                            )
+                        }
+                    }
+                }
             }
         }
     }

@@ -986,4 +986,62 @@ public class NormalJavaClass {
 }
         """.trimIndent(), text)
     }
+
+    @Test
+    fun testJavaExtendsImplementTooLong() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView implements EventCompat, VideoDebugInfoListener, IAudienceVideoQualityChangeListener {
+
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView implements
+        EventCompat,
+        VideoDebugInfoListener,
+        IAudienceVideoQualityChangeListener {
+
+}
+        """.trimIndent())
+    }
+
+    @Test
+    fun testJavaOddArrayTooLong() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView {
+
+    public boolean isPluginLianMai() {
+        float[] radii = {topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius};
+    }
+
+}
+        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView {
+
+    public boolean isPluginLianMai() {
+        float[] radii = {
+            topLeftRadius,
+            topLeftRadius,
+            topRightRadius,
+            topRightRadius,
+            bottomRightRadius,
+            bottomRightRadius,
+            bottomLeftRadius,
+            bottomLeftRadius
+        };
+    }
+
+}
+        """.trimIndent())
+    }
 }
