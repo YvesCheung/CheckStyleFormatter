@@ -53,7 +53,7 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
 
     public boolean isPluginLianMai() {//niubi
         int i = 0;//niubi
-        int j = 1;
+        int j = 1 ;
     }//niubi
 
 }

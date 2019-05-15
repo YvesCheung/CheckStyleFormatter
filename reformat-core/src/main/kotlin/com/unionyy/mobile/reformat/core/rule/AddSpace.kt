@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.SEMICOLON
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
+import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
@@ -94,6 +95,19 @@ class AddSpace : FormatRule {
             } else {
                 toBeAddSpace.add(AddSpaceSomewhere(node.treeParent, node.treeNext))
             }
+        } else if (node.elementType == SEMICOLON) {
+            subSpaceBeforeSemiColon(context, node)
+        }
+    }
+
+    private fun subSpaceBeforeSemiColon(
+        context: FormatContext,
+        node: ASTNode
+    ) {
+        val prev = node.treePrev
+        if (prev != null && prev is PsiWhiteSpace) {
+            // ; 前有空格
+            prev.treeParent.replaceChild(prev, PsiWhiteSpaceImpl(""))
         }
     }
 }

@@ -236,10 +236,10 @@ public class A {
             final boolean showDefaultLoading
     ) {
         MLog.info(
-            "PluginCenterApiImpl",
-            "loadPlugin plugin = %s, showDefaultLoading = %s",
-            pluginInfo,
-            showDefaultLoading
+                "PluginCenterApiImpl",
+                "loadPlugin plugin = %s, showDefaultLoading = %s",
+                pluginInfo,
+                showDefaultLoading
         );
         return PluginCenterController.INSTANCE.loadPlugin(pluginInfo, showDefaultLoading);
     }
@@ -532,9 +532,9 @@ public class A {
             final boolean showDefaultLoading
     ) {
         MLog.info(
-            TAG,
-            "zhangyu4 is a nice man, wangfeihang is a beautiful woman," +
-                " pengkangjia is a well guider,pengyangfan is a good xiaodi"
+                TAG,
+                "zhangyu4 is a nice man, wangfeihang is a beautiful woman," +
+                    " pengkangjia is a well guider,pengyangfan is a good xiaodi"
         );
     }
 
@@ -600,8 +600,9 @@ public class A {
                                         channelTemplateId = extendInfo.get("template_id");
                                         ICoreManagerBase.getChannelLinkCore().setTemplateId(channelTemplateId);
                                         MLog.info(
-                                            TAG,
-                                            "requestChannelType receive over channelTemplateId = " + channelTemplateId
+                                                TAG,
+                                                "requestChannelType receive over channelTemplateId = " +
+                                                    channelTemplateId
                                         );
                                     }
                                 }
@@ -610,8 +611,8 @@ public class A {
                             //避免流信息回来被覆盖
                             int realLiveType = getStreamInfoType();
                             MLog.info(
-                                TAG,
-                                "requestChannelType receive type = " + type + " realLiveType = " + realLiveType
+                                    TAG,
+                                    "requestChannelType receive type = " + type + " realLiveType = " + realLiveType
                             );
                             if (realLiveType == 0) {
                                 switch (type) {
@@ -640,8 +641,7 @@ public class A {
             return changeInfoInner(param);
         }
     }
-}
-""".trimIndent())
+}""".trimIndent())
     }
 
     @Test
@@ -811,17 +811,17 @@ public class A {
                 CommonPref.instance().get(String.valueOf(LoginUtil.getUid()) + "nobleChatEmotssssssionGuide");
 
         mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(
-            mXdown > getWidth() / 2 ? R.drawable.icon_voice : R.drawable.icon_brigh,
-            0,
-            0,
-            0
+                mXdown > getWidth() / 2 ? R.drawable.icon_voice : R.drawable.icon_brigh,
+                0,
+                0,
+                0
         );
         mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 
         com.yy.mobile.http.RequestManager.instance().submitDownloadRequest(
-            url,
-            urlPathMap.get(url),
-            new ResponseListener<String>()
+                url,
+                urlPathMap.get(url),
+                new ResponseListener<String>()
         );
     }
 }
@@ -888,30 +888,30 @@ public class A {
 
     public boolean isPluginLianMai() {
         com.yy.mobile.http.RequestManager.instance().submitDownloadRequest(
-            url,
-            urlPathMap.get(url),
-            new ResponseListener<String>() {
+                url,
+                urlPathMap.get(url),
+                new ResponseListener<String>() {
                         @Override
                         public void onResponse(String response) {
                             MLog.info("BatchDownloadManager", url + " download success");
                             e.onNext(url);
                         }
                     },
-            new ResponseErrorListener() {
+                new ResponseErrorListener() {
                         @Override
                         public void onErrorResponse(RequestError error) {
                             MLog.info("BatchDownloadManager", url + " download failed");
                             e.onNext(DOWNLOAD_FAILED);
                         }
                     },
-            new ProgressListener() {
+                new ProgressListener() {
                         @Override
                         public void onProgress(ProgressInfo info) {
 
                         }
                     },
-            false,
-            true
+                false,
+                true
         );
     }
 }""".trimIndent())
@@ -937,22 +937,21 @@ public class A {
 
     public boolean isPluginLianMai() {
         mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(
-            info,
-            urlPathMap.get(
-                url,
-                url,
-                url,
-                url
+                info,
+                urlPathMap.get(
+                    url,
+                    url,
+                    url,
+                    url
             ),
-            0,
-            0,
-            zhangyu4,
-            wangfeihang,
-            pengyangfan
+                0,
+                0,
+                zhangyu4,
+                wangfeihang,
+                pengyangfan
         );
     }
-}
-        """.trimIndent())
+}""".trimIndent())
     }
 
     @Test
@@ -1085,8 +1084,8 @@ public class A {
         Assert.assertEquals("""
 public class A {
     private static final int imgSize = (int) ResolutionUtils.convertDpToPixel(
-        27,
-        BasicConfig.getInstance().getAppContext()
+            27,
+            BasicConfig.getInstance().getAppContext()
     );
 }
         """.trimIndent(), text)
