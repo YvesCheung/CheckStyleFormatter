@@ -41,38 +41,38 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public A(
-        String arg1,
-        int arg2,
-        String veryLongArg3,
-        float arg4,
-        String arg5,
-        byte[] arg6,
-        int arg7,
-        String veryLongArg8
+            String arg1,
+            int arg2,
+            String veryLongArg3,
+            float arg4,
+            String arg5,
+            byte[] arg6,
+            int arg7,
+            String veryLongArg8
     ) {
         System.out.println(veryLongArg3);
     }
 
     public String makeAVeryLongMethod(
-        String arg1,
-        int arg2,
-        String veryLongArg3,
-        float arg4,
-        String arg5,
-        byte[] arg6,
-        int arg7,
-        String veryLongArg8
+            String arg1,
+            int arg2,
+            String veryLongArg3,
+            float arg4,
+            String arg5,
+            byte[] arg6,
+            int arg7,
+            String veryLongArg8
     ) {
         System.out.println(veryLongArg3);
         return veryLongArg8;
     }
 
     public String tooMuchParam(
-        String arg1,
-        int arg2,
-        String a,
-        int b,
-        int c
+            String arg1,
+            int arg2,
+            String a,
+            int b,
+            int c
     ) {
         return arg1;
     }
@@ -134,8 +134,8 @@ public class A {
     public static final String TAGB = "B";
 
     public void docTooLong(
-        String arg1,
-        int arg2
+            String arg1,
+            int arg2
     ) {
     //asljdfashasdsfasfaddfdsvfflishlhjfkasdddasdasdadasldhjksfakjhdgfkahs
     //dhflakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfa
@@ -219,21 +219,21 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public A(
-        String arg1,
-        int arg2,
-        String veryLongArg3,
-        float arg4,
-        String arg5,
-        byte[] arg6,
-        int arg7,
-        String veryLongArg8
+            String arg1,
+            int arg2,
+            String veryLongArg3,
+            float arg4,
+            String arg5,
+            byte[] arg6,
+            int arg7,
+            String veryLongArg8
     ) {
         System.out.println(veryLongArg3);
     }
 
     public Observable<LoadPluginListener.Result> loadPlugin(
-        final SinglePluginInfo pluginInfo,
-        final boolean showDefaultLoading
+            final SinglePluginInfo pluginInfo,
+            final boolean showDefaultLoading
     ) {
         MLog.info(
             "PluginCenterApiImpl",
@@ -244,7 +244,7 @@ public class A {
         return PluginCenterController.INSTANCE.loadPlugin(pluginInfo, showDefaultLoading);
     }
 }
-        """.trimIndent())
+""".trimIndent())
     }
 
     @Test
@@ -283,11 +283,11 @@ import java.io.File;
 public class NormalJavaClass {
 
     private static void main(
-        String a,
-        String b,
-        String c,
-        String d,
-        String e
+            String a,
+            String b,
+            String c,
+            String d,
+            String e
     ) {
         final File dir =
                 new File(YYFileUtils.getRootDir() + File.separator + CommonFuncNoticeController.COMMON_ANIMATION_DIR);
@@ -351,29 +351,29 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public A(
-        String arg1,
-        int arg2,
-        String veryLongArg3,
-        float arg4,
-        String arg5,
-        byte[] arg6,
-        int arg7,
-        String veryLongArg8
+            String arg1,
+            int arg2,
+            String veryLongArg3,
+            float arg4,
+            String arg5,
+            byte[] arg6,
+            int arg7,
+            String veryLongArg8
     ) {
         System.out.println(veryLongArg3);
     }
 
     public Observable<LoadPluginListener.Result> loadPlugin(
-        final SinglePluginInfo pluginInfo,
-        final boolean showDefaultLoading
+            final SinglePluginInfo pluginInfo,
+            final boolean showDefaultLoading
     ) {
         MLog.info("zhangyu4 is a nice man, wangfeihang is a beautiful woman, " +
             "pengkangjia is a well guider, pengyangfan is a good xiaodi");
     }
 
     public Observable<LoadPluginListener.Result> loadPlugin2(
-        final SinglePluginInfo pluginInfo,
-        final boolean showDefaultLoading
+            final SinglePluginInfo pluginInfo,
+            final boolean showDefaultLoading
     ) {
         MLog.info("zhangyu4 is a nice man, " +
             "wangfeihang is a beautiful woman, " +
@@ -381,7 +381,7 @@ public class A {
             "pengyangfan is a good xiaodi");
     }
 }
-        """.trimIndent(), text)
+""".trimIndent(), text)
     }
 
     @Test
@@ -407,8 +407,8 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public Observable<LoadPluginListener.Result> loadPlugin(
-        final SinglePluginInfo pluginInfo,
-        final boolean showDefaultLoading
+            final SinglePluginInfo pluginInfo,
+            final boolean showDefaultLoading
     ) {
         if (LiveModuleManagerProxy.getInstance().isBookMode(EarningRxEvent.StreamLight_Type)
                 && LiveModuleManagerProxy.getInstance().getEarnigCommonEvent() != null) {
@@ -528,8 +528,8 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public Observable<LoadPluginListener.Result> loadPlugin(
-        final SinglePluginInfo pluginInfo,
-        final boolean showDefaultLoading
+            final SinglePluginInfo pluginInfo,
+            final boolean showDefaultLoading
     ) {
         MLog.info(
             TAG,
@@ -552,7 +552,7 @@ public class A {
                     .concatMap(new Function<Scene, Publisher<DispenseChannelProtocol.ChannelSearchResp>>() {
                         @Override
                         public Publisher<DispenseChannelProtocol.ChannelSearchResp> apply(
-                            Scene scene
+                                Scene scene
                         ) throws Exception {
                             applySceneToRoot(scene);
                             return requestChannelType(sid, ssid)
@@ -563,7 +563,7 @@ public class A {
                             ? extends DispenseChannelProtocol.ChannelSearchResp>>() {
                         @Override
                         public Publisher<? extends DispenseChannelProtocol.ChannelSearchResp> apply(
-                            Throwable throwable
+                                Throwable throwable
                         ) throws Exception {
                             if (throwable instanceof EntNoConnectionError
                                     || throwable instanceof EntTimeoutError
@@ -584,7 +584,7 @@ public class A {
                     .concatMap(new Function<DispenseChannelProtocol.ChannelSearchResp, Publisher<? extends Scene>>() {
                         @Override
                         public Publisher<? extends Scene> apply(
-                            DispenseChannelProtocol.ChannelSearchResp channelSearchResp
+                                DispenseChannelProtocol.ChannelSearchResp channelSearchResp
                         ) throws Exception {
                             Map<String, String> extendInfo = channelSearchResp.mData;
                             int type = channelSearchResp.type.intValue();
@@ -641,7 +641,7 @@ public class A {
         }
     }
 }
-        """.trimIndent())
+""".trimIndent())
     }
 
     @Test

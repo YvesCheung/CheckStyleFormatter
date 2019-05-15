@@ -214,7 +214,7 @@ class LineBreaker : FormatRule {
                     toBeLineBreak.add(
                         NormalLineBreak(
                             whiteSpaceExpect,
-                            lineBreak(context, line.start, indent),
+                            lineBreak(context, line.start, indent + indent),
                             "the token $token in a parameter list: ${node.text}."
                         )
                     )
