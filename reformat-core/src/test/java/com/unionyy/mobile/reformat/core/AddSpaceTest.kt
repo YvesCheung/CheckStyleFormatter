@@ -1,7 +1,7 @@
 package com.unionyy.mobile.reformat.core
 
-import com.unionyy.mobile.reformat.core.rule.AddSpace
 import com.unionyy.mobile.reformat.core.rule.DumpAST
+import com.unionyy.mobile.reformat.core.rule.AddSpace
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import org.junit.Assert
 import org.junit.Test

@@ -708,6 +708,73 @@ public class A {
     }
 
     @Test
+    fun testJavaDocument() {
+        val text = CodeFormatter.reformat("A.java", """
+public class A {
+    /*
+     * 判断当前模板是否符合勋章所属的模板类型
+     * 0：全部
+     * 1：现场
+     * 2：秀场
+     */
+     public int a = 2;
+
+    /*
+     * 判断当前模板是否符合勋章所属的模板类型sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     * 0：全部sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     * 1：现场sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     * 2：秀场sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     */
+     public int b = 2;
+
+     /*
+       判断当前模板是否符合勋章所属的模板类型sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+       0：全部sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+       1：现场sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+       2：秀场sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     */
+     public int b = 2;
+}
+        """.trimIndent())
+
+        Assert.assertEquals("""
+public class A {
+    /*
+     * 判断当前模板是否符合勋章所属的模板类型
+     * 0：全部
+     * 1：现场
+     * 2：秀场
+     */
+     public int a = 2;
+
+    /*
+     * 判断当前模板是否符合勋章所属的模板类型sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvj
+     * khaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     * 0：全部sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;
+     * lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     * 1：现场sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;
+     * lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     * 2：秀场sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;
+     * lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     */
+     public int b = 2;
+
+     /*
+       判断当前模板是否符合勋章所属的模板类型sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvj
+       khaskvh;lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+       0：全部sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;
+       lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+       1：现场sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;
+       lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+       2：秀场sdahfkjsdhakhl;dsh;lhjfl;kasjdlkvncjaklsbdvjkhaskvh;
+       lawjel;fqenlkjnl.ajdkl;sfjksjdkfhdjkshbhjvdsjbfgvjhdsbhjbavfdfbv
+     */
+     public int b = 2;
+}
+        """.trimIndent(),text)
+    }
+
+    @Test
     fun testJavaDeclarationTooLong() {
         val text = CodeFormatter.reformat("D.java", """
 package com.yy.mobile.checkstyleformatter;
