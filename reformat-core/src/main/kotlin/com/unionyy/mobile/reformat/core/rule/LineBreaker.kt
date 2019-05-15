@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.ASTERISK
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.C_STYLE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DIV
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
@@ -17,6 +18,7 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.PLUS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
 import org.jetbrains.kotlin.com.intellij.psi.PsiCodeBlock
+import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionList
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
@@ -37,6 +39,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenI
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 import org.jetbrains.kotlin.psi.psiUtil.children
+import java.lang.StringBuilder
 
 class LineBreaker : FormatRule {
 
@@ -134,7 +137,7 @@ class LineBreaker : FormatRule {
             if (context.scanningTimes == SCAN_HIGH) {
                 if (node is ParameterListElement) {
                     breakFunctionParam(context, node, line)
-                } else if (node.elementType == END_OF_LINE_COMMENT) {
+                } else if (node is PsiComment) {
                     breakComment(context, node, line)
                 } else if (node is PsiIfStatement) {
                     breakIfStatement(context, node, line)
@@ -290,7 +293,7 @@ class LineBreaker : FormatRule {
         node: ASTNode,
         line: Line
     ) {
-        if (line.exceed) {
+        if (line.exceed && node.elementType == END_OF_LINE_COMMENT) {
             val parent = node.treeParent
             if (parent != null) {
                 val preNode = node.treePrev
@@ -318,7 +321,9 @@ class LineBreaker : FormatRule {
                 }
             }
 
-            toBeLineBreak.add(CutComment(node))
+            toBeLineBreak.add(CutEndOfLineComment(node))
+        } else if (node.elementType == C_STYLE_COMMENT) {
+            toBeLineBreak.add(CutCStyleComment(node))
         }
     }
 
@@ -464,7 +469,7 @@ class LineBreaker : FormatRule {
     /**
      * 如果注释 [comment] 过长，需要裁剪
      */
-    private class CutComment(
+    private class CutEndOfLineComment(
         val comment: ASTNode
     ) : LineBreakAction {
 
@@ -509,7 +514,45 @@ class LineBreaker : FormatRule {
 
         override fun report(context: FormatContext) {
             context.report(
-                "Cut the too long comment: ${comment.text}.",
+                "Cut the too long comment(//..): ${comment.text}.",
+                context.getCodeFragment(comment))
+        }
+    }
+
+    private class CutCStyleComment(
+        val comment: ASTNode
+    ) : LineBreakAction {
+        override fun run(context: FormatContext) {
+            val textLines = comment.text.split(lineBreak)
+            val indentSize = lineBreak(comment, " ").textLength
+            val newText = StringBuilder()
+            textLines.forEach { text ->
+                cutLine(text, indentSize) {
+                    newText.append(it)
+                }
+            }
+            val newComment = PsiCoreCommentImpl(C_STYLE_COMMENT, newText.toString())
+            comment.treeParent.replaceChild(comment, newComment)
+        }
+
+        private fun cutLine(text: String, indentSize: Int, addToTree: (String) -> Unit) {
+            if (text.length + indentSize > 100) {
+                val half = text.length / 2
+                cutLine(newLine(text.substring(0, half)), indentSize, addToTree)
+                cutLine(newLine("\n" + " ".repeat(indentSize) + text.substring(half)),
+                    indentSize, addToTree)
+            } else {
+                addToTree(text)
+            }
+        }
+
+        private fun newLine(text: String): String {
+            return if (text.startsWith(lineBreak)) text else lineBreak + text
+        }
+
+        override fun report(context: FormatContext) {
+            context.report(
+                "Cut the too long comment(/**/): ${comment.text}.",
                 context.getCodeFragment(comment))
         }
     }

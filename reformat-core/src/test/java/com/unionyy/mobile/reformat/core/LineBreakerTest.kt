@@ -114,10 +114,33 @@ public class A {
 
         System.out.println(arggg);//asljdfashflishlasljdfashf苏打粉萨阿德沙发上的阿斯顿vlishlhjfkasdddasdasdadasldhjksfakjhdgasdsdfasdfad
 
+/*            if (isLandScape) {
+                //横屏 频道Combo 礼物名字统计
+//                getCore(IHiidoStatisticCore.class).sendEventStatistic(getCore(IAuthCore.class).getUserId(), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_GIFT_NAME_LAND + itemBase.name);
+                //横屏 频道Combo 礼物数量统计
+//                getCore(IHiidoStatisticCore.class).sendEventStatistic(getCore(IAuthCore.class).getUserId(), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_GIFT_NUM_LAND + num);
+                //横屏 频道Combo 礼物组数统计
+                //CoreFactory.getCore(IHiidoStatisticCore.class).sendEventStatistic(LoginUtil.getUid(),IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_GIFT_GROUP_LAND + (int)(nowCombo*1.0f/groupTotal));
+                //横屏 频道Combo 连击次数统计
+//                getCore(IHiidoStatisticCore.class).sendEventStatistic(getCore(IAuthCore.class).getUserId(), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_COMBO_NUM_LAND + nowCombo);
+
+//                getCore(IHiidoStatisticCore.class).sendEventStatistic(getCore(IAuthCore.class).getUserId(), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_SUCCEED_LAND);
+            } else {
+                //竖屏 频道Combo 礼物名字统计
+//                getCore(IHiidoStatisticCore.class).sendEventStatistic(getCore(IAuthCore.class).getUserId(), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_GIFT_NAME + itemBase.name);
+                //竖屏 频道Combo 礼物数量统计
+//                getCore(IHiidoStatisticCore.class).sendEventStatistic(getCore(IAuthCore.class).getUserId(), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_GIFT_NUM + num);
+                //竖屏 频道Combo 礼物组数统计
+                //CoreFactory.getCore(IHiidoStatisticCore.class).sendEventStatistic(LoginUtil.getUid(),IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_GIFT_GROUP_LAND + (int)(nowCombo*1.0f/groupTotal));
+                //竖屏 频道Combo 连击次数统计
+//                getCore(IHiidoStatisticCore.class).sendEventStatistic(getCore(IAuthCore.class).getUserId(), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_COMBO_NUM + nowCombo);
+
+//                getCore(IHiidoStatisticCore.class).sendEventStatistic(getCore(IAuthCore.class).getUserId(), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_SUCCEED);
+            }*/
         int ddd = 12362713;//asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekfdjshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvfluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
     }
 }
-        """.trimIndent())
+""".trimIndent(), setOf(DumpAST(), LineBreaker()))
 
         Assert.assertEquals("""
 package com.yy.mobile.checkstyleformatter;
@@ -160,6 +183,47 @@ public class A {
         //asljdfashflishlasljdfashf苏打粉萨阿德沙发上的阿斯顿vlishlhjfkasdddasdasdadasldhjksfakjhdgasdsdfasdfad
         System.out.println(arggg);
 
+/*            if (isLandScape) {                //横屏 频道Combo 礼物名字统计
+//                getCore(IHiidoStatisticCore.class).send
+    EventStatistic(getCore(IAuthCore.class).getUserId(), IHiido
+    StatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCo
+    re.EVENT_LABEL_CHANNEL_COMBO_GIFT_NAME_LAND + itemBase.name);                //横屏 频道Combo 礼物数量统计
+//                getCore(IHiidoStatisticCore.class).s
+    endEventStatistic(getCore(IAuthCore.class).getUserId(),
+    IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoSta
+    tisticCore.EVENT_LABEL_CHANNEL_COMBO_GIFT_NUM_LAND + num);                //横屏 频道Combo 礼物组数统计
+                //CoreFactory.getCore(IHiidoStatisticCore.cl
+    ass).sendEventStatistic(LoginUtil.getUid(),IHiidoStatisticCore
+    .EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_C
+    HANNEL_COMBO_GIFT_GROUP_LAND + (int)(nowCombo*1.0f/groupTotal));                //横屏 频道Combo 连击次数统计
+//                getCore(IHiidoStatisticCore.class).sen
+    dEventStatistic(getCore(IAuthCore.class).getUserId(), IHi
+    idoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatist
+    icCore.EVENT_LABEL_CHANNEL_COMBO_COMBO_NUM_LAND + nowCombo);
+//                getCore(IHiidoStatisticCore.class).
+    sendEventStatistic(getCore(IAuthCore.class).getUserId(
+    ), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHii
+    doStatisticCore.EVENT_LABEL_CHANNEL_COMBO_SUCCEED_LAND);            } else {                //竖屏 频道Combo 礼物名字统计
+//                getCore(IHiidoStatisticCore.class).sen
+    dEventStatistic(getCore(IAuthCore.class).getUserId(), IHi
+    idoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStatist
+    icCore.EVENT_LABEL_CHANNEL_COMBO_GIFT_NAME + itemBase.name);                //竖屏 频道Combo 礼物数量统计
+//                getCore(IHiidoStatisticCore.class).
+    sendEventStatistic(getCore(IAuthCore.class).getUserId()
+    , IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiid
+    oStatisticCore.EVENT_LABEL_CHANNEL_COMBO_GIFT_NUM + num);                //竖屏 频道Combo 礼物组数统计
+                //CoreFactory.getCore(IHiidoStatisticCore.cl
+    ass).sendEventStatistic(LoginUtil.getUid(),IHiidoStatisticCore
+    .EVENT_ID_CHANNEL_COMBO, IHiidoStatisticCore.EVENT_LABEL_C
+    HANNEL_COMBO_GIFT_GROUP_LAND + (int)(nowCombo*1.0f/groupTotal));                //竖屏 频道Combo 连击次数统计
+//                getCore(IHiidoStatisticCore.class).se
+    ndEventStatistic(getCore(IAuthCore.class).getUserId(), I
+    HiidoStatisticCore.EVENT_ID_CHANNEL_COMBO, IHiidoStat
+    isticCore.EVENT_LABEL_CHANNEL_COMBO_COMBO_NUM + nowCombo);
+//                getCore(IHiidoStatisticCore.class
+    ).sendEventStatistic(getCore(IAuthCore.class).getUser
+    Id(), IHiidoStatisticCore.EVENT_ID_CHANNEL_COMBO,
+    IHiidoStatisticCore.EVENT_LABEL_CHANNEL_COMBO_SUCCEED);            }*/
         //asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkg
         //sdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekf
         //djshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvf
