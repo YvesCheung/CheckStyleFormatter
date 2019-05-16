@@ -1,5 +1,8 @@
 package com.unionyy.mobile.reformat.core
 
+import com.unionyy.mobile.reformat.core.rule.DumpAST
+import com.unionyy.mobile.reformat.core.rule.EmptyBlockRule
+import org.junit.Assert
 import org.junit.Test
 
 class EmptyBlockTest {
@@ -7,24 +10,30 @@ class EmptyBlockTest {
     @Test
     fun testJavaEmptyTryCatch() {
 
-        val text = CodeFormatter.reformat("", """
-            try {
+        val text = CodeFormatter.reformat("A.java", """
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private static void main() {
+        try {
             statTimestamp = mFile.lastModified();
             statSize = mFile.length();
             map = readFromXml(mFile);
         } catch (Exception e) {
         }
 
-        if ((map == null || map.size() == 0) && mTempFile.exists()) {
-            map = readFromXml(mTempFile);
+        try {
+            map = readFromXml(mBackupFile);
+        } catch (Exception e) {
+            //do nothing
         }
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), EmptyBlockRule()))
 
-        if ((mMap == null || mMap.size() == 0) && (map == null || map.size() == 0)) {
-            try {
-                map = readFromXml(mBackupFile);
-            } catch (Exception e) {
-            }
-        }
+        Assert.assertEquals(text, """
+
         """.trimIndent())
     }
 }
