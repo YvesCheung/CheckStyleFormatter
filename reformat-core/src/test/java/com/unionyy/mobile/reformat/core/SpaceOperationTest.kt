@@ -42,8 +42,8 @@ class A {
 
         Assert.assertEquals("""
 class A {
-    void test(){
-        if(true){ int a = b; }
+    void test() {
+        if(true) { int a = b; }
     }
 
     public enum CacheType {
@@ -51,7 +51,7 @@ class A {
         PUBLIC//公共数据
     }
 }
-        """.trimIndent(), text)
+""".trimIndent(), text)
     }
 
     @Test
@@ -67,7 +67,7 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
     }//niubi
 
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker(), SpaceOperation()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -98,11 +98,11 @@ class A {
         Assert.assertEquals("""
 class A {
     //宇总威武
-    void test(){
-        if(true){ int a = b; }
+    void test() {
+        if(true) { int a = b; }
     }
 }
-        """.trimIndent(), text)
+""".trimIndent(), text)
     }
 
     @Test
@@ -117,7 +117,7 @@ public class NormalJavaClass {
     private static void main(String a, String b, String c, String d, String e) {
     }
 }
-        """.trimIndent(), setOf(DumpAST(), SpaceOperation(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.demo;

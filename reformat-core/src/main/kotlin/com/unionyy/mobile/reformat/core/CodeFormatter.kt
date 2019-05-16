@@ -1,6 +1,7 @@
 package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.reporter.WriterReporter
+import com.unionyy.mobile.reformat.core.rule.AddSwitchDefaultCase
 import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
@@ -39,12 +40,13 @@ object CodeFormatter {
 
     @Suppress("RemoveExplicitTypeArguments")
     private val usingRules = mutableSetOf<FormatRule>(
-        //DumpAST(),
+        DumpAST(),
         ContinuousCodeBlock(),
         LineBreaker(),
         SpaceOperation(),
         TabCharacter(),
-        EmptyStatement()
+        EmptyStatement(),
+        AddSwitchDefaultCase()
     )
 
     init {

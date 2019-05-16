@@ -292,12 +292,12 @@ public class NormalJavaClass {
         final File dir =
                 new File(YYFileUtils.getRootDir() + File.separator + CommonFuncNoticeController.COMMON_ANIMATION_DIR);
         String aa =
-                "asdsafahsdfhladh: " + dir.getPath() + dir.toString().length()+a.length()+ b.length() +
+                "asdsafahsdfhladh: " + dir.getPath() + dir.toString().length() +a.length() + b.length() +
                     " and the next is: " + dir;
         int bbb =
                 a.length() +
-                    dir.toString().length()+
-                    a.length()+
+                    dir.toString().length() +
+                    a.length() +
                     b.length() + 123432 +
                     b.length() +
                     c.length() +
@@ -318,7 +318,7 @@ public class NormalJavaClass {
         }
     }
 }
-        """.trimIndent())
+""".trimIndent())
     }
 
     @Test
