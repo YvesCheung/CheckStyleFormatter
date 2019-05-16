@@ -15,18 +15,44 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FI
  */
 class ArrayBracket : FormatRule {
 
-    override fun visit(context: FormatContext, node: ASTNode) {
-        if (node.elementType == FIELD ||
-            node is PsiLocalVariable) {
-            handleBracket(node)
+    private val bracketList = mutableListOf<MoveBracket>()
+
+    private class MoveBracket(
+        val typeElement: ASTNode,
+        val bracket: List<ASTNode>
+    ) : Runnable {
+
+        override fun run() {
+            bracket.forEach { node ->
+                node.treeParent.removeChild(node)
+                typeElement.addChild(node, null)
+            }
         }
     }
 
-    private fun handleBracket(node: ASTNode) {
+    override fun beforeVisit(context: FormatContext) {
+        super.beforeVisit(context)
+        bracketList.clear()
+    }
+
+    override fun visit(context: FormatContext, node: ASTNode) {
+        if (node.elementType == FIELD ||
+            node is PsiLocalVariable) {
+            handleBracket(context, node)
+        }
+    }
+
+    override fun afterVisit(context: FormatContext) {
+        bracketList.forEach { it.run() }
+        super.afterVisit(context)
+    }
+
+    private fun handleBracket(context: FormatContext, node: ASTNode) {
         val bracket = mutableListOf<ASTNode>()
         var readBracket = false
         var beforeEq = true
         var typeElement: ASTNode? = null
+
         node.getChildren(null).forEach { child ->
             when {
                 child.elementType == EQ -> {
@@ -51,10 +77,11 @@ class ArrayBracket : FormatRule {
             }
         }
 
-        typeElement ?: return
-
-        if (bracket.isNotEmpty()) {
-
+        val type = typeElement
+        if (type != null && bracket.isNotEmpty()) {
+            context.report("Fix array bracket: ${node.text}.",
+                context.getCodeFragment(node))
+            bracketList.add(MoveBracket(type, bracket))
         }
     }
 }

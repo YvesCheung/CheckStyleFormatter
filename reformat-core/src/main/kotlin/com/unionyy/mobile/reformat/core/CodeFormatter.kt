@@ -2,6 +2,7 @@ package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.reporter.WriterReporter
 import com.unionyy.mobile.reformat.core.rule.AddSwitchDefaultCase
+import com.unionyy.mobile.reformat.core.rule.ArrayBracket
 import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
@@ -42,6 +43,7 @@ object CodeFormatter {
     private val usingRules = mutableSetOf<FormatRule>(
         DumpAST(),
         ContinuousCodeBlock(),
+        ArrayBracket(),
         LineBreaker(),
         SpaceOperation(),
         TabCharacter(),

@@ -1,6 +1,5 @@
 package com.unionyy.mobile.reformat.core
 
-import com.unionyy.mobile.reformat.core.rule.DumpAST
 import org.junit.Assert
 import org.junit.Test
 
@@ -15,10 +14,14 @@ public class A {
 
     int[] pos2 = new int[2];
 }
-        """.trimIndent(), setOf(DumpAST()))
+        """.trimIndent())
 
         Assert.assertEquals("""
+public class A {
+    int[] pos = new int[2];
 
+    int[] pos2 = new int[2];
+}
         """.trimIndent(), text)
     }
 
@@ -29,14 +32,20 @@ public class A {
 import com.yy.mobile.ASD;
 
 public class A {
-    ASD pos[] = new ASD[2];
+    ASD pos[ ] = new ASD[2];
 
     ASD[] pos2 = new ASD[2];
 }
-        """.trimIndent(), setOf(DumpAST()))
+        """.trimIndent())
 
         Assert.assertEquals("""
+import com.yy.mobile.ASD;
 
+public class A {
+    ASD[ ] pos = new ASD[2];
+
+    ASD[] pos2 = new ASD[2];
+}
         """.trimIndent(), text)
     }
 
@@ -52,10 +61,17 @@ public class A {
         ASD pos[] = new ASD[2];
     }
 }
-        """.trimIndent(), setOf(DumpAST()))
+        """.trimIndent())
 
         Assert.assertEquals("""
+public class A {
 
+    public void main() {
+        int[] pos = new int[2];
+
+        ASD[] pos = new ASD[2];
+    }
+}
         """.trimIndent(), text)
     }
 }
