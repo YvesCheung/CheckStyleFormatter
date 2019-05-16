@@ -11,6 +11,7 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.SEMICOLON
+import org.jetbrains.kotlin.com.intellij.psi.PsiEmptyStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiForStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.THROWS_LIST
@@ -131,7 +132,11 @@ class SpaceOperation : FormatRule {
     ) {
         val prev = node.treePrev
         val parent = node.treeParent
-        if (prev != null && prev is PsiWhiteSpace && parent !is PsiForStatement) {
+        // for(; ; )
+        if (parent is PsiForStatement && prev.treePrev is PsiEmptyStatement) {
+            return
+        }
+        if (prev != null && prev is PsiWhiteSpace) {
             // ; 前有空格
             toBeAddSpace.add(SubSpaceBeforeSemi(prev))
         }
