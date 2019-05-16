@@ -6,7 +6,6 @@ import com.unionyy.mobile.reformat.core.rule.ArrayBracket
 import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
-import com.unionyy.mobile.reformat.core.rule.TabCharacter
 import com.unionyy.mobile.reformat.core.rule.ContinuousCodeBlock
 import com.unionyy.mobile.reformat.core.rule.EmptyStatement
 import com.unionyy.mobile.reformat.core.rule.ModifierRule
@@ -49,8 +48,7 @@ object CodeFormatter {
         LineBreaker(),
         SpaceOperation(),
         EmptyStatement(),
-        AddSwitchDefaultCase(),
-        TabCharacter()
+        AddSwitchDefaultCase()
     )
 
     init {
@@ -109,6 +107,7 @@ object CodeFormatter {
         val normalizedText = fileContent
             .replace("\r\n", "\n")
             .replace("\r", "\n")
+            .replace("\t", "    ")
 
         var repeat: Boolean
         var repeatTime = 1
@@ -142,11 +141,7 @@ object CodeFormatter {
             repeat = context.requestRepeat && repeatTime < 50
         } while (repeat)
 
-        return if (hasError) {
-            psiFile.text.replace("\n", System.lineSeparator())
-        } else {
-            psiFile.text
-        }
+        return psiFile.text.replace("\n", System.lineSeparator())
     }
 
     private fun ASTNode.visit(cb: (node: ASTNode) -> Unit) {

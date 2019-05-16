@@ -500,22 +500,22 @@ public class CacheClient implements Cache {
         }, 0);
     }
 
-    //	@Override
-    //	public String get(String key) {
-    //		if(BlankUtil.isBlank(key)){
-    //			return null;
-    //		}
-    //		//TODO 读文件json
-    //		String result = null;
-    //		try{
-    //			String json = cacheManager.getCache(key);
-    //			CachePacket packet = JsonParser.parseJsonObject(json, CachePacket.class);
+    //    @Override
+    //    public String get(String key) {
+    //        if(BlankUtil.isBlank(key)){
+    //            return null;
+    //        }
+    //        //TODO 读文件json
+    //        String result = null;
+    //        try{
+    //            String json = cacheManager.getCache(key);
+    //            CachePacket packet = JsonParser.parseJsonObject(json, CachePacket.class);
     //            result = packet.getContent().toString();
-    //		}catch(Exception e){
-    //			MLog.error(TAG, e);
-    //		}
-    //		return result;
-    //	}
+    //        }catch(Exception e){
+    //            MLog.error(TAG, e);
+    //        }
+    //        return result;
+    //    }
 
     @Override
     public void put(String key, String value) {
@@ -688,29 +688,29 @@ public class CacheClient implements Cache {
     }
 
     public static void main(String[] args) {
-        //		User u = new User();
-        //		u.password = "123";
-        //		u.username = "simon";
+        //        User u = new User();
+        //        u.password = "123";
+        //        u.username = "simon";
         //
-        //		CacheClient client = new CacheClient();
-        //		client.putObject("user", u);
+        //        CacheClient client = new CacheClient();
+        //        client.putObject("user", u);
         //
-        //		client.get("user", new ReturnCallback() {
+        //        client.get("user", new ReturnCallback() {
         //
-        //			@Override
-        //			public void onReturn(String data) {
-        //				// TODO Auto-generated method stub
+        //            @Override
+        //            public void onReturn(String data) {
+        //                // TODO Auto-generated method stub
         //
-        //			}
-        //		});
-        //		System.out.println(u1.password+","+u1.username);
+        //            }
+        //        });
+        //        System.out.println(u1.password+","+u1.username);
         //
-        //		List<User> list = new ArrayList<User>();
-        //		list.add(u);
-        //		client.putObject("list", list);
+        //        List<User> list = new ArrayList<User>();
+        //        list.add(u);
+        //        client.putObject("list", list);
         //
-        //		List<User> u2 = client.getJSONList("list", User.class);
-        //		System.out.println(u2);
+        //        List<User> u2 = client.getJSONList("list", User.class);
+        //        System.out.println(u2);
     }
 }
 """.trimIndent(), text)
@@ -744,6 +744,30 @@ public class LabelUtils {
 }
 """.trimIndent())
 
-        Assert.assertEquals("""""", text)
+        Assert.assertEquals("""
+package com.yy.mobile.ui.widget.labelView;
+
+import android.content.Context;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+
+public class LabelUtils {
+
+    public static int dipToPx(Context c, float dipValue) {
+        DisplayMetrics metrics = c.getResources().getDisplayMetrics();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
+    }
+
+    /*public static int spToPx(Context context, float spValue) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, spValue, metrics);
+    }*/
+
+    public static int spToPx(Context context, float spValue) {
+        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
+        return (int) (spValue * fontScale + 0.5f);
+    }
+}
+""".trimIndent(), text)
     }
 }

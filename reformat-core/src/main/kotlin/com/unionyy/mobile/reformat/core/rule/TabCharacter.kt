@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 /**
  * 制表符替换为空格
  */
+@Deprecated(message = "Already handled in [CodeFormatter].")
 class TabCharacter : FormatRule {
 
     companion object {
