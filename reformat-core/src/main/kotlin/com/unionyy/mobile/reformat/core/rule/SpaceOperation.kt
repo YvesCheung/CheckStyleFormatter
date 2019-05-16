@@ -6,9 +6,11 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.SEMICOLON
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
+import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 
 /**
  * Created BY PYF 2019/5/15
@@ -17,7 +19,13 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 class SpaceOperation : FormatRule {
 
     private val toBeAddSpace = mutableListOf<AddSpaceAction>()
-    private val expelChar = setOf(LBRACE, RBRACE, SEMICOLON, COMMA)
+
+    private val expelChar = mapOf(
+        LBRACE to listOf(LBRACE, RBRACE), // {{ {}
+        RBRACE to listOf(SEMICOLON, RPARENTH), // }; })
+        SEMICOLON to listOf(SEMICOLON), // ;;
+        COMMA to listOf()
+    )
 
     override fun beforeVisit(context: FormatContext) {
         super.beforeVisit(context)
@@ -25,8 +33,9 @@ class SpaceOperation : FormatRule {
     }
 
     override fun visit(context: FormatContext, node: ASTNode) {
-        if (expelChar.contains(node.elementType)) {
-            spaceOperation(context, node)
+        val allowNext = expelChar.get(node.elementType)
+        if (allowNext != null) {
+            spaceOperation(allowNext, node)
         }
     }
 
@@ -66,41 +75,48 @@ class SpaceOperation : FormatRule {
     }
 
     private class SubSpaceBeforeSemi(
-        val replaceNode: ASTNode
+        val whiteSpace: ASTNode
     ) : AddSpaceAction {
         override fun spaceOperation() {
-            replaceNode.treeParent.replaceChild(replaceNode, PsiWhiteSpaceImpl(""))
+            whiteSpace.treeParent.removeChild(whiteSpace)
         }
 
         override fun report(context: FormatContext) {
-            context.report("remove a space at ${context.getCodeLocation(replaceNode)}",
-                context.getCodeFragment(replaceNode))
+            context.report("remove a space at ${context.getCodeLocation(whiteSpace)}",
+                context.getCodeFragment(whiteSpace))
         }
     }
 
     private fun spaceOperation(
-        context: FormatContext,
+        allowNext: List<IElementType>,
         node: ASTNode
     ) {
-        if (node.treeNext != null) {
-            //嵌套在里面的原因是如果发现下一个是个空格的话，就不用加空格了，以防进入另一个else if
-            if (node.treeNext !is PsiWhiteSpace) {
-                toBeAddSpace.add(AddSpaceSomewhere(node.treeParent, node.treeNext))
-            }
-        } else if (node.treeParent != null && node.treeParent.treeNext != null &&
-            node.treeParent.treeNext !is PsiWhiteSpace) {
-            if (node.treeNext == null) {
-                toBeAddSpace.add(AddSpaceSomewhere(node.treeParent.treeParent, node.treeParent.treeNext))
-            } else {
-                toBeAddSpace.add(AddSpaceSomewhere(node.treeParent, node.treeNext))
-            }
-        } else if (node.elementType == SEMICOLON) {
-            subSpaceBeforeSemiColon(context, node)
+        val parent = node.getTheNonSpaceParent(allowNext)
+        if (parent != null) {
+            toBeAddSpace.add(AddSpaceSomewhere(parent.treeParent, parent.treeNext))
+        }
+        if (node.elementType == SEMICOLON) {
+            subSpaceBeforeSemiColon(node)
         }
     }
 
+    private fun ASTNode.getTheNonSpaceParent(allowNext: List<IElementType>): ASTNode? {
+        var now: ASTNode? = this
+        while (now != null && now.treeNext == null) {
+            now = now.treeParent
+        }
+
+        if (now != null) {
+            val isAllow = now.treeNext is PsiWhiteSpace ||
+                allowNext.any { now.treeNext.elementType == it }
+            if (!isAllow) {
+                return now
+            }
+        }
+        return null
+    }
+
     private fun subSpaceBeforeSemiColon(
-        context: FormatContext,
         node: ASTNode
     ) {
         val prev = node.treePrev

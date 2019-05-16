@@ -43,7 +43,7 @@ class A {
         Assert.assertEquals("""
 class A {
     void test(){
-        if(true){ int a = b;}
+        if(true){ int a = b; }
     }
 
     public enum CacheType {
@@ -99,7 +99,7 @@ class A {
 class A {
     //宇总威武
     void test(){
-        if(true){ int a = b;}
+        if(true){ int a = b; }
     }
 }
         """.trimIndent(), text)

@@ -3,6 +3,7 @@ package com.unionyy.mobile.reformat.core.rule
 import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import com.unionyy.mobile.reformat.core.Location
+import com.unionyy.mobile.reformat.core.utils.nextNode
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType
@@ -11,6 +12,7 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.C_STYLE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DIV
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.ELSE_KEYWORD
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.EQ
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
@@ -21,6 +23,8 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
 import org.jetbrains.kotlin.com.intellij.psi.PsiArrayInitializerExpression
+import org.jetbrains.kotlin.com.intellij.psi.PsiBlockStatement
+import org.jetbrains.kotlin.com.intellij.psi.PsiCatchSection
 import org.jetbrains.kotlin.com.intellij.psi.PsiCodeBlock
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
@@ -51,6 +55,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicEx
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 import org.jetbrains.kotlin.psi.psiUtil.children
 import java.lang.StringBuilder
+import java.util.*
 
 class LineBreaker : FormatRule {
 
@@ -413,6 +418,8 @@ class LineBreaker : FormatRule {
         }
     }
 
+
+
     private fun breakIfStatement(
         context: FormatContext,
         node: ASTNode,
@@ -651,6 +658,7 @@ class LineBreaker : FormatRule {
                     }
                 }
 
+                //todo: trim text
                 checkAndCutComment(comment.text) { child ->
                     comment.treeParent.addChild(child, comment)
                 }

@@ -1,9 +1,11 @@
 package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.reporter.WriterReporter
+import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import com.unionyy.mobile.reformat.core.rule.TabCharacter
+import com.unionyy.mobile.reformat.core.rule.ContinuousCodeBlock
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -25,7 +27,6 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import sun.reflect.ReflectionFactory
 
-
 /**
  * Created by 张宇 on 2019/5/9.
  * E-mail: zhangyu4@yy.com
@@ -37,7 +38,8 @@ object CodeFormatter {
 
     @Suppress("RemoveExplicitTypeArguments")
     private val usingRules = mutableSetOf<FormatRule>(
-        //DumpAST(),
+        DumpAST(),
+        ContinuousCodeBlock(),
         LineBreaker(),
         SpaceOperation(),
         TabCharacter()

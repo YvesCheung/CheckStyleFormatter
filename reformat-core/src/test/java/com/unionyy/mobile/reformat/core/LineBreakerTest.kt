@@ -1156,49 +1156,4 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView { //niubi
 } //niubi
         """.trimIndent())
     }
-
-    @Test
-    fun testContinueBlock() {
-        val text = CodeFormatter.reformat("A.java", """
-public class A {
-    public void main() {
-        try {
-            ResponseData data = super.performRequest(request);
-            //            entityToBytes(data);
-            //            mRandomAccessFile.write(data.data, 0, data.data.length);
-            return data;
-        }
-        //        catch (Throwable t) {
-        //            throw t;
-        //        }
-        catch (Exception e) {
-            //            e.printStackTrace();
-            HttpLog.e("DownloadContinueNetwork", e);
-        } finally {
-            if (mRandomAccessFile != null) {
-                try {
-                    mRandomAccessFile.close();
-                } catch (IOException e) {
-                    HttpLog.e(e, "RandomAccessFile close error", e);
-                }
-            }
-        }
-    }
-
-    void function() {
-        if(a && b || c) {
-            //Do something.
-        }
-        /*
-        some comment
-        */
-        else {
-            //Do something.
-        }
-    }
-}
-""".trimIndent())
-
-        Assert.assertEquals("""""", text)
-    }
 }
