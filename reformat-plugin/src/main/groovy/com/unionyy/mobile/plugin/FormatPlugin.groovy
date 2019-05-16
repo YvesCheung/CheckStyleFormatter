@@ -17,20 +17,20 @@ class FormatPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.rootProject.allprojects { p ->
-            println("FormatPlugin apply to ${p.name}")
-            p.apply {
-                it.plugin(FormatPlugin)
-            }
-        }
+        applyInner(project)
 
-        if (project != project.rootProject) {
-            getSourceFiles(project) {
-                def files = it.first
-                def sourceSetName = it.second
-                createFormatTask(project, files, sourceSetName)
-                createPrintFileTask(project, files)
-            }
+        project.subprojects { subProject ->
+            applyInner(subProject)
+        }
+    }
+
+    private static def applyInner(Project project) {
+        println("FormatPlugin apply to ${project.name}")
+        getSourceFiles(project) {
+            def files = it.first
+            def sourceSetName = it.second
+            createFormatTask(project, files, sourceSetName)
+            createPrintFileTask(project, files)
         }
     }
 

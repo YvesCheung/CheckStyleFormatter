@@ -2,12 +2,12 @@
 <metadata>
   <groupId>com.unionyy.mobile</groupId>
   <artifactId>reformat</artifactId>
+  <version>1.0.3-SNAPSHOT</version>
   <versioning>
-    <versions>
-      <version>1.0.1-SNAPSHOT</version>
-      <version>1.0.2-SNAPSHOT</version>
-      <version>1.0.3-SNAPSHOT</version>
-    </versions>
+    <snapshot>
+      <timestamp>20190516.083341</timestamp>
+      <buildNumber>3</buildNumber>
+    </snapshot>
     <lastUpdated>20190516083341</lastUpdated>
   </versioning>
 </metadata>
