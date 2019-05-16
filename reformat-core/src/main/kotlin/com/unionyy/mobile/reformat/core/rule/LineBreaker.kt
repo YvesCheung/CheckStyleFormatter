@@ -57,6 +57,9 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 import java.lang.StringBuilder
 import java.util.*
 
+/**
+ * 代码行过长时换行
+ */
 class LineBreaker : FormatRule {
 
     companion object {
@@ -417,7 +420,6 @@ class LineBreaker : FormatRule {
             toBeLineBreak.add(CutCStyleComment(node, line))
         }
     }
-
 
 
     private fun breakIfStatement(

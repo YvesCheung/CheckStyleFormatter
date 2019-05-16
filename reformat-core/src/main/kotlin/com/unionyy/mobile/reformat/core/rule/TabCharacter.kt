@@ -6,6 +6,9 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 
+/**
+ * 制表符替换为空格
+ */
 class TabCharacter : FormatRule {
 
     companion object {

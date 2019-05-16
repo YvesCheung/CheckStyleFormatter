@@ -14,6 +14,8 @@ import org.jetbrains.kotlin.psi.psiUtil.children
 /**
  * Created BY PYF 2019/5/16
  * email: pengyangfan@yy.com
+ *
+ * 常量添加 static 修饰
  */
 class ModifierRule : FormatRule {
 
@@ -62,8 +64,8 @@ class ModifierRule : FormatRule {
 
     class StaticModifierAdd(val node: ASTNode) : ModifierOperation {
         override fun operate() {
-            val staticModifer = PsiKeywordImpl(STATIC_KEYWORD, "static")
-            node.treeParent.addChild(staticModifer, node)
+            val staticModifier = PsiKeywordImpl(STATIC_KEYWORD, "static")
+            node.treeParent.addChild(staticModifier, node)
             node.treeParent.addChild(PsiWhiteSpaceImpl(" "), node)
         }
 

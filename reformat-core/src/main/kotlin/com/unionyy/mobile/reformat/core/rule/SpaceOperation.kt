@@ -19,6 +19,8 @@ import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 /**
  * Created BY PYF 2019/5/15
  * email: pengyangfan@yy.com
+ *
+ * 在一些关键词前后添加或移除空格
  */
 class SpaceOperation : FormatRule {
 

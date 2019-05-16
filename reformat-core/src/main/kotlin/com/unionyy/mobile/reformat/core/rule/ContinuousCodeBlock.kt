@@ -14,6 +14,20 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.psi.psiUtil.children
 import java.util.*
 
+/**
+ * 移动连续代码块之间的注释
+ *
+ * if(){
+ * }
+ * //注释
+ * else{
+ * }
+ *
+ * if(){
+ * }else{
+ * //注释
+ * }
+ */
 class ContinuousCodeBlock : FormatRule {
 
     private class Movement(

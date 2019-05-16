@@ -5,6 +5,9 @@ import com.unionyy.mobile.reformat.core.FormatRule
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.PsiEmptyStatement
 
+/**
+ * 移除多余的空语句
+ */
 class EmptyStatement : FormatRule {
 
     private val emptyStatement = mutableListOf<ASTNode>()
