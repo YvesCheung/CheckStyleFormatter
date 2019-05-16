@@ -33,9 +33,12 @@ class SpaceOperation : FormatRule {
     }
 
     override fun visit(context: FormatContext, node: ASTNode) {
-        val allowNext = expelChar.get(node.elementType)
+        val allowNext = expelChar[node.elementType]
         if (allowNext != null) {
             spaceOperation(allowNext, node)
+        }
+        if (node.elementType == SEMICOLON) {
+            subSpaceBeforeSemiColon(node)
         }
     }
 
@@ -94,9 +97,6 @@ class SpaceOperation : FormatRule {
         val parent = node.getTheNonSpaceParent(allowNext)
         if (parent != null) {
             toBeAddSpace.add(AddSpaceSomewhere(parent.treeParent, parent.treeNext))
-        }
-        if (node.elementType == SEMICOLON) {
-            subSpaceBeforeSemiColon(node)
         }
     }
 
