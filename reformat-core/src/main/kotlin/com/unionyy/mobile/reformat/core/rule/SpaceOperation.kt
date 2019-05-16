@@ -5,6 +5,7 @@ import com.unionyy.mobile.reformat.core.FormatRule
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.SEMICOLON
@@ -21,9 +22,9 @@ class SpaceOperation : FormatRule {
     private val toBeAddSpace = mutableListOf<AddSpaceAction>()
 
     private val expelChar = mapOf(
-        LBRACE to listOf(LBRACE, RBRACE), // {{ {}
-        RBRACE to listOf(SEMICOLON, RPARENTH), // }; })
-        SEMICOLON to listOf(SEMICOLON), // ;;
+        LBRACE to listOf(LBRACE, RBRACE, LPARENTH), // {{ {} {(
+        RBRACE to listOf(SEMICOLON, RPARENTH, COMMA), // }; }) },
+        SEMICOLON to listOf(),
         COMMA to listOf()
     )
 

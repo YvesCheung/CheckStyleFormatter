@@ -131,7 +131,7 @@ public class CacheClient implements Cache {
                     error = new CacheException(mKey, "Wrap otherwise exceptions", e);
                     MLog.error(TAG, error);
                 }
-                for (; ; ) {
+                for (; ;) {
                     CallbackWrapper wrapper = handlers.poll();
                     if (wrapper == null) {
                         break;
