@@ -171,6 +171,6 @@ public class NormalJavaClass {
                 break;
         }
     }
-}""".trimIndent(), setOf(DumpAST(), AddSwitchDefaultCase()))
+}""".trimIndent())
     }
 }
