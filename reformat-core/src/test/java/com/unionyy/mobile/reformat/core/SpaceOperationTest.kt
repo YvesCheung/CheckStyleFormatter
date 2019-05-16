@@ -165,4 +165,32 @@ public class NormalJavaClass {
     }
 }""".trimIndent())
     }
+
+    @Test
+    fun testSpaceinForWithParamsLoop() {
+        val text = CodeFormatter.reformat("Haha.java", """
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private static void main() {
+        for (int i = 0; i < 10 ; i++) {
+
+        }
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), SpaceOperation(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private static void main() {
+        for (int i = 0; i < 10; i++) {
+
+        }
+    }
+}""".trimIndent())
+    }
 }
