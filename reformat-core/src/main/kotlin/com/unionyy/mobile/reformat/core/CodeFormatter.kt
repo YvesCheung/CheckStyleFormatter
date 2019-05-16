@@ -1,8 +1,7 @@
 package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.reporter.WriterReporter
-import com.unionyy.mobile.reformat.core.rule.AddSpace
-import com.unionyy.mobile.reformat.core.rule.DumpAST
+import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import com.unionyy.mobile.reformat.core.rule.TabCharacter
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
@@ -20,7 +19,6 @@ import org.jetbrains.kotlin.com.intellij.pom.PomModelAspect
 import org.jetbrains.kotlin.com.intellij.pom.PomTransaction
 import org.jetbrains.kotlin.com.intellij.pom.impl.PomTransactionBase
 import org.jetbrains.kotlin.com.intellij.pom.tree.TreeAspect
-import org.jetbrains.kotlin.com.intellij.psi.PsiFile
 import org.jetbrains.kotlin.com.intellij.psi.PsiFileFactory
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.TreeCopyHandler
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -41,7 +39,7 @@ object CodeFormatter {
     private val usingRules = mutableSetOf<FormatRule>(
         //DumpAST(),
         LineBreaker(),
-        AddSpace(),
+        SpaceOperation(),
         TabCharacter()
     )
 
