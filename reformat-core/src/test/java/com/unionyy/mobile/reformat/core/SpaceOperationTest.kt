@@ -1,12 +1,12 @@
 package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.rule.DumpAST
-import com.unionyy.mobile.reformat.core.rule.AddSpace
+import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import org.junit.Assert
 import org.junit.Test
 
-class AddSpaceTest {
+class SpaceOperationTest {
 
     @Test
     fun testCommentSpace() {
@@ -63,11 +63,11 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
 
     public boolean isPluginLianMai() {//niubi
         int i = 0;//niubi
-        int j = 1 ;
+        int j = 1                        ;
     }//niubi
 
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker(), AddSpace()))
+        """.trimIndent(), setOf(DumpAST(), LineBreaker(), SpaceOperation()))
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -103,5 +103,38 @@ class A {
     }
 }
         """.trimIndent(), text)
+    }
+
+    @Test
+    fun testSpaceperationAfterComma() {
+        val text = CodeFormatter.reformat("Haha.java", """
+package com.yy.mobile.demo;
+
+import java.io.File;
+
+public class NormalJavaClass {
+
+    private static void main(String a, String b, String c, String d, String e) {
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), SpaceOperation(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.demo;
+
+import java.io.File;
+
+public class NormalJavaClass {
+
+    private static void main(
+            String a,
+            String b,
+            String c,
+            String d,
+            String e
+    ) {
+    }
+}
+        """.trimIndent())
     }
 }

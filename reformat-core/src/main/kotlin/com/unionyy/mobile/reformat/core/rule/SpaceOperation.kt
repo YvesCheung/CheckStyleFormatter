@@ -3,25 +3,18 @@ package com.unionyy.mobile.reformat.core.rule
 import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
-import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
-import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.C_STYLE_COMMENT
-import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.SEMICOLON
-import org.jetbrains.kotlin.com.intellij.psi.PsiComment
-import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
-import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
-import org.jetbrains.kotlin.psi.psiUtil.parents
 
 /**
  * Created BY PYF 2019/5/15
  * email: pengyangfan@yy.com
  */
-class AddSpace : FormatRule {
+class SpaceOperation : FormatRule {
 
     private val toBeAddSpace = mutableListOf<AddSpaceAction>()
     private val expelChar = setOf(LBRACE, RBRACE, SEMICOLON, COMMA)
@@ -33,7 +26,7 @@ class AddSpace : FormatRule {
 
     override fun visit(context: FormatContext, node: ASTNode) {
         if (expelChar.contains(node.elementType)) {
-            addSpaceComment(context, node)
+            spaceOperation(context, node)
         }
     }
 
@@ -44,7 +37,7 @@ class AddSpace : FormatRule {
         }
         toBeAddSpace.forEach {
             try {
-                it.addSpace()
+                it.spaceOperation()
             } finally {
                 context.notifyTextChange()
                 it.report(context)
@@ -53,7 +46,7 @@ class AddSpace : FormatRule {
     }
 
     private interface AddSpaceAction {
-        fun addSpace()
+        fun spaceOperation()
 
         fun report(context: FormatContext)
     }
@@ -62,7 +55,7 @@ class AddSpace : FormatRule {
         val parent: ASTNode,
         val beforeNode: ASTNode
     ) : AddSpaceAction {
-        override fun addSpace() {
+        override fun spaceOperation() {
             parent.addChild(PsiWhiteSpaceImpl(" "), beforeNode)
         }
 
@@ -72,12 +65,28 @@ class AddSpace : FormatRule {
         }
     }
 
-    private fun addSpaceComment(
+    private class SubSpaceBeforeSemi(
+        val replaceNode: ASTNode
+    ) : AddSpaceAction {
+        override fun spaceOperation() {
+            replaceNode.treeParent.replaceChild(replaceNode, PsiWhiteSpaceImpl(""))
+        }
+
+        override fun report(context: FormatContext) {
+            context.report("remove a space at ${context.getCodeLocation(replaceNode)}",
+                context.getCodeFragment(replaceNode))
+        }
+    }
+
+    private fun spaceOperation(
         context: FormatContext,
         node: ASTNode
     ) {
-        if (node.treeNext != null && node.treeNext !is PsiWhiteSpace) {
-            toBeAddSpace.add(AddSpaceSomewhere(node.treeParent, node.treeNext))
+        if (node.treeNext != null) {
+            //嵌套在里面的原因是如果发现下一个是个空格的话，就不用加空格了，以防进入另一个else if
+            if (node.treeNext !is PsiWhiteSpace) {
+                toBeAddSpace.add(AddSpaceSomewhere(node.treeParent, node.treeNext))
+            }
         } else if (node.treeParent != null && node.treeParent.treeNext != null &&
             node.treeParent.treeNext !is PsiWhiteSpace) {
             if (node.treeNext == null) {
@@ -97,7 +106,7 @@ class AddSpace : FormatRule {
         val prev = node.treePrev
         if (prev != null && prev is PsiWhiteSpace) {
             // ; 前有空格
-            prev.treeParent.replaceChild(prev, PsiWhiteSpaceImpl(""))
+            toBeAddSpace.add(SubSpaceBeforeSemi(prev))
         }
     }
 }
