@@ -82,8 +82,11 @@ class SpaceOperation : FormatRule {
         context: FormatContext,
         node: ASTNode
     ) {
-        if (node.treeNext != null && node.treeNext !is PsiWhiteSpace) {
-            toBeAddSpace.add(AddSpaceSomewhere(node.treeParent, node.treeNext))
+        if (node.treeNext != null) {
+            //嵌套在里面的原因是如果发现下一个是个空格的话，就不用加空格了，以防进入另一个else if
+            if (node.treeNext !is PsiWhiteSpace) {
+                toBeAddSpace.add(AddSpaceSomewhere(node.treeParent, node.treeNext))
+            }
         } else if (node.treeParent != null && node.treeParent.treeNext != null &&
             node.treeParent.treeNext !is PsiWhiteSpace) {
             if (node.treeNext == null) {

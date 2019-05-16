@@ -104,4 +104,37 @@ class A {
 }
         """.trimIndent(), text)
     }
+
+    @Test
+    fun testSpaceperationAfterComma() {
+        val text = CodeFormatter.reformat("Haha.java", """
+package com.yy.mobile.demo;
+
+import java.io.File;
+
+public class NormalJavaClass {
+
+    private static void main(String a, String b, String c, String d, String e) {
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), SpaceOperation(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.demo;
+
+import java.io.File;
+
+public class NormalJavaClass {
+
+    private static void main(
+            String a,
+            String b,
+            String c,
+            String d,
+            String e
+    ) {
+    }
+}
+        """.trimIndent())
+    }
 }
