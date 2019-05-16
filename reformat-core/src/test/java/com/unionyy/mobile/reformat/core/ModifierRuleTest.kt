@@ -19,6 +19,7 @@ package com.yy.mobile.demo;
 
 public class NormalJavaClass {
     private final String TAG = "NormalHJavaClass";
+    private final String tag = "abc";
 }
         """.trimIndent())
 
@@ -27,8 +28,8 @@ package com.yy.mobile.demo;
 
 public class NormalJavaClass {
     private static final String TAG = "NormalHJavaClass";
-}
-        """.trimIndent())
+    private final String tag = "abc";
+}""".trimIndent())
     }
 
     @Test
