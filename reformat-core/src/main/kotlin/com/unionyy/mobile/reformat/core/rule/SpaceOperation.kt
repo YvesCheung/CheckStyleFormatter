@@ -79,7 +79,7 @@ class SpaceOperation : FormatRule {
         }
 
         override fun report(context: FormatContext) {
-            context.report("Add a space before ${context.getCodeLocation(beforeNode)}",
+            context.report("Add a space before ${beforeNode.text}",
                 context.getCodeFragment(beforeNode))
         }
     }
