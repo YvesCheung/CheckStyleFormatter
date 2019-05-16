@@ -9,6 +9,7 @@ import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import com.unionyy.mobile.reformat.core.rule.TabCharacter
 import com.unionyy.mobile.reformat.core.rule.ContinuousCodeBlock
 import com.unionyy.mobile.reformat.core.rule.EmptyStatement
+import com.unionyy.mobile.reformat.core.rule.ModifierRule
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -44,6 +45,7 @@ object CodeFormatter {
         //DumpAST(),
         ContinuousCodeBlock(),
         ArrayBracket(),
+        ModifierRule(),
         LineBreaker(),
         SpaceOperation(),
         TabCharacter(),

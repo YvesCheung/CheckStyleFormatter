@@ -20,7 +20,7 @@ package com.yy.mobile.demo;
 public class NormalJavaClass {
     private final String TAG = "NormalHJavaClass";
 }
-        """.trimIndent(), setOf(DumpAST(), ModifierRule()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.demo;
@@ -54,7 +54,7 @@ public class NormalJavaClass {
         return String.format(QUERY_BALANCE_URL, url, appId, signUrl);
     }
 }
-        """.trimIndent(), setOf(DumpAST(), ModifierRule()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.demo;
