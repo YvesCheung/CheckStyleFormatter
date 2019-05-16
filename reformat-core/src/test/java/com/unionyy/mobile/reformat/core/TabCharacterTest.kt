@@ -362,8 +362,7 @@ public class CacheClient implements Cache {
 }
 """.trimIndent())
 
-        Assert.assertEquals("""
-package com.yy.mobile.cache;
+        Assert.assertEquals("""package com.yy.mobile.cache;
 
 import android.annotation.SuppressLint;
 import android.os.Handler;
@@ -414,7 +413,7 @@ public class CacheClient implements Cache {
             if (returnCallback != null) {
                 try {
                     wrapper.getReturnCallback().onReturn(wrapper.getData());
-                    ;
+""" + "                    \n" + """
                 } catch (Exception e) {
                     MLog.error(TAG, e);
                 }
