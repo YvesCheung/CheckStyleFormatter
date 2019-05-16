@@ -48,9 +48,9 @@ object CodeFormatter {
         ModifierRule(),
         LineBreaker(),
         SpaceOperation(),
-        TabCharacter(),
         EmptyStatement(),
-        AddSwitchDefaultCase()
+        AddSwitchDefaultCase(),
+        TabCharacter()
     )
 
     init {
