@@ -1156,4 +1156,46 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView { //niubi
 } //niubi
         """.trimIndent())
     }
+
+    @Test
+    fun testJavaVariousCondition() {
+        val text = CodeFormatter.reformat("D.java", """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView {
+
+    public boolean isPluginLianMai() {
+        hasNotch = apple > banana && (apple == banana || apple != banana || apple < banana || apple > banana || apple.equals(banana));
+
+        if (channelTicketInfo != null && (channelTicketInfo.sid != topSid || channelTicketInfo.subSid != subSid || apple.equals(banana))) {
+            //do nothing
+        }
+    }
+
+}
+        """.trimIndent())
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.checkstyleformatter;
+
+public class ChannelMediaVideoInfoView extends AbsFloatingView {
+
+    public boolean isPluginLianMai() {
+        hasNotch = apple > banana
+                && (apple == banana
+                || apple != banana
+                || apple < banana
+                || apple > banana
+                || apple.equals(banana));
+
+        if (channelTicketInfo != null
+                && (channelTicketInfo.sid != topSid
+                || channelTicketInfo.subSid != subSid
+                || apple.equals(banana))) {
+            //do nothing
+        }
+    }
+
+}""".trimIndent())
+    }
 }

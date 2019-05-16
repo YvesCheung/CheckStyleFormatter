@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
 import org.jetbrains.kotlin.com.intellij.psi.PsiArrayInitializerExpression
+import org.jetbrains.kotlin.com.intellij.psi.PsiBinaryExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiBlockStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiCatchSection
 import org.jetbrains.kotlin.com.intellij.psi.PsiCodeBlock
@@ -165,10 +166,10 @@ class LineBreaker : FormatRule {
                         breakFunctionParam(context, node, line)
                     } else if (node is PsiComment) {
                         breakComment(context, node, line)
-                    } else if (node is PsiIfStatement) {
-                        breakIfStatement(context, node, line)
                     } else if (node is ClassElement) {
                         breakClassDefine(context, node, line)
+                    } else if (node is PsiBinaryExpression || node is PsiPolyadicExpression) {
+                        breakBinaryExpression(context, node, line)
                     }
                 }
                 SCAN_B -> {
@@ -421,8 +422,7 @@ class LineBreaker : FormatRule {
         }
     }
 
-
-    private fun breakIfStatement(
+    private fun breakBinaryExpression(
         context: FormatContext,
         node: ASTNode,
         line: Line
@@ -438,11 +438,16 @@ class LineBreaker : FormatRule {
         }
         //if 语句判断 or else if
         if (line.exceed) {
-            val ifState = node.findChildByType(BINARY_EXPRESSION) ?: return
             val target = listOf<IElementType>(
                 JavaTokenType.OROR, JavaTokenType.ANDAND, JavaTokenType.OR, JavaTokenType.AND
             )
-            target.forEach { ifState.findChildByType(it).doBreak() }
+            target.forEach {
+                node.children().forEach { child ->
+                    if (child.elementType == it) {
+                        child.doBreak()
+                    }
+                }
+            }
         }
     }
 
