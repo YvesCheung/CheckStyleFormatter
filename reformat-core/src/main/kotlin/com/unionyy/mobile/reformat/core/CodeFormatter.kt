@@ -6,6 +6,7 @@ import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import com.unionyy.mobile.reformat.core.rule.TabCharacter
 import com.unionyy.mobile.reformat.core.rule.ContinuousCodeBlock
+import com.unionyy.mobile.reformat.core.rule.EmptyStatement
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -38,11 +39,12 @@ object CodeFormatter {
 
     @Suppress("RemoveExplicitTypeArguments")
     private val usingRules = mutableSetOf<FormatRule>(
-        DumpAST(),
+        //DumpAST(),
         ContinuousCodeBlock(),
         LineBreaker(),
         SpaceOperation(),
-        TabCharacter()
+        TabCharacter(),
+        EmptyStatement()
     )
 
     init {
