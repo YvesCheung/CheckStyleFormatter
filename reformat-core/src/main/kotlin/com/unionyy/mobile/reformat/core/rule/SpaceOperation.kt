@@ -4,12 +4,15 @@ import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACKET
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RBRACE
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.SEMICOLON
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.THROWS_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 
@@ -24,6 +27,9 @@ class SpaceOperation : FormatRule {
     private val expelChar = mapOf(
         LBRACE to listOf(LBRACE, RBRACE, LPARENTH), // {{ {} {(
         RBRACE to listOf(SEMICOLON, RPARENTH, COMMA), // }; }) },
+        RPARENTH to listOf(SEMICOLON, RBRACE, COMMA, RPARENTH,
+            LBRACKET, DOT, THROWS_LIST), // ); )} ), )) )[ ).
+        THROWS_LIST to listOf(SEMICOLON, LBRACE), //; {
         SEMICOLON to listOf(),
         COMMA to listOf()
     )

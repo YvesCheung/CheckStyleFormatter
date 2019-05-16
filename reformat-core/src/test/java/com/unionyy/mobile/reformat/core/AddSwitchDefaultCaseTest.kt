@@ -41,7 +41,7 @@ public class NormalJavaClass {
         }
     }
 }
-        """.trimIndent(), setOf(DumpAST(), AddSwitchDefaultCase()))
+""".trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.demo;
