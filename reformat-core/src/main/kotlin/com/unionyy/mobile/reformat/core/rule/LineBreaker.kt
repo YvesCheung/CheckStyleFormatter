@@ -3,16 +3,16 @@ package com.unionyy.mobile.reformat.core.rule
 import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import com.unionyy.mobile.reformat.core.Location
-import com.unionyy.mobile.reformat.core.utils.nextNode
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
+import org.jetbrains.kotlin.com.intellij.psi.JavaDocTokenType.DOC_COMMENT_DATA
+import org.jetbrains.kotlin.com.intellij.psi.JavaDocTokenType.DOC_COMMENT_LEADING_ASTERISKS
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.ASTERISK
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.C_STYLE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DIV
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.DOT
-import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.ELSE_KEYWORD
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.END_OF_LINE_COMMENT
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.EQ
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.LBRACE
@@ -24,23 +24,20 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STRING_LITERAL
 import org.jetbrains.kotlin.com.intellij.psi.PsiArrayInitializerExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiBinaryExpression
-import org.jetbrains.kotlin.com.intellij.psi.PsiBlockStatement
-import org.jetbrains.kotlin.com.intellij.psi.PsiCatchSection
 import org.jetbrains.kotlin.com.intellij.psi.PsiCodeBlock
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
 import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionList
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
-import org.jetbrains.kotlin.com.intellij.psi.PsiIfStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiJavaCodeReferenceElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiLocalVariable
 import org.jetbrains.kotlin.com.intellij.psi.PsiMethodCallExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiPolyadicExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.javadoc.PsiDocTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.CompositeElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
-import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.BINARY_EXPRESSION
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.EXTENDS_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.IMPLEMENTS_LIST
@@ -53,10 +50,10 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ClassElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterListElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
+import org.jetbrains.kotlin.com.intellij.psi.javadoc.PsiDocComment
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 import org.jetbrains.kotlin.psi.psiUtil.children
 import java.lang.StringBuilder
-import java.util.*
 
 /**
  * 代码行过长时换行
@@ -65,7 +62,7 @@ class LineBreaker : FormatRule {
 
     companion object {
 
-        private const val maxLineLength = 120
+        private const val MAX_LINE_LENGTH = 120
 
         private const val lineBreak = "\n"
 
@@ -164,6 +161,8 @@ class LineBreaker : FormatRule {
                         breakFunctionCallParamList(context, node, line)
                     } else if (node is ParameterListElement) {
                         breakFunctionParam(context, node, line)
+                    } else if (node is PsiDocComment) {
+                        breakDocument(context, node)
                     } else if (node is PsiComment) {
                         breakComment(context, node, line)
                     } else if (node is ClassElement) {
@@ -422,6 +421,27 @@ class LineBreaker : FormatRule {
         }
     }
 
+    private fun breakDocument(
+        context: FormatContext,
+        node: ASTNode //PsiDocComment
+    ) {
+        for (child in node.getChildren(null)) {
+            if (child.elementType == DOC_COMMENT_LEADING_ASTERISKS) {
+                val whiteSpace = child.treePrev
+                val data = child.treeNext
+                if (whiteSpace == null || data == null) {
+                    continue
+                }
+                if (whiteSpace.textLength + child.textLength +
+                    data.textLength > MAX_LINE_LENGTH) {
+                    toBeLineBreak.add(
+                        CutDocComment(whiteSpace, child, data)
+                    )
+                }
+            }
+        }
+    }
+
     private fun breakBinaryExpression(
         context: FormatContext,
         node: ASTNode,
@@ -598,6 +618,56 @@ class LineBreaker : FormatRule {
         }
     }
 
+    private class CutDocComment(
+        val whiteSpace: ASTNode,
+        val leading: ASTNode,
+        val data: ASTNode
+    ) : LineBreakAction {
+
+        override fun run(context: FormatContext) {
+            val anchor = data.treeNext ?: return
+            binaryCut(data.text, data) { doc ->
+                anchor.treeParent.addChild(doc, anchor)
+            }
+        }
+
+        private fun binaryCut(
+            text: String,
+            data: ASTNode?,
+            addToTree: (ASTNode) -> Unit
+        ) {
+            if (whiteSpace.textLength + leading.textLength + text.length > MAX_LINE_LENGTH) {
+                val half = text.length / 2
+                var indentSize = 0
+                text.trimStart { c ->
+                    if (c.isWhitespace()) {
+                        indentSize++
+                        true
+                    } else {
+                        false
+                    }
+                }
+                binaryCut(text.substring(0, half), data, addToTree)
+                binaryCut(" ".repeat(indentSize) + text.substring(half),
+                    null, addToTree)
+            } else {
+                if (data == null) {
+                    addToTree(whiteSpace.copyElement())
+                    addToTree(leading.copyElement())
+                    addToTree(PsiDocTokenImpl(DOC_COMMENT_DATA, text))
+                } else {
+                    data.treeParent.replaceChild(data, PsiDocTokenImpl(DOC_COMMENT_DATA, text))
+                }
+            }
+        }
+
+        override fun report(context: FormatContext) {
+            context.report(
+                "Cut the too long doc comment(/***/): ${data.text}.",
+                context.getCodeFragment(data))
+        }
+    }
+
     /**
      * 把注释 [comment] 挪到 [parent] 的开头
      */
@@ -636,20 +706,13 @@ class LineBreaker : FormatRule {
         override fun run(context: FormatContext) {
             context.notifyTextChange()
 
-            var startNode = comment
-            var totalLength = comment.textLength
-            val whiteSpace = comment.treePrev
-            if (whiteSpace is PsiWhiteSpace) {
-                startNode = whiteSpace
-                totalLength += getIndent((whiteSpace as PsiWhiteSpace).text).length
-            }
+            val lineBreakText = lineBreak(comment, line.start).text
+            val whiteSpaceLen = getIndent(lineBreakText).length
 
-            if (totalLength >= maxLineLength) {
-                val lineBreakText = lineBreak(startNode, line.start).text
-                val whiteSpaceLen = getIndent(lineBreakText).length
+            if (comment.textLength + whiteSpaceLen >= MAX_LINE_LENGTH) {
 
                 fun checkAndCutComment(comment: String, addToTree: (ASTNode) -> Unit) {
-                    if (comment.length + whiteSpaceLen >= maxLineLength) {
+                    if (comment.length + whiteSpaceLen >= MAX_LINE_LENGTH) {
                         val half = comment.length / 2
                         checkAndCutComment(comment.substring(0, half), addToTree)
                         addToTree(PsiWhiteSpaceImpl(lineBreakText))
@@ -665,13 +728,15 @@ class LineBreaker : FormatRule {
                     }
                 }
 
-                //todo: trim text
-                checkAndCutComment(comment.text) { child ->
+                checkAndCutComment(trim(comment.text)) { child ->
                     comment.treeParent.addChild(child, comment)
                 }
                 comment.treeParent.removeChild(comment)
             }
         }
+
+        private fun trim(comment: String): String =
+            comment.removePrefix("//").trimStart()
 
         override fun report(context: FormatContext) {
             context.report(
@@ -726,7 +791,7 @@ class LineBreaker : FormatRule {
         private fun newLine(text: String): String =
             if (text.startsWith(lineBreak)) text else lineBreak + text
 
-        private fun isTooLong(txt: String): Boolean = txt.length + indent.length > maxLineLength
+        private fun isTooLong(txt: String): Boolean = txt.length + indent.length > MAX_LINE_LENGTH
 
         override fun report(context: FormatContext) {
             if (textLines.any(::isTooLong)) {
@@ -834,7 +899,7 @@ class LineBreaker : FormatRule {
             val lineNum = index + 1
             lineEnd += line.length + 1
             lines[lineNum] = Line(
-                lineNum, lineStart, lineEnd, line.length > maxLineLength, line)
+                lineNum, lineStart, lineEnd, line.length > MAX_LINE_LENGTH, line)
             lineStart = lineEnd + 1
         }
     }

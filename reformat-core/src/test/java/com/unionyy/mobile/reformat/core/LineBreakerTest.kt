@@ -125,28 +125,28 @@ package com.yy.mobile.checkstyleformatter;
 
 public class A {
 
-    //it' a tag for log. and this comment is too long, so cut it. asljdf
-    //ashflidsafghakjsdbhkjabfjhasdadsfsdfaddsfasdshlhjfkasdddasdasdadasl.
+    //it' a tag for log. and this comment is too long, so cut it. asljdfa
+    //shflidsafghakjsdbhkjabfjhasdadsfsdfaddsfasdshlhjfkasdddasdasdadasl.
     public static final String TAG = "A";
 
-    //it' a tag for log. and this comment is too long, so cut it. asljdfashflish
-    //lhadsfjkghbajsdh,jsadfhaksdhkhfaskldhfkjhsdjvabskljhfklasfkasdddasdasdadasl.
+    //it' a tag for log. and this comment is too long, so cut it. asljdfashflishl
+    //hadsfjkghbajsdh,jsadfhaksdhkhfaskldhfkjhsdjvabskljhfklasfkasdddasdasdadasl.
     public static final String TAGB = "B";
 
     public void docTooLong(
             String arg1,
             int arg2
     ) {
-    //asljdfashasdsfasfaddfdsvfflishlhjfkasdddasdasdadasldhjksfakjhdgfkahs
-    //dhflakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfa
-    //ilhahekfdjshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckya
+    //asljdfashasdsfasfaddfdsvfflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdh
+    //flakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfai
+    //lhahekfdjshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckya
     //sdvfluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
         System.out.println(arg1);
     }
 
-    //asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkg
-    //sdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekf
-    //djshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvf
+    //asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkgsd
+    //hjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekfd
+    //jshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvf
     //luahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
     public void doc(String arg1, int arg2) {//asljdfashflishlh
         System.out.println(arg1);
@@ -161,9 +161,9 @@ public class A {
         //asljdfashflishlasljdfashf苏打粉萨阿德沙发上的阿斯顿vlishlhjfkasdddasdasdadasldhjksfakjhdgasdsdfasdfad
         System.out.println(arggg);
 
-        //asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkg
-        //sdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekf
-        //djshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvf
+        //asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkgsd
+        //hjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekfd
+        //jshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvf
         //luahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
         int ddd = 12362713;
     }
@@ -1204,20 +1204,39 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
         val text = CodeFormatter.reformat("A.java", """
 /**
  * TextView uses TransformationMethods to do things like replacing the characters of passwords with dots, or keeping the newline characters from causing line breaks in single-line text fields.
+ *** TextView uses TransformationMethods to do things like replacing the characters of passwords with dots, or keeping the newline characters from causing line breaks in single-line text fields.
  */
  class A {}
-        """.trimIndent())
+""".trimIndent())
 
-        Assert.assertEquals("""""", text)
+        Assert.assertEquals("""
+/**
+ * TextView uses TransformationMethods to do things like replacing the characters of passwords wi
+ * th dots, or keeping the newline characters from causing line breaks in single-line text fields.
+ *** TextView uses TransformationMethods to do things like replacing the characters of passwords wi
+ *** th dots, or keeping the newline characters from causing line breaks in single-line text fields.
+ */
+ class A {}
+""".trimIndent(), text)
     }
 
     @Test
-    fun testComment() {
+    fun testJavaLongLineComment() {
 
         val text = CodeFormatter.reformat("A.java", """
+class A {
     //private static final Pattern AIR_TICKET_WITH_SUB_CHANNEL_PATTERN = Pattern.compile(AIR_TICKET_WITH_SUB_CHANNEL_REG);
     private static final String NUMBER_REG = "[0-9]+";
-        """.trimIndent())
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+class A {
+    //private static final Pattern AIR_TICKET_WITH_SUB_CHANNEL_P
+    //ATTERN = Pattern.compile(AIR_TICKET_WITH_SUB_CHANNEL_REG);
+    private static final String NUMBER_REG = "[0-9]+";
+}
+""".trimIndent(), text)
     }
 
     @Test
