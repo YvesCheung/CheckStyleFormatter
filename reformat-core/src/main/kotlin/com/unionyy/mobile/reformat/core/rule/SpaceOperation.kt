@@ -138,9 +138,9 @@ class SpaceOperation : FormatRule {
         val prev = node.treePrev
         val parent = node.treeParent
         // for(; ; )
-        if (parent is PsiForStatement && prev.treePrev is PsiEmptyStatement) {
-            return
-        }
+//        if (parent is PsiForStatement && prev.treePrev is PsiEmptyStatement) {
+//            return
+//        }
         if (prev != null && prev is PsiWhiteSpace) {
             // ; 前有空格
             toBeAddSpace.add(SubSpaceBeforeSemi(prev))
