@@ -4,6 +4,7 @@ import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.EQ
+import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.IDENTIFIER
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.STATIC_KEYWORD
 import org.jetbrains.kotlin.com.intellij.psi.PsiKeyword
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.MODIFIER_LIST
@@ -32,10 +33,11 @@ class ModifierRule : FormatRule {
         if (node is FieldElement) {
             val modifierList = node.findChildByType(MODIFIER_LIST)
             val hasStatic = modifierList?.findChildByType(STATIC_KEYWORD) != null
-            val hasEQ = node.findChildByType(EQ) != null
+            val nameInUppercase = node.findChildByType(IDENTIFIER)!!.text ==
+                (node.findChildByType(IDENTIFIER)!!.text.toUpperCase())
             val finalModifier = modifierList?.children()?.firstOrNull {
                 //只有final，没有static，且后面必须跟等式
-                it is PsiKeyword && (it as PsiKeyword).text == "final" && !hasStatic && hasEQ
+                it is PsiKeyword && (it as PsiKeyword).text == "final" && !hasStatic && nameInUppercase
             }
             finalModifier?.let {
                 toBeDeal.add(StaticModifierAdd(finalModifier))
