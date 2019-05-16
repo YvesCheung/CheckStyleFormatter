@@ -1,12 +1,12 @@
 package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.rule.DumpAST
-import com.unionyy.mobile.reformat.core.rule.AddSpace
+import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import org.junit.Assert
 import org.junit.Test
 
-class AddSpaceTest {
+class SpaceOperationTest {
 
     @Test
     fun testCommentSpace() {
@@ -67,7 +67,7 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
     }//niubi
 
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker(), AddSpace()))
+        """.trimIndent(), setOf(DumpAST(), LineBreaker(), SpaceOperation()))
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;

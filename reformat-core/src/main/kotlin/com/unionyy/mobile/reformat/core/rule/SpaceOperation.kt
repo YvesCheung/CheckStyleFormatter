@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
  * Created BY PYF 2019/5/15
  * email: pengyangfan@yy.com
  */
-class AddSpace : FormatRule {
+class SpaceOperation : FormatRule {
 
     private val toBeAddSpace = mutableListOf<AddSpaceAction>()
     private val expelChar = setOf(LBRACE, RBRACE, SEMICOLON, COMMA)
@@ -26,7 +26,7 @@ class AddSpace : FormatRule {
 
     override fun visit(context: FormatContext, node: ASTNode) {
         if (expelChar.contains(node.elementType)) {
-            addSpaceComment(context, node)
+            spaceOperation(context, node)
         }
     }
 
@@ -78,7 +78,7 @@ class AddSpace : FormatRule {
         }
     }
 
-    private fun addSpaceComment(
+    private fun spaceOperation(
         context: FormatContext,
         node: ASTNode
     ) {
