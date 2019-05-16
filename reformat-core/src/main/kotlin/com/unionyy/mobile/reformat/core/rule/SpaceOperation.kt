@@ -13,7 +13,10 @@ import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.RPARENTH
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.SEMICOLON
 import org.jetbrains.kotlin.com.intellij.psi.PsiEmptyStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiForStatement
+import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.LITERAL_EXPRESSION
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.NAME_VALUE_PAIR
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.THROWS_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
@@ -29,7 +32,7 @@ class SpaceOperation : FormatRule {
     private val toBeAddSpace = mutableListOf<AddSpaceAction>()
 
     private val expelChar = mapOf(
-        LBRACE to listOf(LBRACE, RBRACE, LPARENTH), // {{ {} {(
+        LBRACE to listOf(LBRACE, RBRACE, LPARENTH, LITERAL_EXPRESSION), // {{ {} {(
         RBRACE to listOf(SEMICOLON, RPARENTH, COMMA), // }; }) },
         RPARENTH to listOf(SEMICOLON, RBRACE, COMMA, RPARENTH,
             LBRACKET, DOT, THROWS_LIST), // ); )} ), )) )[ ).
@@ -119,6 +122,7 @@ class SpaceOperation : FormatRule {
 
         if (now != null) {
             val isAllow = now.treeNext is PsiWhiteSpace ||
+                now.treeNext is PsiReferenceExpression ||
                 allowNext.any { now.treeNext.elementType == it }
             if (!isAllow) {
                 return now

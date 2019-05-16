@@ -1,8 +1,5 @@
 package com.unionyy.mobile.reformat.core
 
-import com.unionyy.mobile.reformat.core.rule.DumpAST
-import com.unionyy.mobile.reformat.core.rule.SpaceOperation
-import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import org.junit.Assert
 import org.junit.Test
 
@@ -151,7 +148,7 @@ public class NormalJavaClass {
         }
     }
 }
-        """.trimIndent(), setOf(DumpAST(), SpaceOperation(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.demo;
@@ -179,7 +176,7 @@ public class NormalJavaClass {
         }
     }
 }
-        """.trimIndent(), setOf(DumpAST(), SpaceOperation(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.demo;
@@ -192,5 +189,26 @@ public class NormalJavaClass {
         }
     }
 }""".trimIndent())
+    }
+
+    @Test
+    fun testLiteral() {
+        val text = CodeFormatter.reformat("J.java", """
+class J{
+    @SuppressLint({"NewApi"})
+    @Target({ElementType.TYPE})
+    public ViewHolder setAlpha(int viewId, float value) {
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+class J{
+    @SuppressLint({"NewApi"})
+    @Target({ElementType.TYPE})
+    public ViewHolder setAlpha(int viewId, float value) {
+    }
+}
+        """.trimIndent(), text)
     }
 }

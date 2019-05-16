@@ -72,7 +72,7 @@ class ModifierRule : FormatRule {
         }
 
         override fun report(context: FormatContext) {
-            context.report("Add a static modifier before ${context.getCodeLocation(node)}",
+            context.report("Add a static modifier: ${node.text}",
                 context.getCodeFragment(node))
         }
     }
