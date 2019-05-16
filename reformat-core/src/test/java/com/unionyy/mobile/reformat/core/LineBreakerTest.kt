@@ -656,7 +656,7 @@ public class A {
         ICoreManagerBase.getCore(ITransChannelLnMaiCore.class).getLianmaiType().getZhangyu4().getWangfeihang().testAsLongAs();
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -689,10 +689,10 @@ package com.yy.mobile.checkstyleformatter;
 public class A {
 
     public boolean isPluginLianMai() {
-        ICoreManagerBase.getCore(ITransChannelVeryLongAndVeryLongLnMaiCore.class).getLianmaiType() ? test.pluginA : test.pluginB);
+        ICoreManagerBase.getCore(ITransChannelVeryLongAndVeryLongLnMaiCore.class).getLianmaiType() ? test.pluginA : test.pluginB;
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -702,7 +702,7 @@ public class A {
     public boolean isPluginLianMai() {
         ICoreManagerBase.getCore(ITransChannelVeryLongAndVeryLongLnMaiCore.class).getLianmaiType()
                 ? test.pluginA
-                : test.pluginB);
+                : test.pluginB;
     }
 }""".trimIndent())
     }
@@ -794,7 +794,7 @@ public class A {
         com.yy.mobile.http.RequestManager.instance().submitDownloadRequest(url, urlPathMap.get(url), new ResponseListener<String>());
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -879,7 +879,7 @@ public class A {
                     }, false, true);
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -928,7 +928,7 @@ public class A {
         mTipsTextView.setCompoundDrawablesWithIntrinsicBounds(info, urlPathMap.get(url, url, url, url), 0, 0, zhangyu4, wangfeihang, pengyangfan);
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -966,7 +966,7 @@ public class A {
         com.duowan.mobile.RequestManager.instance().submitDownloadRequest().test().test().test().test().test().test().test().test().test().test();
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -1013,7 +1013,7 @@ public class NormalJavaClass {
 
     private static NormalJavaClass.DispenseChannelProtocol.ALongClassName clsName = new NormalJavaClass.DispenseChannelProtocol.ALongClassName();
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals("""
 package com.yy.mobile.demo;
@@ -1045,7 +1045,7 @@ package com.yy.mobile.checkstyleformatter;
 public class ChannelMediaVideoInfoView extends AbsFloatingView implements EventCompat, VideoDebugInfoListener, IAudienceVideoQualityChangeListener {
 
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -1103,7 +1103,7 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
     }
 
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -1141,7 +1141,7 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView { //niubi
     }//niubi
 
 } //niubi
-        """.trimIndent(), setOf(DumpAST(), LineBreaker(), SpaceOperation()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
