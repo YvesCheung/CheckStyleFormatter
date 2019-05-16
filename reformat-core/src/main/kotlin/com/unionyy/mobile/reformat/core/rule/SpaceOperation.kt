@@ -64,9 +64,10 @@ class SpaceOperation : FormatRule {
         toBeAddSpace.forEach {
             try {
                 it.spaceOperation()
-            } finally {
+            } catch (e: Exception) {
                 context.notifyTextChange()
                 it.report(context)
+                throw e
             }
         }
     }

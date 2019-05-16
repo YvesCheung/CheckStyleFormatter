@@ -35,9 +35,11 @@ class ModifierRule : FormatRule {
             val hasStatic = modifierList?.findChildByType(STATIC_KEYWORD) != null
             val nameInUppercase = node.findChildByType(IDENTIFIER)!!.text ==
                 (node.findChildByType(IDENTIFIER)!!.text.toUpperCase())
+            val hasEQ = node.findChildByType(EQ) != null
             val finalModifier = modifierList?.children()?.firstOrNull {
                 //只有final，没有static，且后面必须跟等式
-                it is PsiKeyword && (it as PsiKeyword).text == "final" && !hasStatic && nameInUppercase
+                it is PsiKeyword && (it as PsiKeyword).text == "final" && !hasStatic &&
+                    hasEQ && nameInUppercase
             }
             finalModifier?.let {
                 toBeDeal.add(StaticModifierAdd(finalModifier))
@@ -53,9 +55,10 @@ class ModifierRule : FormatRule {
         toBeDeal.forEach {
             try {
                 it.operate()
-            } finally {
+            } catch (e: Exception) {
                 context.notifyTextChange()
                 it.report(context)
+                throw e
             }
         }
     }

@@ -814,9 +814,10 @@ class LineBreaker : FormatRule {
         toBeLineBreak.forEach {
             try {
                 it.run(context)
-            } finally {
+            } catch (e: Exception) {
                 context.notifyTextChange()
                 it.report(context)
+                throw e
             }
         }
 

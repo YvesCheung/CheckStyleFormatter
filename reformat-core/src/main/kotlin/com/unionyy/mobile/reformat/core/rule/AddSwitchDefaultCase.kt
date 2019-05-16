@@ -58,9 +58,10 @@ class AddSwitchDefaultCase : FormatRule {
         toBeAddDefault.forEach {
             try {
                 it.add()
-            } finally {
+            } catch (e: Exception) {
                 context.notifyTextChange()
                 it.report(context)
+                throw e
             }
         }
     }
