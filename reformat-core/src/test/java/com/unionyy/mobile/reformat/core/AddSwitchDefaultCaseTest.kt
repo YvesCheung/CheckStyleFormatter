@@ -73,4 +73,104 @@ public class NormalJavaClass {
 }
         """.trimIndent())
     }
+
+    @Test
+    fun testSwitchBlock2() {
+        val text = CodeFormatter.reformat("Haha.java", """
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private static void main() {
+        switch (mAutoAdjustType) {
+            case AUTO_ADJUST_NONE: {
+                // 不用做处理
+                break;
+            }
+            case AUTO_ADJUST_WIDTH: {
+                if (mRelativeWidth != 0 && mRelativeHeight != 0) {
+                    customizeScale = (float) mRelativeWidth
+                            / (float) mRelativeHeight;
+                    viewWidth = (int) (viewHeight * customizeScale);
+                    widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth,
+                            android.view.View.MeasureSpec.EXACTLY);
+                }
+                break;
+            }
+            case AUTO_ADJUST_HEIGHT: {
+                if (mRelativeWidth != 0 && mRelativeHeight != 0) {
+                    customizeScale = (float) mRelativeWidth
+                            / (float) mRelativeHeight;
+                    viewHeight = (int) (viewWidth / customizeScale);
+                    heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewHeight,
+                            android.view.View.MeasureSpec.EXACTLY);
+                }
+                break;
+            }
+            case AUTO_ADJUST_SCALE_WIDTH: {
+                viewWidth = (int) (viewHeight * mScale);
+                widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth,
+                        android.view.View.MeasureSpec.EXACTLY);
+                break;
+            }
+            case AUTO_ADJUST_SCALE_HEIGHT: {
+                viewHeight = (int) (viewWidth / mScale);
+                heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewHeight,
+                        android.view.View.MeasureSpec.EXACTLY);
+                break;
+            }
+        }
+    }
+}
+        """.trimIndent(), setOf(DumpAST(), AddSwitchDefaultCase()))
+
+        Assert.assertEquals(text, """
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private static void main() {
+        switch (mAutoAdjustType) {
+            case AUTO_ADJUST_NONE: {
+                // 不用做处理
+                break;
+            }
+            case AUTO_ADJUST_WIDTH: {
+                if (mRelativeWidth != 0 && mRelativeHeight != 0) {
+                    customizeScale = (float) mRelativeWidth
+                            / (float) mRelativeHeight;
+                    viewWidth = (int) (viewHeight * customizeScale);
+                    widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth,
+                            android.view.View.MeasureSpec.EXACTLY);
+                }
+                break;
+            }
+            case AUTO_ADJUST_HEIGHT: {
+                if (mRelativeWidth != 0 && mRelativeHeight != 0) {
+                    customizeScale = (float) mRelativeWidth
+                            / (float) mRelativeHeight;
+                    viewHeight = (int) (viewWidth / customizeScale);
+                    heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewHeight,
+                            android.view.View.MeasureSpec.EXACTLY);
+                }
+                break;
+            }
+            case AUTO_ADJUST_SCALE_WIDTH: {
+                viewWidth = (int) (viewHeight * mScale);
+                widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth,
+                        android.view.View.MeasureSpec.EXACTLY);
+                break;
+            }
+            case AUTO_ADJUST_SCALE_HEIGHT: {
+                viewHeight = (int) (viewWidth / mScale);
+                heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewHeight,
+                        android.view.View.MeasureSpec.EXACTLY);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+}""".trimIndent())
+    }
 }
