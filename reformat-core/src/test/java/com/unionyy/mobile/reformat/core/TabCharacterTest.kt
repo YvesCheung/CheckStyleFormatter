@@ -715,4 +715,35 @@ public class CacheClient implements Cache {
 }
 """.trimIndent(), text)
     }
+
+    @Test
+    fun testJava2() {
+        val text = CodeFormatter.reformat("A.java", """
+package com.yy.mobile.ui.widget.labelView;
+
+import android.content.Context;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+
+public class LabelUtils {
+
+    public static int dipToPx(Context c, float dipValue) {
+        DisplayMetrics metrics = c.getResources().getDisplayMetrics();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
+    }
+
+    /*public static int spToPx(Context context, float spValue) {
+		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, spValue, metrics);
+    }*/
+
+    public static int spToPx(Context context, float spValue) {
+        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
+        return (int) (spValue * fontScale + 0.5f);
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""""", text)
+    }
 }

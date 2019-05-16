@@ -99,4 +99,21 @@ public class A {
 }
         """.trimIndent(), text)
     }
+
+    @Test
+    fun testJavaIfBlock() {
+
+        val text = CodeFormatter.reformat("A.java", """
+class A {
+    void main(){
+        if (sRecyclerViewItemHeights.get(i) != null) // (this is a sanity check)
+        {
+            scrollY += sRecyclerViewItemHeights.get(i); //add all heights of the views that are gone
+        }
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""""", text)
+    }
 }

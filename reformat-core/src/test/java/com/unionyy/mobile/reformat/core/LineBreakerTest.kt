@@ -1198,4 +1198,52 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
 
 }""".trimIndent())
     }
+
+    @Test
+    fun breakDocument() {
+        val text = CodeFormatter.reformat("A.java", """
+/**
+ * TextView uses TransformationMethods to do things like replacing the characters of passwords with dots, or keeping the newline characters from causing line breaks in single-line text fields.
+ */
+ class A {}
+        """.trimIndent())
+
+        Assert.assertEquals("""""", text)
+    }
+
+    @Test
+    fun testComment() {
+
+        val text = CodeFormatter.reformat("A.java", """
+    //private static final Pattern AIR_TICKET_WITH_SUB_CHANNEL_PATTERN = Pattern.compile(AIR_TICKET_WITH_SUB_CHANNEL_REG);
+    private static final String NUMBER_REG = "[0-9]+";
+        """.trimIndent())
+    }
+
+    @Test
+    fun testErrorBreak() {
+
+        val text = CodeFormatter.reformat("A.java", """
+mActivity.getContentResolver().registerContentObserver(Settings.System.getUriFor
+                    (NAVIGATIONBAR_IS_MIN), true, mBarParams.navigationStatusObserver);
+        """.trimIndent())
+    }
+
+    @Test
+    fun testCatchExp() {
+
+        val text = CodeFormatter.reformat("a.java", """
+try {
+            Class layoutParamsExCls = Class.forName("com.huawei.android.view.LayoutParamsEx");
+            Constructor con = layoutParamsExCls.getConstructor(WindowManager.LayoutParams.class);
+            Object layoutParamsExObj = con.newInstance(layoutParams);
+            Method method = layoutParamsExCls.getMethod("addHwFlags", int.class);
+            method.invoke(layoutParamsExObj, FLAG_NOTCH_SUPPORT);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            Log.e("test", "hw notch screen flag api error");
+        } catch (Exception e) {
+            Log.e("test", "other Exception");
+        }
+        """.trimIndent())
+    }
 }
