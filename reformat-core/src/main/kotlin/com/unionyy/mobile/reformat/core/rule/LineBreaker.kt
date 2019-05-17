@@ -422,7 +422,10 @@ class LineBreaker : FormatRule {
             }
 
             toBeLineBreak.add(CutEndOfLineComment(node, line))
-        } else if (node.elementType == C_STYLE_COMMENT) {
+        } else if (node.elementType == C_STYLE_COMMENT &&
+            (node.treeNext == null ||
+                node.treeNext is PsiWhiteSpace)
+        ) {
             toBeLineBreak.add(CutCStyleComment(node, line))
         }
     }

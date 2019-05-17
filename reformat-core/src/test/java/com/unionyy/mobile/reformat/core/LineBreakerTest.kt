@@ -195,6 +195,42 @@ public class A {
     }
 
     @Test
+    fun testJavaComment3() {
+        val text = CodeFormatter.reformat("A.java", """
+class A {
+    void main(){
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    mListener.onReportViewPageChanged(ReportViewPageChangedListener.REPORT_PAGE_2, findKey(position)/*ReportConstant.Style.POLITICS*/);
+                }
+            }
+        });
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+class A {
+    void main() {
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    mListener.onReportViewPageChanged(
+                            ReportViewPageChangedListener.REPORT_PAGE_2,
+                            findKey(position) /*ReportConstant.Style.POLITICS*/
+                    );
+                }
+            }
+        });
+    }
+}
+""".trimIndent(), text)
+    }
+
+    @Test
     fun testJavaFunctionCallTooLong() {
         val text = CodeFormatter.reformat("C.java", """
 package com.yy.mobile.checkstyleformatter;
@@ -1071,6 +1107,22 @@ public class EntertainmentContainerAdapter extends
         DefaultContainerAdapter<EntertainmentContainerAdapter.EntertainmentParam> {
 }
         """.trimIndent(), text)
+    }
+
+    @Test
+    fun testJavaImplements() {
+        val text = CodeFormatter.reformat("A.java", """
+public class UserReplaySelectFragment extends LiveBaseFragment implements ScrollablePersonPageListener<AbsListView>, View.OnClickListener, UserMoreListentner {
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+public class UserReplaySelectFragment extends LiveBaseFragment implements
+        ScrollablePersonPageListener<AbsListView>,
+        View.OnClickListener,
+        UserMoreListentner {
+}
+""".trimIndent(), text)
     }
 
     @Test
