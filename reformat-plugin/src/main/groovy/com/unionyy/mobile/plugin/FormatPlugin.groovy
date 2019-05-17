@@ -15,6 +15,8 @@ import org.gradle.api.plugins.JavaPluginConvention
 
 class FormatPlugin implements Plugin<Project> {
 
+    private static final String PLUGIN_NAME = "FormatPlugin"
+
     @Override
     void apply(Project project) {
         applyInner(project)
@@ -25,7 +27,7 @@ class FormatPlugin implements Plugin<Project> {
     }
 
     private static def applyInner(Project project) {
-        println("FormatPlugin apply to ${project.name}")
+        println("$PLUGIN_NAME apply to ${project.name}")
         getSourceFiles(project) {
             def files = it.first
             def sourceSetName = it.second
@@ -43,7 +45,7 @@ class FormatPlugin implements Plugin<Project> {
                 it.group = "checkstyle"
                 it.description = "输出会被格式化的文件列表"
                 it.doLast {
-                    println("FileList:")
+                    println("$PLUGIN_NAME FileList:")
                     println(input.join("\n"))
                 }
             }
@@ -98,8 +100,8 @@ class FormatPlugin implements Plugin<Project> {
                             it.include("**/*.java")
                         }.files
                     }.flatten()
-                    println("Variant: " + variant.fullVariantName +
-                            "\nDir:\n" + fileTree.dir.join("\n"))
+                    println("$PLUGIN_NAME Variant: " + variant.fullVariantName +
+                            "\n$PLUGIN_NAME Dir:\n" + fileTree.dir.join("\n"))
                     callback.execute(new Pair<>(files, "main"))
                 }
             } else {
