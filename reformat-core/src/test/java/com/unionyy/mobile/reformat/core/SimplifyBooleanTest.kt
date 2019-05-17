@@ -36,8 +36,27 @@ package com.yy.mobile.demo;
 public class NormalJavaClass {
 
     private void main() {
-        if (initializedCropWindow == false) {
+        if (initializedCropWindow == true) {
             initializedCropWindow = true;
+        }
+    }
+}""".trimIndent(), setOf(DumpAST()))
+
+        Assert.assertEquals("""""", text)
+    }
+
+    @Test
+    fun testSimplifyPoyBooleanExpression() {
+
+        val text = CodeFormatter.reformat("A.java", """
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private void main() {
+
+        if (a.equals(b) || a != false || false) {
+
         }
     }
 }""".trimIndent(), setOf(DumpAST()))
