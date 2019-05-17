@@ -124,15 +124,7 @@ class A {
 class A{
     void main(){
         if (i == R.id.iv_arrow) {
-            String url = ((TextView) findViewById(R.id.tv_title)).getText().toString();
-            if (url != null && url.length() > 0 && !url.startsWith("http://") && !url.startsWith("https://")) {
-                url = "http://" + url;
-            }
-            if (URLUtil.isValidUrl(url)) {
-                NavigationUtils.toJSSupportedWebView(EnvSettingActivity.this, url);
-            } else {
-                toast("invalid url!");
-            }
+            //Do nothing
         } else if (i == R.id.iv_push_channel_arrow) {
             Toast.makeText(EnvSettingActivity.this, "输入错误", Toast.LENGTH_SHORT).show();
 
@@ -150,6 +142,26 @@ class A{
 }
         """.trimIndent())
 
-        Assert.assertEquals("""""", text)
+        Assert.assertEquals("""
+class A{
+    void main() {
+        if (i == R.id.iv_arrow) {
+            //Do nothing
+        } else if (i == R.id.iv_push_channel_arrow) {
+            Toast.makeText(EnvSettingActivity.this, "输入错误", Toast.LENGTH_SHORT).show();
+
+        } else if (i == R.id.btn_crash_test) { /* else if (i == R.id.simple_title_left) {
+            finish();
+
+        } */
+            throw new NullPointerException("环境设置里“点我Java崩溃”测试");
+
+        } else if (i == R.id.btn_native_crash_test) {
+            //CrashReport.testNativeCrash();
+
+        }
+    }
+}
+""".trimIndent(), text)
     }
 }

@@ -113,6 +113,9 @@ class ContinuousCodeBlock : FormatRule {
             } else if (p is PsiComment) {
                 valid = true
                 result.addFirst(p to valid)
+            } else if (p is PsiBlockStatement) {
+                p = p.getChildren(null).lastOrNull()
+                continue
             } else {
                 break
             }
