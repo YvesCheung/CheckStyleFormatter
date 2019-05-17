@@ -315,7 +315,8 @@ class LineBreaker : FormatRule {
                         NormalLineBreak(
                             child,
                             lineBreak(context, lineStart,
-                                getRealIndent(node, actualIndent).substring(4)),
+                                if (getRealIndent(node, actualIndent).length > 4) getRealIndent(node, actualIndent)
+                                    .substring(4) else ""),
                             "the token ')' in a expression: ${node.text}."
                         )
                     )
