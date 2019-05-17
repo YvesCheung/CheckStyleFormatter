@@ -34,7 +34,7 @@ class EmptyBlockRule : FormatRule {
         if (node is PsiCatchSection) {
             val codeBlock = node.findChildByType(CODE_BLOCK) ?: return
             //什么都没有才塞注释，有的话就不用塞
-            val hasOtherElement = codeBlock?.children()?.firstOrNull {
+            val hasOtherElement = codeBlock.children().firstOrNull {
                 it.elementType != LBRACE && it.elementType != RBRACE && it !is PsiWhiteSpace
             } != null
             if (!hasOtherElement) {
@@ -64,7 +64,7 @@ class EmptyBlockRule : FormatRule {
             val lastSpace = node.children().last {
                 it is PsiWhiteSpace
             }
-            val nothing = PsiCommentImpl(END_OF_LINE_COMMENT, "//do nothing")
+            val nothing = PsiCommentImpl(END_OF_LINE_COMMENT, "//Do nothing.")
             //现在问题要把catch这一行的缩进算出来，这个取缩进的方法有点取巧
             val location = context.getCodeLocation(node.treeParent)
             val indent = "    ".repeat(location.column / 4 + 1)

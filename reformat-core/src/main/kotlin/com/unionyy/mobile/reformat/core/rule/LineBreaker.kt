@@ -387,30 +387,32 @@ class LineBreaker : FormatRule {
         node: ASTNode,
         line: Line
     ) {
-        if (line.exceed && node.elementType == END_OF_LINE_COMMENT) {
-            val parent = node.treeParent
-            if (parent != null) {
-                val preNode = node.treePrev
-                val isLineStart =
-                    (preNode is PsiWhiteSpace && preNode.textContains('\n')) ||
-                        node.startOffset == line.start
-                if (preNode != null && !isLineStart) {
-                    if (parent.elementType == FIELD ||
-                        parent is PsiDeclarationStatement ||
-                        parent is PsiExpressionStatement) {
-                        toBeLineBreak.add(
-                            MoveCommentToStart(
-                                node,
-                                parent,
-                                lineBreak(context, parent.startOffset - 1))
-                        )
-                    } else {
-                        toBeLineBreak.add(
-                            NormalLineBreak(
-                                node,
-                                lineBreak(context, line.start),
-                                "move the end of line comment to a new line: ${node.text}.")
-                        )
+        if (node.elementType == END_OF_LINE_COMMENT) {
+            if (line.exceed) {
+                val parent = node.treeParent
+                if (parent != null) {
+                    val preNode = node.treePrev
+                    val isLineStart =
+                        (preNode is PsiWhiteSpace && preNode.textContains('\n')) ||
+                            node.startOffset == line.start
+                    if (preNode != null && !isLineStart) {
+                        if (parent.elementType == FIELD ||
+                            parent is PsiDeclarationStatement ||
+                            parent is PsiExpressionStatement) {
+                            toBeLineBreak.add(
+                                MoveCommentToStart(
+                                    node,
+                                    parent,
+                                    lineBreak(context, parent.startOffset - 1))
+                            )
+                        } else {
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    node,
+                                    lineBreak(context, line.start),
+                                    "move the end of line comment to a new line: ${node.text}.")
+                            )
+                        }
                     }
                 }
             }
@@ -476,7 +478,7 @@ class LineBreaker : FormatRule {
         if (line.exceed) {
             val parentText =
                 if (node.treeParent != null) {
-                    " in the expression: " + node.treeParent + "."
+                    " in the expression: " + node.treeParent.text + "."
                 } else {
                     "."
                 }
@@ -709,21 +711,26 @@ class LineBreaker : FormatRule {
             val lineBreakText = lineBreak(comment, line.start).text
             val whiteSpaceLen = getIndent(lineBreakText).length
 
+            if (!line.exceed) {
+                val newComment = addSlash(trim(comment.text))
+                if (newComment != comment.text) {
+                    comment.treeParent.replaceChild(comment,
+                        PsiCoreCommentImpl(END_OF_LINE_COMMENT, newComment))
+                }
+                return
+            }
+
             if (comment.textLength + whiteSpaceLen >= MAX_LINE_LENGTH) {
 
                 fun checkAndCutComment(comment: String, addToTree: (ASTNode) -> Unit) {
-                    if (comment.length + whiteSpaceLen >= MAX_LINE_LENGTH) {
+                    if (comment.length > 2 && //prevent dead loop
+                        comment.length + whiteSpaceLen >= MAX_LINE_LENGTH) {
                         val half = comment.length / 2
                         checkAndCutComment(comment.substring(0, half), addToTree)
                         addToTree(PsiWhiteSpaceImpl(lineBreakText))
                         checkAndCutComment(comment.substring(half), addToTree)
                     } else {
-                        val text =
-                            if (comment.startsWith("//")) {
-                                comment
-                            } else {
-                                "//$comment"
-                            }
+                        val text = addSlash(comment)
                         addToTree(PsiCoreCommentImpl(END_OF_LINE_COMMENT, text))
                     }
                 }
@@ -734,6 +741,13 @@ class LineBreaker : FormatRule {
                 comment.treeParent.removeChild(comment)
             }
         }
+
+        private fun addSlash(comment: String): String =
+            if (comment.startsWith("//")) {
+                comment
+            } else {
+                "//$comment"
+            }
 
         private fun trim(comment: String): String =
             comment.removePrefix("//").trimStart()

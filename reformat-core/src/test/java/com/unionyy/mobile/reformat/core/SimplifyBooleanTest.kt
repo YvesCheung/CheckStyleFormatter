@@ -1,5 +1,6 @@
 package com.unionyy.mobile.reformat.core
 
+import org.junit.Assert
 import org.junit.Test
 
 class SimplifyBooleanTest {
@@ -8,16 +9,17 @@ class SimplifyBooleanTest {
     fun testJavaBoolean() {
 
         val text = CodeFormatter.reformat("A.java", """
-            private void initCropWindow(Rect bitmapRect) {
+public class A {
+    private void initCropWindow(Rect bitmapRect) {
 
         // Tells the attribute functions the crop window has already been
         // initialized
         if (initializedCropWindow == false) {
             initializedCropWindow = true;
         }
-        }
+    }
 
-        public static boolean showGuidelines() {
+    public static boolean showGuidelines() {
         if ((Math.abs(Edge.LEFT.getCoordinate() - Edge.RIGHT.getCoordinate()) < DEFAULT_SHOW_GUIDELINES_LIMIT)
                 || (Math.abs(Edge.TOP.getCoordinate() - Edge.BOTTOM.getCoordinate()) < DEFAULT_SHOW_GUIDELINES_LIMIT)) {
             return false;
@@ -25,6 +27,10 @@ class SimplifyBooleanTest {
             return true;
         }
     }
-        """.trimIndent())
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+""".trimIndent(), text)
     }
 }

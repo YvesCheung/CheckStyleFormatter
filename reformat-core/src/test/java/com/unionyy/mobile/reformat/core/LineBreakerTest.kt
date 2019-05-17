@@ -185,12 +185,11 @@ public class A {
 
         Assert.assertEquals("""
    public void addMethod() {
-//        AddUiModuleApiMethodAction uiAction = new AddUiModuleApiMethodAction(new UIModuleMethods().getMethods());
-//        HostStore.INSTANCE.dispatch(uiAction);
+//AddUiModuleApiMethodAction uiAction = new AddUiModuleApiMethodAction(new UIModuleMethods().getMethods());
+//HostStore.INSTANCE.dispatch(uiAction);
 
-//        AddDataModuleApiMethodAction dataAction = new AddDa
-//taModuleApiMethodAction(new DataModuleMethods().getMethods());
-//        HostStore.INSTANCE.dispatch(dataAction);
+//AddDataModuleApiMethodAction dataAction = new AddDataModuleApiMethodAction(new DataModuleMethods().getMethods());
+//HostStore.INSTANCE.dispatch(dataAction);
     }
 """.trimIndent(), test)
     }
@@ -620,7 +619,7 @@ public class A {
                                         realLiveType = ILivingCoreConstant.LIVING_TYPE_MOBILE_LIVE;
                                         break;
                                     case TYPE_GAME:
-                                        // 只有游戏类型的用网络传回来的sid ssid
+                                        //只有游戏类型的用网络传回来的sid ssid
                                         long uid = channelSearchResp.uid.longValue();
                                         long respSid = StringUtils.safeParseLong(channelSearchResp.reTopCid);
                                         long respSsid = StringUtils.safeParseLong(channelSearchResp.reSubCid);
@@ -641,7 +640,8 @@ public class A {
             return changeInfoInner(param);
         }
     }
-}""".trimIndent())
+}
+""".trimIndent())
     }
 
     @Test
@@ -1243,16 +1243,30 @@ class A {
     fun testErrorBreak() {
 
         val text = CodeFormatter.reformat("A.java", """
-mActivity.getContentResolver().registerContentObserver(Settings.System.getUriFor
-                    (NAVIGATIONBAR_IS_MIN), true, mBarParams.navigationStatusObserver);
+class A {
+    void main() {
+        mActivity.getContentResolver().registerContentObserver(Settings.System.getUriFor
+            (NAVIGATIONBAR_IS_MIN), true, mBarParams.navigationStatusObserver);
+    }
+}
         """.trimIndent())
+
+        Assert.assertEquals("""
+class A {
+    void main() {
+        mActivity.getContentResolver().registerContentObserver(Settings.System.getUriFor(NAVIGATIONBAR_IS_MIN), true, mBarParams.navigationStatusObserver);
+    }
+}
+        """.trimIndent(), text)
     }
 
     @Test
     fun testCatchExp() {
 
         val text = CodeFormatter.reformat("a.java", """
-try {
+class A {
+    public void main(){
+        try {
             Class layoutParamsExCls = Class.forName("com.huawei.android.view.LayoutParamsEx");
             Constructor con = layoutParamsExCls.getConstructor(WindowManager.LayoutParams.class);
             Object layoutParamsExObj = con.newInstance(layoutParams);
@@ -1263,6 +1277,11 @@ try {
         } catch (Exception e) {
             Log.e("test", "other Exception");
         }
-        """.trimIndent())
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+ """.trimIndent(), text)
     }
 }

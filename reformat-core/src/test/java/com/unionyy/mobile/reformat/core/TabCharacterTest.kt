@@ -484,7 +484,7 @@ public class CacheClient implements Cache {
                     error = new CacheException(mKey, "Wrap otherwise exceptions", e);
                     MLog.error(TAG, error);
                 }
-                for (; ; ) {
+                for (;; ) {
                     CallbackWrapper wrapper = handlers.poll();
                     if (wrapper == null) {
                         break;
@@ -500,22 +500,22 @@ public class CacheClient implements Cache {
         }, 0);
     }
 
-    //    @Override
-    //    public String get(String key) {
-    //        if(BlankUtil.isBlank(key)){
-    //            return null;
-    //        }
-    //        //TODO 读文件json
-    //        String result = null;
-    //        try{
-    //            String json = cacheManager.getCache(key);
-    //            CachePacket packet = JsonParser.parseJsonObject(json, CachePacket.class);
-    //            result = packet.getContent().toString();
-    //        }catch(Exception e){
-    //            MLog.error(TAG, e);
-    //        }
-    //        return result;
-    //    }
+    //@Override
+    //public String get(String key) {
+    //if(BlankUtil.isBlank(key)){
+    //return null;
+    //}
+    //TODO 读文件json
+    //String result = null;
+    //try{
+    //String json = cacheManager.getCache(key);
+    //CachePacket packet = JsonParser.parseJsonObject(json, CachePacket.class);
+    //result = packet.getContent().toString();
+    //}catch(Exception e){
+    //MLog.error(TAG, e);
+    //}
+    //return result;
+    //}
 
     @Override
     public void put(String key, String value) {
@@ -543,13 +543,13 @@ public class CacheClient implements Cache {
     }
 
     public void remove(String key) {
-        // TODO Auto-generated method stub
+        //TODO Auto-generated method stub
         cacheManager.remove(key);
     }
 
 
     public void clear() {
-        // TODO Auto-generated method stub
+        //TODO Auto-generated method stub
         cacheManager.clear();
     }
 
@@ -688,29 +688,29 @@ public class CacheClient implements Cache {
     }
 
     public static void main(String[] args) {
-        //        User u = new User();
-        //        u.password = "123";
-        //        u.username = "simon";
+        //User u = new User();
+        //u.password = "123";
+        //u.username = "simon";
         //
-        //        CacheClient client = new CacheClient();
-        //        client.putObject("user", u);
+        //CacheClient client = new CacheClient();
+        //client.putObject("user", u);
         //
-        //        client.get("user", new ReturnCallback() {
+        //client.get("user", new ReturnCallback() {
         //
-        //            @Override
-        //            public void onReturn(String data) {
-        //                // TODO Auto-generated method stub
+        //@Override
+        //public void onReturn(String data) {
+        // TODO Auto-generated method stub
         //
-        //            }
-        //        });
-        //        System.out.println(u1.password+","+u1.username);
+        //}
+        //});
+        //System.out.println(u1.password+","+u1.username);
         //
-        //        List<User> list = new ArrayList<User>();
-        //        list.add(u);
-        //        client.putObject("list", list);
+        //List<User> list = new ArrayList<User>();
+        //list.add(u);
+        //client.putObject("list", list);
         //
-        //        List<User> u2 = client.getJSONList("list", User.class);
-        //        System.out.println(u2);
+        //List<User> u2 = client.getJSONList("list", User.class);
+        //System.out.println(u2);
     }
 }
 """.trimIndent(), text)

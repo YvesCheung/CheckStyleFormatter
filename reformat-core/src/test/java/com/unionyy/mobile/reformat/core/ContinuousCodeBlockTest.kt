@@ -36,10 +36,10 @@ public class A {
         try {
             return super.performRequest(request);
         } catch (Exception e) {
-        //        catch (Throwable t) {
-        //            throw t;
-        //        }
-            //            e.printStackTrace();
+        //catch (Throwable t) {
+        //throw t;
+        //}
+            //e.printStackTrace();
             HttpLog.e("DownloadContinueNetwork", e);
         } finally {
             try {
@@ -50,7 +50,7 @@ public class A {
         }
     }
 }
-        """.trimIndent(), text)
+""".trimIndent(), text)
     }
 
     @Test
@@ -97,7 +97,7 @@ public class A {
         }
     }
 }
-        """.trimIndent(), text)
+""".trimIndent(), text)
     }
 
     @Test

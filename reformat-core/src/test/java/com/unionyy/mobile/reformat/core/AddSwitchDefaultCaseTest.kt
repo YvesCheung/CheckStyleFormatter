@@ -132,7 +132,7 @@ public class NormalJavaClass {
     private static void main() {
         switch (mAutoAdjustType) {
             case AUTO_ADJUST_NONE: {
-                // 不用做处理
+                //不用做处理
                 break;
             }
             case AUTO_ADJUST_WIDTH: {
@@ -171,6 +171,7 @@ public class NormalJavaClass {
                 break;
         }
     }
-}""".trimIndent())
+}
+""".trimIndent())
     }
 }

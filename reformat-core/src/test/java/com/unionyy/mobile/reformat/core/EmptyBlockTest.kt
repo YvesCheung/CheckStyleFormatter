@@ -43,7 +43,7 @@ public class NormalJavaClass {
             statSize = mFile.length();
             map = readFromXml(mFile);
         } catch (Exception e) {
-            //do nothing
+            //Do nothing.
         }
 
         try {
