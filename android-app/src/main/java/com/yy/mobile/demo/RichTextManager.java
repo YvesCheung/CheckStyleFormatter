@@ -16,5 +16,25 @@ public class RichTextManager {
     public void main() {
 
         MLog.info(TAG, "type=" + type + "child=" + child + "style=" + style + "anchoruid=" + reportAnchorUid + "content=" + content + "extParUrlEncoder=" + extParUrlEncoder + "extProductParam" + extProductParam + "title=" + title);
+
+        switch (mAutoAdjustType) {
+            case AUTO_ADJUST_NONE: {
+                // 不用做处理
+                break;
+            }
+            case AUTO_ADJUST_SCALE_WIDTH: {
+                viewWidth = (int) (viewHeight * mScale);
+                widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth,
+                        android.view.View.MeasureSpec.EXACTLY);
+                break;
+            }
+            case AUTO_ADJUST_SCALE_HEIGHT: {
+                viewHeight = (int) (viewWidth / mScale);
+                heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewHeight,
+                        android.view.View.MeasureSpec.EXACTLY);
+                break;
+            }
+        }
     }
+
 }
