@@ -33,7 +33,26 @@ public class NormalJavaClass {
         """.trimIndent(), setOf(DumpAST(), EmptyBlockRule()))
 
         Assert.assertEquals(text, """
+package com.yy.mobile.demo;
 
+public class NormalJavaClass {
+
+    private static void main() {
+        try {
+            statTimestamp = mFile.lastModified();
+            statSize = mFile.length();
+            map = readFromXml(mFile);
+        } catch (Exception e) {
+            //do nothing
+        }
+
+        try {
+            map = readFromXml(mBackupFile);
+        } catch (Exception e) {
+            //do nothing
+        }
+    }
+}
         """.trimIndent())
     }
 }
