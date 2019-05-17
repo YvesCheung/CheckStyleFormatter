@@ -1249,7 +1249,7 @@ class A {
             (NAVIGATIONBAR_IS_MIN), true, mBarParams.navigationStatusObserver);
     }
 }
-        """.trimIndent())
+""".trimIndent())
 
         Assert.assertEquals("""
 class A {

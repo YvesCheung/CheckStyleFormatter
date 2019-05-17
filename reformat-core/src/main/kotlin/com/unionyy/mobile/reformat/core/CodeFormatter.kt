@@ -7,6 +7,7 @@ import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import com.unionyy.mobile.reformat.core.rule.ContinuousCodeBlock
+import com.unionyy.mobile.reformat.core.rule.EmptyBlockRule
 import com.unionyy.mobile.reformat.core.rule.EmptyStatement
 import com.unionyy.mobile.reformat.core.rule.ModifierRule
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
@@ -48,6 +49,7 @@ object CodeFormatter {
         LineBreaker(),
         SpaceOperation(),
         EmptyStatement(),
+        EmptyBlockRule(),
         AddSwitchDefaultCase()
     )
 

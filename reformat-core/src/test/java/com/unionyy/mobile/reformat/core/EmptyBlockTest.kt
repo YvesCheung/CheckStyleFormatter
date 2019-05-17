@@ -30,7 +30,7 @@ public class NormalJavaClass {
         }
     }
 }
-        """.trimIndent(), setOf(DumpAST(), EmptyBlockRule()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.demo;
