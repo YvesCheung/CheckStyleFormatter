@@ -1437,4 +1437,19 @@ class A {
 }
 """.trimIndent(), text)
     }
+
+    @Test
+    fun testJavaAnnotation() {
+        val text = CodeFormatter.reformat("A.java", """
+class A {
+    @BusEvent(busType = BusType.SCOPE_PLUGIN, busName = PluginBus.PLUGIN_BUS_NAME /* TODO: [CoreEvent to BusEvent] 以前同时在主线和非指定线程抛出，先统一为主线程接收 */)
+    void main(){
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+
+        """.trimIndent(), text)
+    }
 }

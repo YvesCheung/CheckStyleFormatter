@@ -41,6 +41,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.javadoc.PsiDocTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.CompositeElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.ANNOTATION_PARAMETER_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.EXTENDS_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.IMPLEMENTS_LIST
@@ -160,7 +161,8 @@ class LineBreaker : FormatRule {
 
             when (context.scanningTimes) {
                 SCAN_A -> {
-                    if (node is PsiExpressionList) {
+                    if (node is PsiExpressionList ||
+                        node.elementType == ANNOTATION_PARAMETER_LIST) {
                         breakFunctionCallParamList(context, node, true)
                     } else if (node is ParameterListElement) {
                         breakFunctionParam(context, node, line)
