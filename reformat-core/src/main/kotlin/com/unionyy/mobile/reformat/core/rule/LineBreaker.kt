@@ -43,6 +43,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.javadoc.PsiDocTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.CompositeElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.FileElement
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.ANNOTATION_PARAMETER_LIST
+import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.CLASS
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.EXTENDS_LIST
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.FIELD
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.JavaElementType.IMPLEMENTS_LIST
@@ -179,6 +180,9 @@ class LineBreaker : FormatRule {
                         /* catch(A | B | C | D exception) */
                         node is PsiTypeElement) {
                         breakBinaryExpression(context, node, line)
+                    } else if (node.text == "enum" &&
+                        node is PsiKeyword) {
+                        breakEnumConstant(context, node)
                     }
                 }
                 SCAN_B -> {
@@ -560,6 +564,16 @@ class LineBreaker : FormatRule {
                     }
                 }
             }
+        }
+    }
+
+    private fun breakEnumConstant(
+        context: FormatContext,
+        node: ASTNode // enum keyword
+    ) {
+        val clsExpect = node.treeParent
+        if (clsExpect != null && clsExpect.elementType == CLASS) {
+            breakFunctionCallParamList(context, clsExpect, true)
         }
     }
 

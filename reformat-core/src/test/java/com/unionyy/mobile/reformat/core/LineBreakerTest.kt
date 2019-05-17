@@ -1150,6 +1150,36 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView implements
     }
 
     @Test
+    fun testJavaEnum() {
+
+        val text = CodeFormatter.reformat("A.java", """
+public class RichTextManager {
+
+    public static enum Feature {
+        EMOTICON(0), CHANNELAIRTICKET(1), GROUPTICKET(2), IMAGE(3), VOICE(4), VIPEMOTICON(5), NUMBER(6), NOBLEEMOTION(7), NOBLEGIFEMOTION(8);
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+public class RichTextManager {
+
+    public static enum Feature {
+        EMOTICON(0),
+        CHANNELAIRTICKET(1),
+        GROUPTICKET(2),
+        IMAGE(3),
+        VOICE(4),
+        VIPEMOTICON(5),
+        NUMBER(6),
+        NOBLEEMOTION(7),
+        NOBLEGIFEMOTION(8);
+    }
+}
+""".trimIndent(), text)
+    }
+
+    @Test
     fun testJavaExtends() {
         val text = CodeFormatter.reformat("A.java", """
 public class EntertainmentContainerAdapter extends DefaultContainerAdapter<EntertainmentContainerAdapter.EntertainmentParam> {
