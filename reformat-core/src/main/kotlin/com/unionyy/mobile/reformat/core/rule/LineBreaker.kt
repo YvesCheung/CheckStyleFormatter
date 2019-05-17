@@ -308,7 +308,7 @@ class LineBreaker : FormatRule {
                     )
                 } else if (child.elementType == RPARENTH) {
                     val next = elementAfterRparenth(child)
-                    val actualIndent = if (next?.elementType == COMMA) "    " else ""
+                    val actualIndent = if (next?.elementType == COMMA || next?.elementType == RPARENTH) "    " else ""
                     toBeLineBreak.add(
                         NormalLineBreak(
                             child,
@@ -332,7 +332,7 @@ class LineBreaker : FormatRule {
             //防止中间加个空格
             node.treeNext.treeNext
         } else {
-            null
+            node.treeNext
         }
     }
 
