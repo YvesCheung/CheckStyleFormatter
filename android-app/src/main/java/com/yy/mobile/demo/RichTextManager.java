@@ -24,14 +24,12 @@ public class RichTextManager {
             }
             case AUTO_ADJUST_SCALE_WIDTH: {
                 viewWidth = (int) (viewHeight * mScale);
-                widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth,
-                        android.view.View.MeasureSpec.EXACTLY);
+                widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth, android.view.View.MeasureSpec.EXACTLY);
                 break;
             }
             case AUTO_ADJUST_SCALE_HEIGHT: {
                 viewHeight = (int) (viewWidth / mScale);
-                heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewHeight,
-                        android.view.View.MeasureSpec.EXACTLY);
+                heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewHeight, android.view.View.MeasureSpec.EXACTLY);
                 break;
             }
         }
