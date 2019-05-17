@@ -420,6 +420,18 @@ public class A {
     }
 
     @Test
+    fun testJavaCutString(){
+        val text = CodeFormatter.reformat("D.java", """
+public class D {
+    private static final String RECHARGE_DATA = "{\"userContact\":\"%s\",\"chId\":\"%s\",\"payMethod\":\"%s\",\"prodId\":\"ANDYB\",\"prodName\":\"%s\",\"amount\":\"%.2f\",\"yyOper\":\"a\",\"source\":\"%s\",\"payUnit\":\"%s\",\"returnUrl\":\"%s\",\"userId\":\"%d\",\"category\":{\"source\":\"%s\",\"userAgent\":\"%s\",\"desc\":\"\",\"mac\":\"%s\",\"imei\":\"%s\",\"channelSource\":\"%s\",\"yyversion\":\"%s\",\"scenceType\":\"1\"},\"notifyUrl\":\"%s\"}";
+}
+""".trimIndent(), setOf(DumpAST(), LineBreaker()))
+
+        Assert.assertEquals(text, """
+""".trimIndent())
+    }
+
+    @Test
     fun testJavaConditionTooLong() {
         val text = CodeFormatter.reformat("D.java", """
 package com.yy.mobile.checkstyleformatter;

@@ -214,6 +214,29 @@ class LineBreaker : FormatRule {
         node: ASTNode,
         line: Line
     ) {
+        fun doBreak(anchor: ASTNode, token: String, indent: String) {
+            val shouldBreak = when {
+                anchor is PsiWhiteSpace -> {
+                    !(anchor as PsiWhiteSpace).text.contains(lineBreak)
+                }
+                anchor.treePrev is PsiWhiteSpace -> {
+                    !(anchor.treePrev as PsiWhiteSpace).text.contains(lineBreak)
+                }
+                else -> {
+                    true
+                }
+            }
+            if (shouldBreak) {
+                toBeLineBreak.add(
+                    NormalLineBreak(
+                        anchor,
+                        lineBreak(context, line.start, indent),
+                        "the token '$token' in a parameter list: ${node.text}."
+                    )
+                )
+            }
+        }
+
         val paramNum = node.children().count {
             it.elementType == PARAMETER
         }
@@ -222,22 +245,9 @@ class LineBreaker : FormatRule {
                 if (child.elementType == COMMA ||
                     child.elementType == LPARENTH) {
                     val token = if (child.elementType == COMMA) "','" else "'('"
-                    val whiteSpaceExpect = child.treeNext
-                    toBeLineBreak.add(
-                        NormalLineBreak(
-                            whiteSpaceExpect,
-                            lineBreak(context, line.start, indent + indent),
-                            "the token $token in a parameter list: ${node.text}."
-                        )
-                    )
+                    doBreak(child.treeNext, token, indent + indent)
                 } else if (child.elementType == RPARENTH) {
-                    toBeLineBreak.add(
-                        NormalLineBreak(
-                            child,
-                            lineBreak(context, line.start),
-                            "the token ')' in a parameter list: ${node.text}."
-                        )
-                    )
+                    doBreak(child, ")", "")
                 }
             }
         }
@@ -764,9 +774,11 @@ class LineBreaker : FormatRule {
             comment.removePrefix("//").trimStart()
 
         override fun report(context: FormatContext) {
-            context.report(
-                "Cut the too long comment(//..): ${comment.text}.",
-                context.getCodeFragment(comment))
+            if (line.exceed) {
+                context.report(
+                    "Cut the too long comment(//..): ${comment.text}.",
+                    context.getCodeFragment(comment))
+            }
         }
     }
 
