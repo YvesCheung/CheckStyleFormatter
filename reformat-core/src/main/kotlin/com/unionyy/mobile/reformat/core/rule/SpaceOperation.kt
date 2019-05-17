@@ -34,8 +34,8 @@ class SpaceOperation : FormatRule {
     private val expelChar = mapOf(
         LBRACE to listOf(LBRACE, RBRACE, LPARENTH, LITERAL_EXPRESSION), // {{ {} {(
         RBRACE to listOf(SEMICOLON, RPARENTH, COMMA), // }; }) },
-        RPARENTH to listOf(SEMICOLON, RBRACE, COMMA, RPARENTH,
-            LBRACKET, DOT, THROWS_LIST), // ); )} ), )) )[ ).
+        RPARENTH to listOf(SEMICOLON, RBRACE, COMMA, LPARENTH, RPARENTH,
+            LBRACKET, DOT, THROWS_LIST), // ); )} ), )) )[ )] ).
         THROWS_LIST to listOf(SEMICOLON, LBRACE), //; {
         SEMICOLON to listOf(),
         COMMA to listOf()
