@@ -1261,6 +1261,25 @@ class A {
 """.trimIndent())
 
         Assert.assertEquals("""
- """.trimIndent(), text)
+class A {
+    public void main() {
+        try {
+            Class layoutParamsExCls = Class.forName("com.huawei.android.view.LayoutParamsEx");
+            Constructor con = layoutParamsExCls.getConstructor(WindowManager.LayoutParams.class);
+            Object layoutParamsExObj = con.newInstance(layoutParams);
+            Method method = layoutParamsExCls.getMethod("addHwFlags", int.class);
+            method.invoke(layoutParamsExObj, FLAG_NOTCH_SUPPORT);
+        } catch (ClassNotFoundException
+                | NoSuchMethodException
+                | IllegalAccessException
+                | InstantiationException
+                | InvocationTargetException e) {
+            Log.e("test", "hw notch screen flag api error");
+        } catch (Exception e) {
+            Log.e("test", "other Exception");
+        }
+    }
+}
+""".trimIndent(), text)
     }
 }

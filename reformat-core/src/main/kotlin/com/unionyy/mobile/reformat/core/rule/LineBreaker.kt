@@ -34,6 +34,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiLocalVariable
 import org.jetbrains.kotlin.com.intellij.psi.PsiMethodCallExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiPolyadicExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiReferenceExpression
+import org.jetbrains.kotlin.com.intellij.psi.PsiTypeElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.javadoc.PsiDocTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.CompositeElement
@@ -167,7 +168,10 @@ class LineBreaker : FormatRule {
                         breakComment(context, node, line)
                     } else if (node is ClassElement) {
                         breakClassDefine(context, node, line)
-                    } else if (node is PsiBinaryExpression || node is PsiPolyadicExpression) {
+                    } else if (node is PsiBinaryExpression ||
+                        node is PsiPolyadicExpression ||
+                        /* catch(A | B | C | D exception) */
+                        node is PsiTypeElement) {
                         breakBinaryExpression(context, node, line)
                     }
                 }
@@ -455,7 +459,7 @@ class LineBreaker : FormatRule {
                 NormalLineBreak(
                     target,
                     lineBreak(context, line.start, indent + indent),
-                    "operator '${target.elementType}' in 'if' statement.")
+                    "operator '${target.elementType}' in : ${node.text}.")
             )
         }
         //if 语句判断 or else if
