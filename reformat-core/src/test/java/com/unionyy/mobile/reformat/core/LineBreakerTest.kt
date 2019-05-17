@@ -1112,11 +1112,17 @@ public class EntertainmentContainerAdapter extends
     @Test
     fun testJavaImplements() {
         val text = CodeFormatter.reformat("A.java", """
+/**
+ * Created by chenyangyi on 2016/11/30.
+ */
 public class UserReplaySelectFragment extends LiveBaseFragment implements ScrollablePersonPageListener<AbsListView>, View.OnClickListener, UserMoreListentner {
 }
 """.trimIndent())
 
         Assert.assertEquals("""
+/**
+ * Created by chenyangyi on 2016/11/30.
+ */
 public class UserReplaySelectFragment extends LiveBaseFragment implements
         ScrollablePersonPageListener<AbsListView>,
         View.OnClickListener,

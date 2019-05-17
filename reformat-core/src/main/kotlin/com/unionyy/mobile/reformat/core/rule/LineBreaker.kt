@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiDeclarationStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionList
 import org.jetbrains.kotlin.com.intellij.psi.PsiExpressionStatement
 import org.jetbrains.kotlin.com.intellij.psi.PsiJavaCodeReferenceElement
+import org.jetbrains.kotlin.com.intellij.psi.PsiKeyword
 import org.jetbrains.kotlin.com.intellij.psi.PsiLocalVariable
 import org.jetbrains.kotlin.com.intellij.psi.PsiMethodCallExpression
 import org.jetbrains.kotlin.com.intellij.psi.PsiPolyadicExpression
@@ -53,6 +54,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenI
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
 import org.jetbrains.kotlin.com.intellij.psi.javadoc.PsiDocComment
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
+import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.psi.psiUtil.children
 import java.lang.StringBuilder
 
@@ -118,8 +120,7 @@ class LineBreaker : FormatRule {
         val start: Int,
         val end: Int,
         val exceed: Boolean,
-        val txt: String,
-        val line: Line? = null
+        val txt: String
     )
 
     //map lineNum -> line(startOffset, endOffset)
@@ -167,7 +168,7 @@ class LineBreaker : FormatRule {
                     } else if (node is PsiComment) {
                         breakComment(context, node, line)
                     } else if (node is ClassElement) {
-                        breakClassDefine(context, node, line)
+                        breakClassDefine(context, node)
                     } else if (node is PsiBinaryExpression ||
                         node is PsiPolyadicExpression ||
                         /* catch(A | B | C | D exception) */
@@ -179,7 +180,7 @@ class LineBreaker : FormatRule {
                     if (node.elementType == EQ) {
                         breakFieldOrVariable(context, node, line)
                     } else if (node is ClassElement) {
-                        breakClassDefine(context, node, line)
+                        breakClassDefine(context, node)
                     }
                 }
                 SCAN_C -> {
@@ -543,9 +544,12 @@ class LineBreaker : FormatRule {
 
     private fun breakClassDefine(
         context: FormatContext,
-        node: ASTNode,
-        line: Line
+        node: ASTNode
     ) {
+        val clsKey = node.getChildren(null).find {
+            it.text == "class" && it is PsiKeyword
+        } ?: return
+        val line = lines.getValue(context.getCodeLocation(clsKey).line)
         if (line.exceed) {
             when (context.scanningTimes) {
                 SCAN_A -> {
