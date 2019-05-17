@@ -3,6 +3,7 @@ package com.unionyy.mobile.reformat.core.rule
 import com.unionyy.mobile.reformat.core.FormatContext
 import com.unionyy.mobile.reformat.core.FormatRule
 import com.unionyy.mobile.reformat.core.Location
+import com.unionyy.mobile.reformat.core.utils.nextNode
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.psi.JavaDocTokenType.DOC_COMMENT_DATA
@@ -274,16 +275,32 @@ class LineBreaker : FormatRule {
                         )
                     )
                 } else if (child.elementType == RPARENTH) {
+                    val next = elementAfterRparenth(child)
+                    val actualIndent = if (next?.elementType == COMMA) "    " else ""
                     toBeLineBreak.add(
                         NormalLineBreak(
                             child,
                             lineBreak(context, line.start,
-                                getRealIndent(node, "").substring(4)),
+                                getRealIndent(node, actualIndent).substring(4)),
                             "the token ')' in a expression: ${node.text}."
                         )
                     )
                 }
             }
+        }
+    }
+
+    private fun elementAfterRparenth(node: ASTNode): ASTNode? {
+        if (node.treeParent == null) {
+            return null
+        }
+        return if (node.treeNext == null) {
+            elementAfterRparenth(node.treeParent)
+        } else if (node.treeNext is PsiWhiteSpace) {
+            //防止中间加个空格
+            node.treeNext.treeNext
+        } else {
+            null
         }
     }
 

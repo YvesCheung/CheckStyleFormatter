@@ -1363,4 +1363,34 @@ class A {
 }
 """.trimIndent(), text)
     }
+
+    @Test
+    fun testIndentInParamsList() {
+        val text = CodeFormatter.reformat("a.java", """
+class A {
+    public void test() {
+        holder.isReplay.setdsadsPadding(DimenConvdsdserter.dip2px(mContext, 8), 4, DimenConverter.dip2px(mContext, 8), 5);
+    }
+}
+        """.trimIndent())
+
+        Assert.assertEquals("""
+class A {
+    public void test() {
+        holder.isReplay.setdsadsPadding(
+                DimenConvdsdserter.dip2px(
+                    mContext,
+                    8
+                ),
+                4,
+                DimenConverter.dip2px(
+                    mContext,
+                    8
+                ),
+                5
+        );
+    }
+}
+        """.trimIndent(), text)
+    }
 }
