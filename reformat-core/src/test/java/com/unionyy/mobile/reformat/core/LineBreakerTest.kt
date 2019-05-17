@@ -1404,9 +1404,12 @@ class A {
 class A {
     public void test() {
         holder.isReplay.setdsadsPadding(DimenConvdsdserter.dip2px(mContext, 8), 4, DimenConverter.dip2px(mContext, 8), 5);
+
+        CoreManager.getCore(IHiidoStatisticCore.class).sendEventStatistic(LoginUtil.getUid(),
+                    IHiidoStatisticCore.EVENT_ID_PERSONALPAGE_PRODUCT_TAB_EVENT, IHiidoStatisticCore.EVENT_ID_PERSONALPAGE_PRODUCT_LOAD, property);
     }
 }
-        """.trimIndent())
+""".trimIndent())
 
         Assert.assertEquals("""
 class A {
@@ -1423,8 +1426,15 @@ class A {
                 ),
                 5
         );
+
+        CoreManager.getCore(IHiidoStatisticCore.class).sendEventStatistic(
+                LoginUtil.getUid(),
+                IHiidoStatisticCore.EVENT_ID_PERSONALPAGE_PRODUCT_TAB_EVENT,
+                IHiidoStatisticCore.EVENT_ID_PERSONALPAGE_PRODUCT_LOAD,
+                property
+        );
     }
 }
-        """.trimIndent(), text)
+""".trimIndent(), text)
     }
 }

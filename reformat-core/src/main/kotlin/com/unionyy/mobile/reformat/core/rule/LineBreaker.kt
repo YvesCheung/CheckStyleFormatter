@@ -161,7 +161,7 @@ class LineBreaker : FormatRule {
             when (context.scanningTimes) {
                 SCAN_A -> {
                     if (node is PsiExpressionList) {
-                        breakFunctionCallParamList(context, node, line, true)
+                        breakFunctionCallParamList(context, node, true)
                     } else if (node is ParameterListElement) {
                         breakFunctionParam(context, node, line)
                     } else if (node is PsiDocComment) {
@@ -208,7 +208,7 @@ class LineBreaker : FormatRule {
                 }
                 SCAN_F -> {
                     if (node is PsiExpressionList) {
-                        breakFunctionCallParamList(context, node, line, false)
+                        breakFunctionCallParamList(context, node, false)
                     }
                 }
             }
@@ -262,7 +262,6 @@ class LineBreaker : FormatRule {
     private fun breakFunctionCallParamList(
         context: FormatContext,
         node: ASTNode,
-        line: Line,
         needComma: Boolean
     ) {
         fun canScan(): Boolean {
@@ -280,8 +279,16 @@ class LineBreaker : FormatRule {
             }
         }
 
-        if (line.exceed && canScan()) {
-            var lineStart = line.start
+        val startLine = context.getCodeFragment(node).startPos.line
+        val endLine = context.getCodeFragment(node).endPos.line
+        val lineExceed = (startLine..endLine).map { line ->
+            lines.getValue(line)
+        }.any { line ->
+            line.exceed
+        }
+
+        if (lineExceed && canScan()) {
+            var lineStart = lines.getValue(startLine).start
 
             node.getChildren(null).forEach { child ->
                 if (child.elementType == LPARENTH) {
