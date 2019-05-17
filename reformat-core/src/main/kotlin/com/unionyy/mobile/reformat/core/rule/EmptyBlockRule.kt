@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.psi.psiUtil.children
  * Created BY PYF 2019/5/16
  * email: pengyangfan@yy.com
  * try-catch 空代码块
+ * //放在执行完删除空行之后执行
  */
 
 class EmptyBlockRule : FormatRule {

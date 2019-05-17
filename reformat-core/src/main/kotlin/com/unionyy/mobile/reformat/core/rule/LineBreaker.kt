@@ -300,16 +300,32 @@ class LineBreaker : FormatRule {
                         )
                     )
                 } else if (child.elementType == RPARENTH) {
+                    val next = elementAfterRparenth(child)
+                    val actualIndent = if (next?.elementType == COMMA) "    " else ""
                     toBeLineBreak.add(
                         NormalLineBreak(
                             child,
                             lineBreak(context, lineStart,
-                                getRealIndent(node, "").substring(4)),
+                                getRealIndent(node, actualIndent).substring(4)),
                             "the token ')' in a expression: ${node.text}."
                         )
                     )
                 }
             }
+        }
+    }
+
+    private fun elementAfterRparenth(node: ASTNode): ASTNode? {
+        if (node.treeParent == null) {
+            return null
+        }
+        return if (node.treeNext == null) {
+            elementAfterRparenth(node.treeParent)
+        } else if (node.treeNext is PsiWhiteSpace) {
+            //防止中间加个空格
+            node.treeNext.treeNext
+        } else {
+            null
         }
     }
 
@@ -579,40 +595,42 @@ class LineBreaker : FormatRule {
 
     private fun breakClassDefine(
         context: FormatContext,
-        node: ASTNode,
-        scanImplement: Boolean
+        node: ASTNode
     ) {
         val clsKey = node.getChildren(null).find {
             it.text == "class" && it is PsiKeyword
         } ?: return
         val line = lines.getValue(context.getCodeLocation(clsKey).line)
         if (line.exceed) {
-            if (scanImplement) {
-                //第一遍扫描换行接口们
-                val implements = node.findChildByType(IMPLEMENTS_LIST)
-                implements?.children()?.forEach {
-                    if (it is PsiJavaCodeReferenceElement) {
-                        toBeLineBreak.add(
-                            NormalLineBreak(
-                                it,
-                                lineBreak(context, line.start, indent + indent),
-                                "'implement' in the class define expression: ${node.text}."
+            when (context.scanningTimes) {
+                SCAN_A -> {
+                    //第一遍扫描换行接口们
+                    val implements = node.findChildByType(IMPLEMENTS_LIST)
+                    implements?.children()?.forEach {
+                        if (it is PsiJavaCodeReferenceElement) {
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    it,
+                                    lineBreak(context, line.start, indent + indent),
+                                    "'implement' in the class define expression: ${node.text}."
+                                )
                             )
-                        )
+                        }
                     }
                 }
-            } else {
-                //第二遍扫描换行extends
-                val extends = node.findChildByType(EXTENDS_LIST)
-                extends?.children()?.forEach {
-                    if (it is PsiJavaCodeReferenceElement) {
-                        toBeLineBreak.add(
-                            NormalLineBreak(
-                                it,
-                                lineBreak(context, line.start, indent + indent),
-                                "'extends' in the class define expression: ${node.text}."
+                SCAN_B -> {
+                    //第二遍扫描换行extends
+                    val extends = node.findChildByType(EXTENDS_LIST)
+                    extends?.children()?.forEach {
+                        if (it is PsiJavaCodeReferenceElement) {
+                            toBeLineBreak.add(
+                                NormalLineBreak(
+                                    it,
+                                    lineBreak(context, line.start, indent + indent),
+                                    "'extends' in the class define expression: ${node.text}."
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -958,7 +976,7 @@ class LineBreaker : FormatRule {
             }
         }
 
-        if (lines.values.any { it.exceed } && context.scanningTimes < SCAN_F) {
+        if (lines.values.any { it.exceed } && context.scanningTimes < SCAN_E) {
             context.requestRepeatScan()
         }
     }

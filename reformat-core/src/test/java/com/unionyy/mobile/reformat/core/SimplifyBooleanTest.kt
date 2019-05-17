@@ -1,25 +1,20 @@
 package com.unionyy.mobile.reformat.core
 
+import com.unionyy.mobile.reformat.core.rule.DumpAST
 import org.junit.Assert
 import org.junit.Test
 
 class SimplifyBooleanTest {
 
     @Test
-    fun testJavaBoolean() {
+    fun testSimplifyBooleanReturn() {
 
         val text = CodeFormatter.reformat("A.java", """
-public class A {
-    private void initCropWindow(Rect bitmapRect) {
+package com.yy.mobile.demo;
 
-        // Tells the attribute functions the crop window has already been
-        // initialized
-        if (initializedCropWindow == false) {
-            initializedCropWindow = true;
-        }
-    }
+public class NormalJavaClass {
 
-    public static boolean showGuidelines() {
+    private boolean main() {
         if ((Math.abs(Edge.LEFT.getCoordinate() - Edge.RIGHT.getCoordinate()) < DEFAULT_SHOW_GUIDELINES_LIMIT)
                 || (Math.abs(Edge.TOP.getCoordinate() - Edge.BOTTOM.getCoordinate()) < DEFAULT_SHOW_GUIDELINES_LIMIT)) {
             return false;
@@ -27,10 +22,26 @@ public class A {
             return true;
         }
     }
-}
-""".trimIndent())
+}""".trimIndent(), setOf(DumpAST()))
 
-        Assert.assertEquals("""
-""".trimIndent(), text)
+        Assert.assertEquals("""""", text)
+    }
+
+    @Test
+    fun testSimplifyBooleanExpression() {
+
+        val text = CodeFormatter.reformat("A.java", """
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private void main() {
+        if (initializedCropWindow == false) {
+            initializedCropWindow = true;
+        }
+    }
+}""".trimIndent(), setOf(DumpAST()))
+
+        Assert.assertEquals("""""", text)
     }
 }
