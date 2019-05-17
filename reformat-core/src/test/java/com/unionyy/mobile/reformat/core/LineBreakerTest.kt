@@ -1436,6 +1436,7 @@ class A {
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
             Log.e("test", "hw notch screen flag api error");
         } catch (Exception e) {
+            Log.e("test", "other Exception");
         }
     }
 }
