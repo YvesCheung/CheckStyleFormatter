@@ -227,26 +227,13 @@ class LineBreaker : FormatRule {
         line: Line
     ) {
         fun doBreak(anchor: ASTNode, token: String, indent: String) {
-            val shouldBreak = when {
-                anchor is PsiWhiteSpace -> {
-                    !(anchor as PsiWhiteSpace).text.contains(lineBreak)
-                }
-                anchor.treePrev is PsiWhiteSpace -> {
-                    !(anchor.treePrev as PsiWhiteSpace).text.contains(lineBreak)
-                }
-                else -> {
-                    true
-                }
-            }
-            if (shouldBreak) {
-                toBeLineBreak.add(
-                    NormalLineBreak(
-                        anchor,
-                        lineBreak(context, line.start, indent),
-                        "the token '$token' in a parameter list: ${node.text}."
-                    )
+            toBeLineBreak.add(
+                NormalLineBreak(
+                    anchor,
+                    lineBreak(context, line.start, indent),
+                    "the token '$token' in a parameter list: ${node.text}."
                 )
-            }
+            )
         }
 
         val paramNum = node.children().count {
