@@ -54,7 +54,6 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenI
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
 import org.jetbrains.kotlin.com.intellij.psi.javadoc.PsiDocComment
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
-import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.psi.psiUtil.children
 import java.lang.StringBuilder
 
@@ -881,9 +880,17 @@ class LineBreaker : FormatRule {
             addToTree: (ASTNode) -> Unit
         ) {
             if (mustCut || node.length > 80) {
-                val half = node.length / 2
+                var half = node.length / 2
+                while (half < node.length && node[half - 1] == '\\') {
+                    //don't break the escape character
+                    half++
+                }
+                if (half >= node.length - 1) {
+                    addStringToTree(node, addToTree)
+                    return
+                }
                 cutStringIfNeed(
-                    node.substring(0, half),
+                    node.substring(0, half) + "\"",
                     lineBreak,
                     false,
                     addToTree)
@@ -891,22 +898,26 @@ class LineBreaker : FormatRule {
                 addToTree(PsiJavaTokenImpl(PLUS, "+"))
                 addToTree(PsiWhiteSpaceImpl(lineBreak))
                 cutStringIfNeed(
-                    node.substring(half),
+                    "\"" + node.substring(half),
                     lineBreak,
                     false,
                     addToTree)
             } else {
-                val literal = CompositeElement(LITERAL_EXPRESSION)
-                addToTree(literal)
-                var txtWithQuot: String = node
-                if (!node.startsWith("\"")) {
-                    txtWithQuot = "\"" + node
-                }
-                if (!node.endsWith("\"")) {
-                    txtWithQuot = node + "\""
-                }
-                literal.addChild(PsiJavaTokenImpl(STRING_LITERAL, txtWithQuot))
+                addStringToTree(node, addToTree)
             }
+        }
+
+        private fun addStringToTree(str: String, addToTree: (ASTNode) -> Unit) {
+            val literal = CompositeElement(LITERAL_EXPRESSION)
+            addToTree(literal)
+//            var txtWithQuot: String = str
+//            if (!str.startsWith("\"")) {
+//                txtWithQuot = "\"" + txtWithQuot
+//            }
+//            if (!str.endsWith("\"") || str.endsWith("\\\"")) {
+//                txtWithQuot += "\""
+//            }
+            literal.addChild(PsiJavaTokenImpl(STRING_LITERAL, str))
         }
     }
 

@@ -118,7 +118,7 @@ public class A {
         int ddd = 12362713;//asljdfashflishlhjfkasdddasdasdadasldhjksfakjhdgfkahsdhflakshdfkgsdhjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekfdjshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvfluahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
     }
 }
-""".trimIndent(), setOf(DumpAST(), LineBreaker()))
+""".trimIndent())
 
         Assert.assertEquals("""
 package com.yy.mobile.checkstyleformatter;
@@ -148,7 +148,7 @@ public class A {
     //hjgfhjasgjkhasjkfhjadsghjfasjdbhjabfghgsadklsjaflkjdskhfailhahekfd
     //jshkjhfjkdhfjkdhskjfhksealsdhfiludsahfklhsaklhfkahfksgdhsgckyasdvf
     //luahlshdfklhasjkdhfbkuagjfgsafhsjhfksdhfusgrakfhbksahdfkasgvakhdfkj
-    public void doc(String arg1, int arg2) {//asljdfashflishlh
+    public void doc(String arg1, int arg2) { //asljdfashflishlh
         System.out.println(arg1);
     }
 
@@ -156,7 +156,7 @@ public class A {
         //asljdfashflishlh
         System.out.println(arg1);
 
-        System.out.println(argdd);//asljdfashflishl
+        System.out.println(argdd); //asljdfashflishl
 
         //asljdfashflishlasljdfashf苏打粉萨阿德沙发上的阿斯顿vlishlhjfkasdddasdasdadasldhjksfakjhdgasdsdfasdfad
         System.out.println(arggg);
@@ -181,7 +181,7 @@ public class A {
 //        AddDataModuleApiMethodAction dataAction = new AddDataModuleApiMethodAction(new DataModuleMethods().getMethods());
 //        HostStore.INSTANCE.dispatch(dataAction);
     }
-""".trimIndent(), setOf(DumpAST(), LineBreaker()))
+""".trimIndent())
 
         Assert.assertEquals("""
    public void addMethod() {
@@ -246,7 +246,7 @@ public class A {
         return PluginCenterController.INSTANCE.loadPlugin(pluginInfo, showDefaultLoading);
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -420,15 +420,26 @@ public class A {
     }
 
     @Test
-    fun testJavaCutString(){
+    fun testJavaCutString() {
         val text = CodeFormatter.reformat("D.java", """
 public class D {
     private static final String RECHARGE_DATA = "{\"userContact\":\"%s\",\"chId\":\"%s\",\"payMethod\":\"%s\",\"prodId\":\"ANDYB\",\"prodName\":\"%s\",\"amount\":\"%.2f\",\"yyOper\":\"a\",\"source\":\"%s\",\"payUnit\":\"%s\",\"returnUrl\":\"%s\",\"userId\":\"%d\",\"category\":{\"source\":\"%s\",\"userAgent\":\"%s\",\"desc\":\"\",\"mac\":\"%s\",\"imei\":\"%s\",\"channelSource\":\"%s\",\"yyversion\":\"%s\",\"scenceType\":\"1\"},\"notifyUrl\":\"%s\"}";
 }
-""".trimIndent(), setOf(DumpAST(), LineBreaker()))
-
-        Assert.assertEquals(text, """
 """.trimIndent())
+
+        Assert.assertEquals("""
+public class D {
+    private static final String RECHARGE_DATA =
+            "{\"userContact\":\"%s\",\"chId\":\"%s\",\"payMetho" +
+                "d\":\"%s\",\"prodId\":\"ANDYB\",\"prodName\":\"%s\"" +
+                ",\"amount\":\"%.2f\",\"yyOper\":\"a\",\"source\":\"" +
+                "%s\",\"payUnit\":\"%s\",\"returnUrl\":\"%s\",\"us" +
+                "erId\":\"%d\",\"category\":{\"source\":\"%s\",\"us" +
+                "erAgent\":\"%s\",\"desc\":\"\",\"mac\":\"%s\",\"im" +
+                "ei\":\"%s\",\"channelSource\":\"%s\",\"yyversion\"" +
+                ":\"%s\",\"scenceType\":\"1\"},\"notifyUrl\":\"%s\"}";
+}
+""".trimIndent(), text)
     }
 
     @Test
@@ -446,7 +457,7 @@ public class A {
         }
     }
 }
-        """.trimIndent(), setOf(DumpAST(), LineBreaker()))
+        """.trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.checkstyleformatter;
@@ -756,7 +767,7 @@ public class A {
     }
 
     @Test
-    fun testJavaDocument() {
+    fun testJavaFieldDocument() {
         val text = CodeFormatter.reformat("A.java", """
 public class A {
     /*
@@ -783,7 +794,7 @@ public class A {
      */
      public int b = 2;
 }
-        """.trimIndent())
+""".trimIndent())
 
         Assert.assertEquals("""
 public class A {
@@ -877,7 +888,7 @@ public class A {
     }
 
     @Test
-    fun textPlusString() {
+    fun testJavaPlusString() {
         val text = CodeFormatter.reformat("A.java", """
 public class A {
     public void main() {
@@ -1043,7 +1054,7 @@ public class A {
     }
 
     @Test
-    fun testLongVariable() {
+    fun testJavaLongVariable() {
         val text = CodeFormatter.reformat("A.java", """
 package com.yy.mobile.demo;
 
@@ -1144,7 +1155,7 @@ public class UserReplaySelectFragment extends LiveBaseFragment implements
     }
 
     @Test
-    fun testFieldWithMethodCall() {
+    fun testJavaFieldWithMethodCall() {
         val text = CodeFormatter.reformat("A.java", """
 public class A {
     private static final int imgSize = (int) ResolutionUtils.convertDpToPixel(27, BasicConfig.getInstance().getAppContext());
@@ -1270,7 +1281,7 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
     }
 
     @Test
-    fun breakDocument() {
+    fun testJavaClassDocument() {
         val text = CodeFormatter.reformat("A.java", """
 /**
  * TextView uses TransformationMethods to do things like replacing the characters of passwords with dots, or keeping the newline characters from causing line breaks in single-line text fields.
@@ -1310,7 +1321,7 @@ class A {
     }
 
     @Test
-    fun testCatchExp() {
+    fun testJavaCatchExp() {
 
         val text = CodeFormatter.reformat("a.java", """
 class A {

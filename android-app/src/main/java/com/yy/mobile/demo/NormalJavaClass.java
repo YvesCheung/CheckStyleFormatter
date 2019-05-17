@@ -6,7 +6,6 @@ public class NormalJavaClass {
 
     public NormalJavaClass
             () {
-
     }
 
     private static void main(String a, String b, String c, String d, String e) {
