@@ -4,6 +4,11 @@ import java.io.File;
 
 public class NormalJavaClass {
 
+    public NormalJavaClass
+            () {
+
+    }
+
     private static void main(String a, String b, String c, String d, String e) {
         final File dir = new File(YYFileUtils.getRootDir() + File.separator + CommonFuncNoticeController.COMMON_ANIMATION_DIR);
         String aa = "asdsafahsdfhladh: " + dir.getPath() + " and the next is: " + dir;

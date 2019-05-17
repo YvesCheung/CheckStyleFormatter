@@ -1240,27 +1240,6 @@ class A {
     }
 
     @Test
-    fun testErrorBreak() {
-
-        val text = CodeFormatter.reformat("A.java", """
-class A {
-    void main() {
-        mActivity.getContentResolver().registerContentObserver(Settings.System.getUriFor
-            (NAVIGATIONBAR_IS_MIN), true, mBarParams.navigationStatusObserver);
-    }
-}
-""".trimIndent())
-
-        Assert.assertEquals("""
-class A {
-    void main() {
-        mActivity.getContentResolver().registerContentObserver(Settings.System.getUriFor(NAVIGATIONBAR_IS_MIN), true, mBarParams.navigationStatusObserver);
-    }
-}
-        """.trimIndent(), text)
-    }
-
-    @Test
     fun testCatchExp() {
 
         val text = CodeFormatter.reformat("a.java", """
