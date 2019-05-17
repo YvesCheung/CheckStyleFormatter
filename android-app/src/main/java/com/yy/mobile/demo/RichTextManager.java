@@ -12,4 +12,9 @@ public class RichTextManager {
         private int value;
     }
 
+
+    public void main() {
+
+        MLog.info(TAG, "type=" + type + "child=" + child + "style=" + style + "anchoruid=" + reportAnchorUid + "content=" + content + "extParUrlEncoder=" + extParUrlEncoder + "extProductParam" + extProductParam + "title=" + title);
+    }
 }
