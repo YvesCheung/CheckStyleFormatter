@@ -42,7 +42,7 @@ object CodeFormatter {
     private val psiFileFactory: PsiFileFactory
 
     private val usingRules = mutableSetOf(
-        DumpAST(),
+        //DumpAST(),
         ContinuousCodeBlock(),
         ArrayBracket(),
         ModifierRule(),
