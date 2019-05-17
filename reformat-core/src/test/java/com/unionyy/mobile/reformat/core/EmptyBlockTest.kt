@@ -1,7 +1,5 @@
 package com.unionyy.mobile.reformat.core
 
-import com.unionyy.mobile.reformat.core.rule.DumpAST
-import com.unionyy.mobile.reformat.core.rule.EmptyBlockRule
 import org.junit.Assert
 import org.junit.Test
 
@@ -30,7 +28,7 @@ public class NormalJavaClass {
         }
     }
 }
-        """.trimIndent())
+""".trimIndent())
 
         Assert.assertEquals(text, """
 package com.yy.mobile.demo;
@@ -54,5 +52,29 @@ public class NormalJavaClass {
     }
 }
         """.trimIndent())
+    }
+
+    @Test
+    fun testJavaEmptyIfBlock() {
+        val text = CodeFormatter.reformat("A.java", """
+package com.yy.mobile.demo;
+
+public class NormalJavaClass {
+
+    private boolean a = true;
+
+    private static void main() {
+        if(a) {
+
+        }else if(b){
+            a = false;
+        } else {
+            a = true
+        }
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""""", text)
     }
 }

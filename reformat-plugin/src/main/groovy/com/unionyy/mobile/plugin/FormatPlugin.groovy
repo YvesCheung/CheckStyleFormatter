@@ -41,6 +41,7 @@ class FormatPlugin implements Plugin<Project> {
         if (project.tasks.findByName(taskName) == null) {
             project.tasks.create(taskName) {
                 it.group = "checkstyle"
+                it.description = "输出会被格式化的文件列表"
                 it.doLast {
                     println("FileList:")
                     println(input.join("\n"))
@@ -58,7 +59,7 @@ class FormatPlugin implements Plugin<Project> {
         if (project.tasks.findByName(taskName) == null) {
             project.tasks.create(taskName) {
                 it.group = "checkstyle"
-
+                it.description = "格式化Java文件"
                 it.doLast {
                     input.forEach { file ->
                         def newText = CodeFormatter.reformat(

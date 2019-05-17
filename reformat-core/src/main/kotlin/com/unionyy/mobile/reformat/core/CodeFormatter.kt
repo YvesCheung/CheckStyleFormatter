@@ -7,6 +7,7 @@ import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.SpaceOperation
 import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import com.unionyy.mobile.reformat.core.rule.ContinuousCodeBlock
+import com.unionyy.mobile.reformat.core.rule.ContinuousExpression
 import com.unionyy.mobile.reformat.core.rule.EmptyBlockRule
 import com.unionyy.mobile.reformat.core.rule.EmptyStatement
 import com.unionyy.mobile.reformat.core.rule.ModifierRule
@@ -40,12 +41,12 @@ object CodeFormatter {
 
     private val psiFileFactory: PsiFileFactory
 
-    @Suppress("RemoveExplicitTypeArguments")
-    private val usingRules = mutableSetOf<FormatRule>(
+    private val usingRules = mutableSetOf(
         DumpAST(),
         ContinuousCodeBlock(),
         ArrayBracket(),
         ModifierRule(),
+        ContinuousExpression(),
         LineBreaker(),
         SpaceOperation(),
         EmptyStatement(),
