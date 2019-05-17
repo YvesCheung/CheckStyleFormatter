@@ -1363,4 +1363,21 @@ class A {
 }
 """.trimIndent(), text)
     }
+
+    @Test
+    fun testJavaFunctionCallWithOneParam() {
+
+        val text = CodeFormatter.reformat("a.java", """
+class A {
+    public void main(){
+        PluginBus.INSTANCE.get().post(new ISocialCoreClient_onReFreshNearByPeople_VeryLong_ForEventBus_EventArgs(CommonConstant.GENDER_ALL));
+
+        PluginBus.INSTANCE.get().post(new ISocialCoreClient_onReFreshNearByPeople_VeryLong_VeryVeryVeryVeryLong_ReallyLong_ForEventBus_EventArgs());
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+""".trimIndent(), text)
+    }
 }
