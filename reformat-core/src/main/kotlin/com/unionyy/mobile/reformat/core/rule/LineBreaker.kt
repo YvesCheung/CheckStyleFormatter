@@ -595,42 +595,40 @@ class LineBreaker : FormatRule {
 
     private fun breakClassDefine(
         context: FormatContext,
-        node: ASTNode
+        node: ASTNode,
+        scanImplement: Boolean
     ) {
         val clsKey = node.getChildren(null).find {
             it.text == "class" && it is PsiKeyword
         } ?: return
         val line = lines.getValue(context.getCodeLocation(clsKey).line)
         if (line.exceed) {
-            when (context.scanningTimes) {
-                SCAN_A -> {
-                    //第一遍扫描换行接口们
-                    val implements = node.findChildByType(IMPLEMENTS_LIST)
-                    implements?.children()?.forEach {
-                        if (it is PsiJavaCodeReferenceElement) {
-                            toBeLineBreak.add(
-                                NormalLineBreak(
-                                    it,
-                                    lineBreak(context, line.start, indent + indent),
-                                    "'implement' in the class define expression: ${node.text}."
-                                )
+            if (scanImplement) {
+                //第一遍扫描换行接口们
+                val implements = node.findChildByType(IMPLEMENTS_LIST)
+                implements?.children()?.forEach {
+                    if (it is PsiJavaCodeReferenceElement) {
+                        toBeLineBreak.add(
+                            NormalLineBreak(
+                                it,
+                                lineBreak(context, line.start, indent + indent),
+                                "'implement' in the class define expression: ${node.text}."
                             )
-                        }
+                        )
                     }
                 }
-                SCAN_B -> {
-                    //第二遍扫描换行extends
-                    val extends = node.findChildByType(EXTENDS_LIST)
-                    extends?.children()?.forEach {
-                        if (it is PsiJavaCodeReferenceElement) {
-                            toBeLineBreak.add(
-                                NormalLineBreak(
-                                    it,
-                                    lineBreak(context, line.start, indent + indent),
-                                    "'extends' in the class define expression: ${node.text}."
-                                )
+            } else {
+                //第二遍扫描换行extends
+                val extends = node.findChildByType(EXTENDS_LIST)
+                extends?.children()?.forEach {
+                    if (it is PsiJavaCodeReferenceElement) {
+                        toBeLineBreak.add(
+                            NormalLineBreak(
+                                it,
+                                lineBreak(context, line.start, indent + indent),
+                                "'extends' in the class define expression: ${node.text}."
                             )
-                        }
+                        )
                     }
                 }
             }
@@ -952,13 +950,6 @@ class LineBreaker : FormatRule {
         private fun addStringToTree(str: String, addToTree: (ASTNode) -> Unit) {
             val literal = CompositeElement(LITERAL_EXPRESSION)
             addToTree(literal)
-//            var txtWithQuot: String = str
-//            if (!str.startsWith("\"")) {
-//                txtWithQuot = "\"" + txtWithQuot
-//            }
-//            if (!str.endsWith("\"") || str.endsWith("\\\"")) {
-//                txtWithQuot += "\""
-//            }
             literal.addChild(PsiJavaTokenImpl(STRING_LITERAL, str))
         }
     }
@@ -976,7 +967,7 @@ class LineBreaker : FormatRule {
             }
         }
 
-        if (lines.values.any { it.exceed } && context.scanningTimes < SCAN_E) {
+        if (lines.values.any { it.exceed } && context.scanningTimes < SCAN_F) {
             context.requestRepeatScan()
         }
     }

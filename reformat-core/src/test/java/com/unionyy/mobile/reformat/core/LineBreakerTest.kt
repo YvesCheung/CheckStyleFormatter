@@ -1378,6 +1378,23 @@ class A {
 """.trimIndent())
 
         Assert.assertEquals("""
+class A {
+    public void main() {
+        PluginBus.INSTANCE
+                .get()
+                .post(
+                        new ISocialCoreClient_onReFreshNearByPeople_VeryLong_ForEventBus_EventArgs(
+                            CommonConstant.GENDER_ALL
+                        )
+                );
+
+        PluginBus.INSTANCE
+                .get()
+                .post(
+                        new ISocialCoreClient_onReFreshNearByPeople_VeryLong_VeryVeryVeryVeryLong_ReallyLong_ForEventBus_EventArgs()
+                );
+    }
+}
 """.trimIndent(), text)
     }
 
