@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.psi.JavaDocTokenType.DOC_COMMENT_DATA
 import org.jetbrains.kotlin.com.intellij.psi.JavaDocTokenType.DOC_COMMENT_LEADING_ASTERISKS
+import org.jetbrains.kotlin.com.intellij.psi.JavaDocTokenType.DOC_TAG_NAME
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.ASTERISK
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
@@ -55,6 +56,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.ParameterList
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.java.PsiPolyadicExpressionImpl
 import org.jetbrains.kotlin.com.intellij.psi.javadoc.PsiDocComment
+import org.jetbrains.kotlin.com.intellij.psi.javadoc.PsiDocTag
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 import org.jetbrains.kotlin.psi.psiUtil.children
 import java.lang.StringBuilder
@@ -169,7 +171,7 @@ class LineBreaker : FormatRule {
                     } else if (node is PsiDocComment) {
                         breakDocument(context, node)
                     } else if (node is PsiComment) {
-                        breakComment(context, node, line)
+                        breakComment(context, node, line, false)
                     } else if (node is ClassElement) {
                         breakClassDefine(context, node, true)
                     } else if (node is PsiBinaryExpression ||
@@ -193,14 +195,16 @@ class LineBreaker : FormatRule {
                     } else if (node.elementType == STRING_LITERAL) {
                         breakStringLiteral(context, node, line)
                     } else if (node is PsiPolyadicExpression) {
-                        breakPolyadicOperator(context, node, line)
+                        breakPolyadicOperator(context, node, true)
                     } else if (node is PsiArrayInitializerExpression) {
                         breakArrayInitializer(context, node, line)
                     }
                 }
                 SCAN_D -> {
                     if (node is PsiPolyadicExpression) {
-                        breakPolyadicOperator(context, node, line)
+                        breakPolyadicOperator(context, node, false)
+                    } else if (node is PsiComment) {
+                        breakComment(context, node, line, true)
                     }
                 }
                 SCAN_E -> {
@@ -385,9 +389,17 @@ class LineBreaker : FormatRule {
     private fun breakPolyadicOperator(
         context: FormatContext,
         node: ASTNode, //PsiPolyadicExpression
-        line: Line
+        onlyScanLiteral: Boolean
     ) {
-        if (line.exceed) {
+
+        val startLine = context.getCodeFragment(node).startPos.line
+        val endLine = context.getCodeFragment(node).endPos.line
+        val lineExceed = (startLine..endLine).map { line ->
+            lines.getValue(line)
+        }.any { line ->
+            line.exceed
+        }
+        if (lineExceed) {
             for (child in node.getChildren(null)) {
                 if (child.elementType == PLUS ||
                     child.elementType == MINUS ||
@@ -404,7 +416,7 @@ class LineBreaker : FormatRule {
                             maybeWhiteSpace
                         }) ?: continue
 
-                    if (context.scanningTimes == SCAN_C) {
+                    if (onlyScanLiteral) {
                         if (next.elementType != LITERAL_EXPRESSION ||
                             next.getChildren(null).firstOrNull()?.elementType != STRING_LITERAL) {
                             continue
@@ -416,10 +428,11 @@ class LineBreaker : FormatRule {
                         }
                     }
 
+                    val lineStart = lines.getValue(context.getCodeLocation(child).line).start
                     toBeLineBreak.add(
                         NormalLineBreak(
                             next,
-                            lineBreak(context, line.start, indent),
+                            lineBreak(context, lineStart, indent),
                             "operator '${child.elementType}' " +
                                 "in the expression: ${node.text}."))
                 }
@@ -441,7 +454,7 @@ class LineBreaker : FormatRule {
                     NormalLineBreak(
                         node.treeNext,
                         lineBreak(context, line.start, indent + indent),
-                        "token '=' in the field or variable: ${parent.text}."
+                        "token '=' in the field or variable: '${parent.text}'."
                     )
                 )
             }
@@ -451,7 +464,8 @@ class LineBreaker : FormatRule {
     private fun breakComment(
         context: FormatContext,
         node: ASTNode,
-        line: Line
+        line: Line,
+        considerBreakCStyle: Boolean
     ) {
         if (node.elementType == END_OF_LINE_COMMENT) {
             if (line.exceed) {
@@ -476,7 +490,7 @@ class LineBreaker : FormatRule {
                                 NormalLineBreak(
                                     node,
                                     lineBreak(context, line.start),
-                                    "move the end of line comment to a new line: ${node.text}.")
+                                    "move the end of line comment to a new line: '${node.text}'.")
                             )
                         }
                     }
@@ -484,11 +498,20 @@ class LineBreaker : FormatRule {
             }
 
             toBeLineBreak.add(CutEndOfLineComment(node, line))
-        } else if (node.elementType == C_STYLE_COMMENT &&
-            (node.treeNext == null ||
-                node.treeNext is PsiWhiteSpace)
-        ) {
-            toBeLineBreak.add(CutCStyleComment(node, line))
+        } else if (node.elementType == C_STYLE_COMMENT) {
+            if (line.exceed && considerBreakCStyle) {
+                toBeLineBreak.add(
+                    NormalLineBreak(
+                        node,
+                        lineBreak(context, line.start),
+                        "move the c-style comment to a new line: '${node.text}'."
+                    )
+                )
+            }
+            if (node.treeNext == null ||
+                node.treeNext is PsiWhiteSpace) {
+                toBeLineBreak.add(CutCStyleComment(node, line))
+            }
         }
     }
 
@@ -499,16 +522,27 @@ class LineBreaker : FormatRule {
         for (child in node.getChildren(null)) {
             if (child.elementType == DOC_COMMENT_LEADING_ASTERISKS) {
                 val whiteSpace = child.treePrev
-                val data = child.treeNext
-                if (whiteSpace == null || data == null) {
+                var data = child.treeNext
+
+                val dataList = mutableListOf<ASTNode>()
+                while (data != null && data.elementType == DOC_COMMENT_DATA) {
+                    dataList.add(data)
+                    data = data.treeNext
+                }
+                val dataText = dataList.joinToString(separator = "") { it.text }
+                if (whiteSpace == null || dataList.isEmpty()) {
                     continue
                 }
+                dataList.add(0, child)
+                dataList.add(0, whiteSpace)
                 if (whiteSpace.textLength + child.textLength +
-                    data.textLength > MAX_LINE_LENGTH) {
+                    dataText.length > MAX_LINE_LENGTH) {
                     toBeLineBreak.add(
-                        CutDocComment(whiteSpace, child, data)
+                        CutDocComment(whiteSpace, child, dataText, dataList)
                     )
                 }
+            } else if (child is PsiDocTag) {
+                breakDocument(context, child)
             }
         }
     }
@@ -693,19 +727,24 @@ class LineBreaker : FormatRule {
     private class CutDocComment(
         val whiteSpace: ASTNode,
         val leading: ASTNode,
-        val data: ASTNode
+        val data: String,
+        val oldNode: List<ASTNode>
     ) : LineBreakAction {
 
+        private val anchor: ASTNode? = oldNode.lastOrNull()?.treeNext
+
         override fun run(context: FormatContext) {
-            val anchor = data.treeNext ?: return
-            binaryCut(data.text, data) { doc ->
+            anchor ?: return
+            binaryCut(data) { doc ->
                 anchor.treeParent.addChild(doc, anchor)
+            }
+            oldNode.forEach {
+                it.treeParent.removeChild(it)
             }
         }
 
         private fun binaryCut(
             text: String,
-            data: ASTNode?,
             addToTree: (ASTNode) -> Unit
         ) {
             if (whiteSpace.textLength + leading.textLength + text.length > MAX_LINE_LENGTH) {
@@ -719,24 +758,20 @@ class LineBreaker : FormatRule {
                         false
                     }
                 }
-                binaryCut(text.substring(0, half), data, addToTree)
-                binaryCut(" ".repeat(indentSize) + text.substring(half),
-                    null, addToTree)
+                binaryCut(text.substring(0, half), addToTree)
+                binaryCut(" ".repeat(indentSize) + text.substring(half), addToTree)
             } else {
-                if (data == null) {
-                    addToTree(whiteSpace.copyElement())
-                    addToTree(leading.copyElement())
-                    addToTree(PsiDocTokenImpl(DOC_COMMENT_DATA, text))
-                } else {
-                    data.treeParent.replaceChild(data, PsiDocTokenImpl(DOC_COMMENT_DATA, text))
-                }
+                addToTree(whiteSpace.copyElement())
+                addToTree(leading.copyElement())
+                addToTree(PsiDocTokenImpl(DOC_COMMENT_DATA, text))
             }
         }
 
         override fun report(context: FormatContext) {
+            anchor ?: return
             context.report(
-                "Cut the too long doc comment(/***/): ${data.text}.",
-                context.getCodeFragment(data))
+                "Cut the too long doc comment(/***/): $data.",
+                context.getCodeFragment(anchor))
         }
     }
 

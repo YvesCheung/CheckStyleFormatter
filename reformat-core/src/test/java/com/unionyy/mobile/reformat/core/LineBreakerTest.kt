@@ -977,7 +977,38 @@ public class A {
     }
 
     @Test
-    fun testJavaFuntionCallTooLong() {
+    fun testJavaPlusString2() {
+        val text = CodeFormatter.reformat("D.java", """
+public class A {
+
+    public boolean main() {
+        MLog.info(TAG, "invalid argument, " + "prodName: " + prodName +
+            ", payAmount: " + payAmount + ", payUnit: " + payUnit + ", returnUrl: " + returnUrl + ", uid: " + uid + ", source: " + source);
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals(text, """
+public class A {
+
+    public boolean main() {
+        MLog.info(
+                TAG,
+                "invalid argument, " +
+                    "prodName: " + prodName +
+            ", payAmount: " + payAmount +
+                ", payUnit: " + payUnit +
+                ", returnUrl: " + returnUrl +
+                ", uid: " + uid +
+                ", source: " + source
+        );
+    }
+}
+""".trimIndent())
+    }
+
+    @Test
+    fun testJavaFunctionCallTooLong2() {
         val text = CodeFormatter.reformat("D.java", """
 package com.yy.mobile.checkstyleformatter;
 
@@ -1302,6 +1333,46 @@ public class ChannelMediaVideoInfoView extends AbsFloatingView {
     }
 
     @Test
+    fun testJavaNothingDocument() {
+        val text = CodeFormatter.reformat("A.java", """
+package com.yy.a;
+
+    /**
+     * @CoreEvent(coreClientClass = IPayClient.class)
+     * public void onBalance(int code, long uid, double balance, String statusMsg) {
+     * MLog.info(TAG, "onBalance code: " + code + ", uid: " + uid + ", balance: " + balance + ", statusMsg: " + statusMsg);
+     * if (code == PayConstant.CODE_SUCCESS) {
+     * if (uid == LoginUtil.getUid()) {
+     * updateBalance(balance);
+     * } else {
+     * MLog.error(TAG, "uid not equal getMyUid");
+     * }
+     * }
+     * }
+     **/
+""".trimIndent())
+
+        Assert.assertEquals("""
+package com.yy.a;
+
+    /**
+     * @CoreEvent(coreClientClass = IPayClient.class)
+     * public void onBalance(int code, long uid, double balance, String statusMsg) {
+     * MLog.info(TAG, "onBalance code: " + code + ", uid: " + ui
+     * d + ", balance: " + balance + ", statusMsg: " + statusMsg);
+     * if (code == PayConstant.CODE_SUCCESS) {
+     * if (uid == LoginUtil.getUid()) {
+     * updateBalance(balance);
+     * } else {
+     * MLog.error(TAG, "uid not equal getMyUid");
+     * }
+     * }
+     * }
+     **/
+""".trimIndent(), text)
+    }
+
+    @Test
     fun testJavaLongLineComment() {
 
         val text = CodeFormatter.reformat("A.java", """
@@ -1442,14 +1513,21 @@ class A {
     fun testJavaAnnotation() {
         val text = CodeFormatter.reformat("A.java", """
 class A {
-    @BusEvent(busType = BusType.SCOPE_PLUGIN, busName = PluginBus.PLUGIN_BUS_NAME /* TODO: [CoreEvent to BusEvent] 以前同时在主线和非指定线程抛出，先统一为主线程接收 */)
+    @BusEvent(busType = BusType.SCOPE_PLUGIN, busName = PluginBus.PLUGIN_BUS_NAME /* TODO: [CoreEvent to BusEvent] 以前同时在主线和非指定线程抛出，lalalalalalalalalalalalala先统一为主线程接收 */)
     void main(){
     }
 }
 """.trimIndent())
 
-        Assert.assertEquals("""
-
-        """.trimIndent(), text)
+        Assert.assertEquals("""class A {
+    @BusEvent(
+        busType = BusType.SCOPE_PLUGIN,
+        busName = PluginBus.PLUGIN_BUS_NAME
+        /* TODO: [CoreEvent to BusEvent] 以前同时在主线和非指定线程抛出，lalalalalalalalalalalalala先统一为主线程接收 */
+    )""" + " \n" + """
+    void main() {
+    }
+}
+""".trimIndent(), text)
     }
 }
