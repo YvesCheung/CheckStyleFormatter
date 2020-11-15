@@ -5,17 +5,20 @@ import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.internal.VariantManager
 import com.android.build.gradle.internal.scope.VariantScope
 import com.unionyy.mobile.reformat.core.CodeFormatter
+import com.unionyy.mobile.reformat.core.FormatRule
 import kotlin.Pair
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.plugins.JavaPluginConvention
 
-class FormatPlugin implements Plugin<Project> {
+@SuppressWarnings("GrMethodMayBeStatic")
+abstract class FormatPlugin implements Plugin<Project> {
 
     private static final String PLUGIN_NAME = "FormatPlugin"
+
+    protected abstract Set<FormatRule> rules()
 
     @Override
     void apply(Project project) {
@@ -26,7 +29,7 @@ class FormatPlugin implements Plugin<Project> {
         }
     }
 
-    private static def applyInner(Project project) {
+    protected def applyInner(Project project) {
         println("$PLUGIN_NAME apply to ${project.name}")
         getSourceFiles(project) {
             def files = it.first
@@ -36,7 +39,7 @@ class FormatPlugin implements Plugin<Project> {
         }
     }
 
-    private static Task createPrintFileTask(
+    protected def createPrintFileTask(
             Project project,
             Collection<File> input) {
         def taskName = "printSrcDirs"
@@ -52,7 +55,7 @@ class FormatPlugin implements Plugin<Project> {
         }
     }
 
-    private static Task createFormatTask(
+    protected def createFormatTask(
             Project project,
             Collection<File> input,
             String sourceSetName) {
@@ -66,7 +69,8 @@ class FormatPlugin implements Plugin<Project> {
                     input.forEach { file ->
                         def newText = CodeFormatter.reformat(
                                 file.absolutePath,
-                                file.newReader().text)
+                                file.newReader().text,
+                                rules())
                         file.write(newText)
                     }
                 }
@@ -74,7 +78,7 @@ class FormatPlugin implements Plugin<Project> {
         }
     }
 
-    private static def getSourceFiles(
+    protected def getSourceFiles(
             Project project,
             Action<Pair<Collection<File>, String>> callback) {
         project.afterEvaluate {
@@ -120,7 +124,7 @@ class FormatPlugin implements Plugin<Project> {
         }
     }
 
-    private static <T> T firstOrNull(List<T> list) {
+    static <T> T firstOrNull(List<T> list) {
         if (list.isEmpty()) {
             return null
         } else {

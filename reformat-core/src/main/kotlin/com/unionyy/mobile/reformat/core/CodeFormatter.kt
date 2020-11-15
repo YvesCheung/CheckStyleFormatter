@@ -1,16 +1,10 @@
 package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.reporter.WriterReporter
-import com.unionyy.mobile.reformat.core.rule.AddSwitchDefaultCase
-import com.unionyy.mobile.reformat.core.rule.ArrayBracket
-import com.unionyy.mobile.reformat.core.rule.DumpAST
-import com.unionyy.mobile.reformat.core.rule.SpaceOperation
-import com.unionyy.mobile.reformat.core.rule.LineBreaker
-import com.unionyy.mobile.reformat.core.rule.ContinuousCodeBlock
-import com.unionyy.mobile.reformat.core.rule.ContinuousExpression
-import com.unionyy.mobile.reformat.core.rule.EmptyBlockRule
-import com.unionyy.mobile.reformat.core.rule.EmptyStatement
-import com.unionyy.mobile.reformat.core.rule.ModifierRule
+import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
+import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
+import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
+import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -28,7 +22,13 @@ import org.jetbrains.kotlin.com.intellij.pom.impl.PomTransactionBase
 import org.jetbrains.kotlin.com.intellij.pom.tree.TreeAspect
 import org.jetbrains.kotlin.com.intellij.psi.PsiFileFactory
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.TreeCopyHandler
+import org.jetbrains.kotlin.config.ApiVersion
+import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.config.JVMConfigurationKeys
+import org.jetbrains.kotlin.config.JvmTarget
+import org.jetbrains.kotlin.config.LanguageVersion
+import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import sun.reflect.ReflectionFactory
 
@@ -37,22 +37,10 @@ import sun.reflect.ReflectionFactory
  * E-mail: zhangyu4@yy.com
  * YY: 909017428
  */
+@Suppress("MemberVisibilityCanBePrivate")
 object CodeFormatter {
 
     private val psiFileFactory: PsiFileFactory
-
-    private val usingRules = mutableSetOf(
-        //DumpAST(),
-        ContinuousCodeBlock(),
-        ArrayBracket(),
-        ModifierRule(),
-        ContinuousExpression(),
-        LineBreaker(),
-        SpaceOperation(),
-        EmptyStatement(),
-        EmptyBlockRule(),
-        AddSwitchDefaultCase()
-    )
 
     init {
         val pomModel: PomModel = object : UserDataHolderBase(), PomModel {
@@ -70,14 +58,27 @@ object CodeFormatter {
                         .newConstructorForSerialization(
                             aspect, Any::class.java.getDeclaredConstructor(*arrayOfNulls<Class<*>>(0))
                         )
-                    return constructor.newInstance(*emptyArray()) as T
+                    return constructor.newInstance() as T
                 }
                 return null
             }
         }
+        val compilerConfiguration = CompilerConfiguration()
+        setIdeaIoUseFallback()
+        compilerConfiguration.put(
+            CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
+            PrintingMessageCollector(System.err, MessageRenderer.PLAIN_FULL_PATHS, false)
+        )
+        compilerConfiguration.put(CommonConfigurationKeys.MODULE_NAME, "CodeFormatter")
+        compilerConfiguration.put(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS,
+            LanguageVersionSettingsImpl(
+                LanguageVersion.LATEST_STABLE,
+                ApiVersion.createByLanguageVersion(LanguageVersion.LATEST_STABLE)
+            ))
+        compilerConfiguration.put(JVMConfigurationKeys.JVM_TARGET, JvmTarget.JVM_1_8)
         val project = KotlinCoreEnvironment.createForProduction(
             Disposer.newDisposable(),
-            CompilerConfiguration(),
+            compilerConfiguration,
             EnvironmentConfigFiles.JVM_CONFIG_FILES).project as MockProject
         val extensionPoint = "org.jetbrains.kotlin.com.intellij.treeCopyHandler"
         val extensionClassName = TreeCopyHandler::class.java.name
@@ -96,7 +97,7 @@ object CodeFormatter {
     fun reformat(
         fileName: String,
         fileContent: String,
-        rules: Set<FormatRule> = usingRules,
+        rules: Set<FormatRule>,
         reporter: Reporter = WriterReporter(System.out)
     ): String {
         val lang =

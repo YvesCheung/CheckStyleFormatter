@@ -8,7 +8,6 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
 import org.jetbrains.kotlin.com.intellij.psi.JavaDocTokenType.DOC_COMMENT_DATA
 import org.jetbrains.kotlin.com.intellij.psi.JavaDocTokenType.DOC_COMMENT_LEADING_ASTERISKS
-import org.jetbrains.kotlin.com.intellij.psi.JavaDocTokenType.DOC_TAG_NAME
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.ASTERISK
 import org.jetbrains.kotlin.com.intellij.psi.JavaTokenType.COMMA
@@ -60,7 +59,6 @@ import org.jetbrains.kotlin.com.intellij.psi.javadoc.PsiDocComment
 import org.jetbrains.kotlin.com.intellij.psi.javadoc.PsiDocTag
 import org.jetbrains.kotlin.com.intellij.psi.tree.IElementType
 import org.jetbrains.kotlin.psi.psiUtil.children
-import java.lang.StringBuilder
 
 /**
  * 代码行过长时换行
