@@ -2,6 +2,7 @@ package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.HuyaExReplacement
+import org.junit.Assert
 import org.junit.Test
 
 /**
@@ -417,6 +418,33 @@ public class A {
 }
 """.trimIndent(), setOf(DumpAST(), HuyaExReplacement()))
 
-        println(text)
+        Assert.assertEquals("""
+package a;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class A {
+
+    public com.java.B a = new com.java.B();
+    
+    Map<String, String> field1 = new HashMap<String, String>() {
+        {
+            com.hyex.collections.MapEx.put(this,"k0","v0");
+        }
+    };
+
+    {
+        com.hyex.collections.MapEx.put(field1,"k1","v1");
+    }
+
+    private static void main() {
+        Map<String, String> map = new HashMap<>();
+        com.hyex.collections.MapEx.put(map,"k2","v2");
+        
+        a.b();
+    }
+}
+        """.trimIndent(), text)
     }
 }

@@ -1,10 +1,10 @@
 package com.unionyy.mobile.reformat.core
 
+import com.unionyy.mobile.reformat.core.utils.JavaEvaluator
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.FileASTNode
 import org.jetbrains.kotlin.com.intellij.lang.Language
-import org.jetbrains.kotlin.com.intellij.psi.PsiFile
-import java.util.ArrayList
+import java.util.*
 
 @Suppress("MemberVisibilityCanBePrivate", "unused", "CanBeParameter")
 class FormatContext(
@@ -15,6 +15,8 @@ class FormatContext(
     private val reporter: Reporter,
     private val rules: Set<FormatRule>
 ) {
+
+    val evaluator = JavaEvaluator()
 
     var requestRepeat: Boolean = false
         private set
