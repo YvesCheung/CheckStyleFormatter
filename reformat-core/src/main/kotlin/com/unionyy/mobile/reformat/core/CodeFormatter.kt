@@ -45,6 +45,8 @@ object CodeFormatter {
 
     private val psiFileFactory: PsiFileFactory
 
+    val defaultRules = mutableSetOf<FormatRule>()
+
     init {
         val pomModel: PomModel = object : UserDataHolderBase(), PomModel {
             override fun runTransaction(transaction: PomTransaction) {
@@ -108,7 +110,7 @@ object CodeFormatter {
     fun reformat(
         fileName: String,
         fileContent: String,
-        rules: Set<FormatRule>,
+        rules: Set<FormatRule> = defaultRules,
         reporter: Reporter = WriterReporter(System.out)
     ): String {
         val lang =

@@ -1,12 +1,16 @@
 package com.unionyy.mobile.reformat.core
 
-import com.unionyy.mobile.reformat.core.rule.SpaceOperation
-import com.unionyy.mobile.reformat.core.rule.DumpAST
-import com.unionyy.mobile.reformat.core.rule.LineBreaker
+import com.unionyy.mobile.reformat.core.rule.YYRuleSet
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 
 class LineBreakerTest {
+
+    @Before
+    fun before(){
+        CodeFormatter.defaultRules.addAll(YYRuleSet)
+    }
 
     @Test
     fun testJavaMethodParameters() {
@@ -402,8 +406,10 @@ public class A {
             final SinglePluginInfo pluginInfo,
             final boolean showDefaultLoading
     ) {
-        MLog.info("zhangyu4 is a nice man, wangfeihang is a beautiful woman, " +
-            "pengkangjia is a well guider, pengyangfan is a good xiaodi");
+        MLog.info("TextView uses TransformationMethods to do thing" +
+            "s like replacing the characters of passwords wi" +
+            "th dots, or keeping the newline characters from" +
+            " causing line breaks in single-line text fields.");
     }
 
     public Observable<LoadPluginListener.Result> loadPlugin2(

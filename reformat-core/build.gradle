@@ -43,7 +43,6 @@ static def isJenkins() {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version"
-    compile 'com.github.javaparser:javaparser-core:3.14.0'
 
     testCompile 'junit:junit:4.12'
 }

@@ -1,10 +1,17 @@
 package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.rule.DumpAST
+import com.unionyy.mobile.reformat.core.rule.YYRuleSet
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 
 class SimplifyBooleanTest {
+
+    @Before
+    fun before(){
+        CodeFormatter.defaultRules.addAll(YYRuleSet)
+    }
 
     @Test
     fun testSimplifyBooleanReturn() {
