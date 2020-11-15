@@ -6,6 +6,7 @@ import com.android.build.gradle.internal.VariantManager
 import com.android.build.gradle.internal.scope.VariantScope
 import com.unionyy.mobile.reformat.core.CodeFormatter
 import com.unionyy.mobile.reformat.core.FormatRule
+import com.unionyy.mobile.reformat.core.Reporter
 import kotlin.Pair
 import org.gradle.api.Action
 import org.gradle.api.Plugin
@@ -67,11 +68,15 @@ abstract class FormatPlugin implements Plugin<Project> {
                 it.description = "格式化Java文件"
                 it.doLast {
                     input.forEach { file ->
+                        Reporter reporter = WriterReporter(System.out)
                         def newText = CodeFormatter.reformat(
                                 file.absolutePath,
                                 file.newReader().text,
-                                rules())
-                        file.write(newText)
+                                rules(),
+                                reporter)
+                        if (reporter.reportCount > 0) {
+                            file.write(newText)
+                        }
                     }
                 }
             }
