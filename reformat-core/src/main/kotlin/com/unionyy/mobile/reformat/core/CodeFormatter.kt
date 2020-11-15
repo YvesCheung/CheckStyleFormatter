@@ -7,6 +7,8 @@ import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.cli.jvm.compiler.NoScopeRecordCliBindingTrace
+import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.FileASTNode
 import org.jetbrains.kotlin.com.intellij.lang.java.JavaLanguage
@@ -30,6 +32,7 @@ import org.jetbrains.kotlin.config.JvmTarget
 import org.jetbrains.kotlin.config.LanguageVersion
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.idea.KotlinLanguage
+import org.jetbrains.kotlin.resolve.lazy.declarations.FileBasedDeclarationProviderFactory
 import sun.reflect.ReflectionFactory
 
 /**
@@ -63,23 +66,25 @@ object CodeFormatter {
                 return null
             }
         }
-        val compilerConfiguration = CompilerConfiguration()
-        setIdeaIoUseFallback()
-        compilerConfiguration.put(
-            CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
-            PrintingMessageCollector(System.err, MessageRenderer.PLAIN_FULL_PATHS, false)
-        )
-        compilerConfiguration.put(CommonConfigurationKeys.MODULE_NAME, "CodeFormatter")
-        compilerConfiguration.put(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS,
-            LanguageVersionSettingsImpl(
+        val compilerConfiguration = CompilerConfiguration().apply {
+            setIdeaIoUseFallback()
+            put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY,
+                PrintingMessageCollector(System.err, MessageRenderer.PLAIN_FULL_PATHS, false))
+            put(CommonConfigurationKeys.MODULE_NAME, "CodeFormatter")
+            put(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS, LanguageVersionSettingsImpl(
                 LanguageVersion.LATEST_STABLE,
                 ApiVersion.createByLanguageVersion(LanguageVersion.LATEST_STABLE)
             ))
-        compilerConfiguration.put(JVMConfigurationKeys.JVM_TARGET, JvmTarget.JVM_1_8)
-        val project = KotlinCoreEnvironment.createForProduction(
+            put(JVMConfigurationKeys.JVM_TARGET, JvmTarget.JVM_1_8)
+//            addJavaSourceRoots(javaFiles)
+//            addKotlinSourceRoots(kotlinFiles)
+//            addJvmClasspathRoots(classpathFiles)
+        }
+        val environment = KotlinCoreEnvironment.createForProduction(
             Disposer.newDisposable(),
             compilerConfiguration,
-            EnvironmentConfigFiles.JVM_CONFIG_FILES).project as MockProject
+            EnvironmentConfigFiles.JVM_CONFIG_FILES)
+        val project = environment.project as MockProject
         val extensionPoint = "org.jetbrains.kotlin.com.intellij.treeCopyHandler"
         val extensionClassName = TreeCopyHandler::class.java.name
         for (area in arrayOf(Extensions.getArea(project), Extensions.getArea(null))) {
@@ -90,6 +95,12 @@ object CodeFormatter {
         }
         project.registerService(PomModel::class.java, pomModel)
         psiFileFactory = PsiFileFactory.getInstance(project)
+
+        TopDownAnalyzerFacadeForJVM.analyzeFilesWithJavaIntegration(
+            environment.project, emptyList(), NoScopeRecordCliBindingTrace(),
+            environment.configuration, environment::createPackagePartProvider,
+            ::FileBasedDeclarationProviderFactory
+        )
     }
 
     @JvmStatic
