@@ -396,6 +396,8 @@ import java.util.Map;
 
 public class A {
 
+    public com.java.B a = new com.java.B();
+    
     Map<String, String> field1 = new HashMap<String, String>() {
         {
             put("k0", "v0");
@@ -409,6 +411,8 @@ public class A {
     private static void main() {
         Map<String, String> map = new HashMap<>();
         map.put("k2", "v2");
+        
+        a.b();
     }
 }
 """.trimIndent(), setOf(DumpAST(), HuyaExReplacement()))

@@ -1,7 +1,6 @@
 package com.unionyy.mobile.reformat.core
 
 import com.unionyy.mobile.reformat.core.rule.DumpAST
-import com.unionyy.mobile.reformat.core.rule.LineBreaker
 import org.junit.Test
 
 
