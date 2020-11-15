@@ -1,0 +1,103 @@
+apply plugin: 'java'
+apply plugin: 'kotlin'
+apply plugin: 'maven'
+
+compileJava {
+    sourceCompatibility = '1.7'
+    targetCompatibility = '1.7'
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+sourceSets {
+    main {
+        java {
+            include '**/*.java'
+            include '**/*.kt'
+        }
+    }
+}
+
+if (isJenkins()) { //构建系统构建时不要测试
+    gradle.taskGraph.whenReady {
+        tasks.each { task ->
+            if (task.name.contains("test")) {
+                task.enabled = false
+            }
+        }
+    }
+}
+
+static def isJenkins() {
+    return System.getenv("BUILD_NUMBER") != null
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    compile project(":reformat-core")
+
+    testCompile 'junit:junit:4.12'
+}
+
+apply from: '../publish_java.gradle'
+
+def artifactName = "reformat-rules-yy"
+
+publishing {
+
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.unionyy.mobile'
+            artifactId artifactName
+            // Tell maven to prepare the generated "*.aar" file for publishing
+            artifact("$buildDir/libs/${project.getName()}-${version}.jar")
+            artifact javaSourceJar
+
+            pom.withXml {
+                //Creating additional node for dependencies
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                //Defining configuration names from which dependencies will be taken (debugCompile or releaseCompile and compile)
+                def configurationNames = ['compile']
+
+                configurationNames.each { configurationName ->
+                    configurations[configurationName].allDependencies.each {
+                        if (it.group != null && it.name != null) {
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', it.group)
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+
+                            //If there are any exclusions in dependency
+                            if (it.excludeRules.size() > 0) {
+                                def exclusionsNode = dependencyNode.appendNode('exclusions')
+                                it.excludeRules.each { rule ->
+                                    def exclusionNode = exclusionsNode.appendNode('exclusion')
+                                    exclusionNode.appendNode('groupId', rule.group)
+                                    exclusionNode.appendNode('artifactId', rule.module)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: uri('../reformatRepo'))
+        pom.groupId = 'com.unionyy.mobile'
+        pom.artifactId = artifactName
+        pom.version = version
+    }
+}
