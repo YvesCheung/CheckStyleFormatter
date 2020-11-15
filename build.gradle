@@ -2,7 +2,7 @@
 apply plugin: 'format'
 
 buildscript {
-    ext.kotlin_version = '1.3.31'
+    ext.kotlin_version = '1.3.50'
     repositories {
         maven { url "${rootProject.projectDir}/reformatRepo" }
         maven { url 'http://repo.yypm.com:8181/nexus/content/groups/public' }
@@ -10,7 +10,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:3.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'net.researchgate:gradle-release:2.6.0'
         classpath 'com.unionyy.mobile:reformat:1.0.3-SNAPSHOT'
