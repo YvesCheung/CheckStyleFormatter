@@ -143,15 +143,18 @@ object CodeFormatter {
                 rules
             )
             rules.forEach {
-                if (context.reportCnt > 0) {
-                    context.notifyTextChange()
-                }
+                if (it.targetLanguage.contains(lang)) {
 
-                it.beforeVisit(context)
-                psiFile.visit { node ->
-                    it.visit(context, node)
+                    if (context.reportCnt > 0) {
+                        context.notifyTextChange()
+                    }
+
+                    it.beforeVisit(context)
+                    psiFile.visit { node ->
+                        it.visit(context, node)
+                    }
+                    it.afterVisit(context)
                 }
-                it.afterVisit(context)
             }
 
             hasError = hasError || context.reportCnt > 0
