@@ -1,6 +1,5 @@
 apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
+apply from: '../publish_java.gradle'
 
 sourceSets {
     main {
@@ -23,62 +22,3 @@ compileJava {
     sourceCompatibility = '1.7'
     targetCompatibility = '1.7'
 }
-
-apply from: '../publish_java.gradle'
-
-def artifactName = "reformat"
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            version "${version}"
-            groupId 'com.unionyy.mobile'
-            artifactId artifactName
-            artifact("$buildDir/libs/${project.getName()}-${version}.jar")
-            artifact javaSourceJar
-
-            pom.withXml {
-                //Creating additional node for dependencies
-                def dependenciesNode = asNode().appendNode('dependencies')
-
-                //Defining configuration names from which dependencies will be taken (debugCompile or releaseCompile and compile)
-                def configurationNames = ['compile']
-
-                configurationNames.each { configurationName ->
-                    configurations[configurationName].allDependencies.each {
-                        if (it.group != null && it.name != null) {
-                            def dependencyNode = dependenciesNode.appendNode('dependency')
-                            dependencyNode.appendNode('groupId', it.group)
-                            dependencyNode.appendNode('artifactId', it.name)
-                            dependencyNode.appendNode('version', it.version)
-
-                            //If there are any exclusions in dependency
-                            if (it.excludeRules.size() > 0) {
-                                def exclusionsNode = dependencyNode.appendNode('exclusions')
-                                it.excludeRules.each { rule ->
-                                    def exclusionNode = exclusionsNode.appendNode('exclusion')
-                                    exclusionNode.appendNode('groupId', rule.group)
-                                    exclusionNode.appendNode('artifactId', rule.module)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-uploadArchives {
-    repositories.mavenDeployer {
-        repository(url: uri("../${artifactName}Repo"))
-        pom.groupId = 'com.unionyy.mobile'
-        pom.artifactId = artifactName
-        pom.version = version
-    }
-}
-
-//./gradlew :spdt-plugin:clean :spdt-plugin:publishToMavenLocal
-
-//插件修改后运行前需要重新发布: ./gradlew -p spdt-plugin clean build uploadArchives --info
-

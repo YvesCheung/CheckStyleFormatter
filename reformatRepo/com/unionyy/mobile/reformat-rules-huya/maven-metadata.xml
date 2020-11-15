@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
   <groupId>com.unionyy.mobile</groupId>
-  <artifactId>reformat-core</artifactId>
+  <artifactId>reformat-rules-huya</artifactId>
   <versioning>
     <versions>
-      <version>1.0.1-SNAPSHOT</version>
-      <version>1.0.2-SNAPSHOT</version>
       <version>1.0.3-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20201115142902</lastUpdated>
+    <lastUpdated>20201115142908</lastUpdated>
   </versioning>
 </metadata>
