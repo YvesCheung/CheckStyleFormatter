@@ -3,6 +3,7 @@ package com.unionyy.mobile.reformat.core
 import com.unionyy.mobile.reformat.core.rule.DumpAST
 import com.unionyy.mobile.reformat.core.rule.HuyaExReplacement
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 
 /**
@@ -10,6 +11,13 @@ import org.junit.Test
  * 2020/11/14
  */
 class HuyaExCaseTest {
+
+    @Before
+    fun setupRule() {
+        CodeFormatter.defaultRules.addAll(
+            listOf(DumpAST(), HuyaExReplacement())
+        )
+    }
 
     @Test
     fun mapPutCase() {
@@ -43,7 +51,7 @@ public class A {
         a.b();
     }
 }
-""".trimIndent(), setOf(DumpAST(), HuyaExReplacement()))
+""".trimIndent())
 
         Assert.assertEquals("""
 package a;
@@ -94,7 +102,7 @@ public class A {
         new java.util.LinkedList<java.lang.String>().add("?");
     }
 }
-""".trimIndent(), setOf(HuyaExReplacement()))
+""".trimIndent())
 
         Assert.assertEquals("""
 package a;
@@ -109,6 +117,35 @@ public class A {
         MapEx.put(map, "k2", "v2");
         
         ListEx.add(new java.util.LinkedList<java.lang.String>(), "?");
+    }
+}
+""".trimIndent(), text)
+    }
+
+    @Test
+    fun clearCase() {
+        val text = CodeFormatter.reformat("A.java", """
+package a;
+
+public class A {
+
+    private static void main() {
+        java.util.List<java.lang.String> list = new java.util.LinkedList<java.lang.String>();
+        list.clear();
+    }
+}
+""".trimIndent())
+
+        Assert.assertEquals("""
+package a;
+
+import com.hyex.collections.ListEx;
+
+public class A {
+
+    private static void main() {
+        java.util.List<java.lang.String> list = new java.util.LinkedList<java.lang.String>();
+        ListEx.clear(list);
     }
 }
 """.trimIndent(), text)

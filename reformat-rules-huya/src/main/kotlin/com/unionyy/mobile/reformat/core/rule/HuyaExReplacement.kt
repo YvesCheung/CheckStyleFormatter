@@ -44,10 +44,10 @@ class HuyaExReplacement : FormatRule {
                     val receiver =
                         node.methodExpression.qualifierExpression?.text ?: "this"
                     val params =
-                        node.argumentList.expressions
+                        node.argumentList.expressions.map { it.text }
+                    val codeSegment = mutableListOf(receiver) + params
                     val code = "$ex.$methodName(" +
-                        "$receiver, " +
-                        "${params.joinToString(separator = ", ") { it.text }})"
+                        "${codeSegment.joinToString(separator = ", ")})"
 
                     context.report("replace ${node.getText()} with $code",
                         context.getCodeFragment(node), true)
