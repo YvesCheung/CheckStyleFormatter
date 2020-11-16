@@ -49,10 +49,10 @@ class HuyaExReplacement : FormatRule {
                         "$receiver, " +
                         "${params.joinToString(separator = ", ") { it.text }})"
 
-                    node.treeParent.replaceChild(node, PsiCodeBlockImpl(code))
-
                     context.report("replace ${node.getText()} with $code",
                         context.getCodeFragment(node), true)
+
+                    node.treeParent.replaceChild(node, PsiCodeBlockImpl(code))
                 }
 
                 when {

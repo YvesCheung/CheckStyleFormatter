@@ -7,6 +7,7 @@ import com.android.build.gradle.internal.scope.VariantScope
 import com.unionyy.mobile.reformat.core.CodeFormatter
 import com.unionyy.mobile.reformat.core.FormatRule
 import com.unionyy.mobile.reformat.core.Reporter
+import com.unionyy.mobile.reformat.core.reporter.WriterReporter
 import kotlin.Pair
 import org.gradle.api.Action
 import org.gradle.api.Plugin
@@ -20,6 +21,20 @@ abstract class FormatPlugin implements Plugin<Project> {
     private static final String PLUGIN_NAME = "FormatPlugin"
 
     protected abstract Set<FormatRule> rules()
+
+    protected String taskGroup() {
+        return "codeformat"
+    }
+
+    protected String printSourceDirsTaskName(Project project) {
+        return "printSrcDirs"
+    }
+
+    protected String formatTaskName(Project project, String sourceSetName) {
+        return sourceSetName == "main"
+                ? "javaFormatting"
+                : "${sourceSetName}JavaFormatting"
+    }
 
     @Override
     void apply(Project project) {
@@ -43,10 +58,10 @@ abstract class FormatPlugin implements Plugin<Project> {
     protected def createPrintFileTask(
             Project project,
             Collection<File> input) {
-        def taskName = "printSrcDirs"
+        def taskName = printSourceDirsTaskName(project)
         if (project.tasks.findByName(taskName) == null) {
             project.tasks.create(taskName) {
-                it.group = "checkstyle"
+                it.group = taskGroup()
                 it.description = "输出会被格式化的文件列表"
                 it.doLast {
                     println("$PLUGIN_NAME FileList:")
@@ -60,15 +75,14 @@ abstract class FormatPlugin implements Plugin<Project> {
             Project project,
             Collection<File> input,
             String sourceSetName) {
-        def taskName = sourceSetName == "main" ? "javaFormatting"
-                : "${sourceSetName}JavaFormatting"
+        def taskName = formatTaskName(project, sourceSetName)
         if (project.tasks.findByName(taskName) == null) {
             project.tasks.create(taskName) {
-                it.group = "checkstyle"
+                it.group = taskGroup()
                 it.description = "格式化Java文件"
                 it.doLast {
                     input.forEach { file ->
-                        Reporter reporter = WriterReporter(System.out)
+                        Reporter reporter = new WriterReporter(System.out)
                         def newText = CodeFormatter.reformat(
                                 file.absolutePath,
                                 file.newReader().text,
