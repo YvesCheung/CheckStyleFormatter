@@ -1,0 +1,43 @@
+apply plugin: 'java'
+apply plugin: 'kotlin'
+apply from: '../publish_java.gradle'
+
+compileJava {
+    sourceCompatibility = '1.7'
+    targetCompatibility = '1.7'
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+sourceSets {
+    main {
+        java {
+            include '**/*.java'
+            include '**/*.kt'
+        }
+    }
+}
+
+dependencies {
+    ext.lint_version = '27.0.0-alpha06'
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    compileOnly "com.android.tools.lint:lint-api:$lint_version"
+    compileOnly "com.android.tools.lint:lint-checks:$lint_version"
+    testCompile "com.android.tools.lint:lint:$lint_version"
+    testCompile "com.android.tools.lint:lint-tests:$lint_version"
+    testCompile 'junit:junit:4.12'
+}
+
+jar {
+    manifest {
+        attributes("Lint-Registry": "com.huya.pitaya.RuleRegister")
+    }
+}
