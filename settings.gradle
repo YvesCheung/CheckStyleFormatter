@@ -1,2 +1,2 @@
 include ':app', ':android-app', ':reformat-plugin', ':reformat-core'
-include ':reformat-rules-yy', ':reformat-rules-huya'
+include ':reformat-rules-yy' //...other rules
